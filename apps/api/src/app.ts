@@ -1,0 +1,59 @@
+import fastify from 'fastify'
+import cors from '@fastify/cors'
+import jwt from '@fastify/jwt'
+import swagger from '@fastify/swagger'
+import swaggerUi from '@fastify/swagger-ui'
+import {
+  serializerCompiler,
+  validatorCompiler,
+  jsonSchemaTransform,
+  type ZodTypeProvider,
+} from 'fastify-type-provider-zod'
+
+import { env } from './env.js'
+import prismaPlugin from './lib/prisma.js'
+import errorHandler from './plugins/error-handler.js'
+import authPlugin from './plugins/auth.js'
+import healthModule from './modules/health/index.js'
+import authModule from './modules/auth/index.js'
+
+export async function buildApp() {
+  const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>()
+
+  app.setValidatorCompiler(validatorCompiler)
+  app.setSerializerCompiler(serializerCompiler)
+
+  app.register(cors)
+
+  app.register(swagger, {
+    openapi: {
+      info: {
+        title: 'FinFlow API',
+        version: '0.0.1',
+      },
+      components: {
+        securitySchemes: {
+          bearer: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+    transform: jsonSchemaTransform,
+  })
+
+  app.register(swaggerUi, { routePrefix: '/docs' })
+
+  app.register(jwt, { secret: env.JWT_SECRET })
+
+  app.register(prismaPlugin)
+  app.register(errorHandler)
+  app.register(authPlugin)
+
+  app.register(healthModule, { prefix: '/health' })
+  app.register(authModule, { prefix: '/auth' })
+
+  return app
+}
