@@ -23,6 +23,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@fastify/cookie':
+        specifier: ^11.0.2
+        version: 11.0.2
       '@fastify/cors':
         specifier: ^11.0.0
         version: 11.2.0
@@ -81,6 +84,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.2.2
+        version: 5.2.2(react-hook-form@7.72.0(react@19.2.4))
       '@hugeicons/core-free-icons':
         specifier: ^4.1.1
         version: 4.1.1
@@ -99,12 +105,24 @@ importers:
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      ky:
+        specifier: ^1.14.3
+        version: 1.14.3
       react:
         specifier: ^19.2.4
         version: 19.2.4
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
+      react-hook-form:
+        specifier: ^7.72.0
+        version: 7.72.0(react@19.2.4)
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.2
@@ -693,6 +711,9 @@ packages:
   '@fastify/ajv-compiler@4.0.5':
     resolution: {integrity: sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==}
 
+  '@fastify/cookie@11.0.2':
+    resolution: {integrity: sha512-GWdwdGlgJxyvNv+QcKiGNevSspMQXncjMZ1J8IvuDQk0jvkzgWWZFNC2En3s+nHndZBGV8IbLwOI/sxCZw/mzA==}
+
   '@fastify/cors@11.2.0':
     resolution: {integrity: sha512-LbLHBuSAdGdSFZYTLVA3+Ch2t+sA6nq3Ejc6XLAKiQ6ViS2qFnvicpj0htsx03FyYeLs04HfRNBsz/a8SvbcUw==}
 
@@ -755,6 +776,11 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@hookform/resolvers@5.2.2':
+    resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
+    peerDependencies:
+      react-hook-form: ^7.55.0
 
   '@hugeicons/core-free-icons@4.1.1':
     resolution: {integrity: sha512-teqIBvPHl90ygIwKyJwTxOH8aNp1X1PjDTcMvLkEwdPxPD+8mssrZ5kXKIAJJFYPsz69a8LYQY0UPid4PAdavg==}
@@ -1275,6 +1301,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@tailwindcss/node@4.2.1':
     resolution: {integrity: sha512-jlx6sLk4EOwO6hHe1oCGm1Q4AN/s0rSrTTPBGPM0/RQ6Uylwq17FuU8IeJJKEjtc6K6O07zsvP+gDO6MMWo7pg==}
@@ -3201,6 +3230,10 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
+  ky@1.14.3:
+    resolution: {integrity: sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw==}
+    engines: {node: '>=18'}
+
   language-subtag-registry@0.3.23:
     resolution: {integrity: sha512-0K65Lea881pHotoGEa5gDlMxt3pctLi2RplBb7Ezh4rRdLEOtgi7n4EwK9lamnUCkKBqaeKRVebTq6BAxSkpXQ==}
 
@@ -3901,6 +3934,12 @@ packages:
     resolution: {integrity: sha512-AXJdLo8kgMbimY95O2aKQqsz2iWi9jMgKJhRBAxECE4IFxfcazB2LmzloIoibJI3C12IlY20+KFaLv+71bUJeQ==}
     peerDependencies:
       react: ^19.2.4
+
+  react-hook-form@7.72.0:
+    resolution: {integrity: sha512-V4v6jubaf6JAurEaVnT9aUPKFbNtDgohj5CIgVGyPHvT9wRx5OZHVjz31GsxnPNI278XMu+ruFz+wGOscHaLKw==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -4652,6 +4691,24 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zustand@5.0.12:
+    resolution: {integrity: sha512-i77ae3aZq4dhMlRhJVCYgMLKuSiZAaUPAct2AksxQ+gOtimhGMdXljRT21P5BNpeT4kXlLIckvkPM029OljD7g==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
 snapshots:
 
   '@babel/code-frame@7.29.0':
@@ -5067,6 +5124,11 @@ snapshots:
       ajv-formats: 3.0.1(ajv@8.18.0)
       fast-uri: 3.1.0
 
+  '@fastify/cookie@11.0.2':
+    dependencies:
+      cookie: 1.1.1
+      fastify-plugin: 5.1.0
+
   '@fastify/cors@11.2.0':
     dependencies:
       fastify-plugin: 5.1.0
@@ -5158,6 +5220,11 @@ snapshots:
   '@hono/node-server@1.19.12(hono@4.12.10)':
     dependencies:
       hono: 4.12.10
+
+  '@hookform/resolvers@5.2.2(react-hook-form@7.72.0(react@19.2.4))':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.72.0(react@19.2.4)
 
   '@hugeicons/core-free-icons@4.1.1': {}
 
@@ -5636,6 +5703,8 @@ snapshots:
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@standard-schema/utils@0.3.0': {}
 
   '@tailwindcss/node@4.2.1':
     dependencies:
@@ -6879,8 +6948,8 @@ snapshots:
       '@babel/parser': 7.29.0
       eslint: 9.39.3(jiti@2.6.1)
       hermes-parser: 0.25.1
-      zod: 3.25.76
-      zod-validation-error: 4.0.2(zod@3.25.76)
+      zod: 4.3.6
+      zod-validation-error: 4.0.2(zod@4.3.6)
     transitivePeerDependencies:
       - supports-color
 
@@ -7758,6 +7827,8 @@ snapshots:
 
   kleur@4.1.5: {}
 
+  ky@1.14.3: {}
+
   language-subtag-registry@0.3.23: {}
 
   language-tags@1.0.9:
@@ -8385,6 +8456,10 @@ snapshots:
     dependencies:
       react: 19.2.4
       scheduler: 0.27.0
+
+  react-hook-form@7.72.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   react-is@16.13.1: {}
 
@@ -9234,10 +9309,16 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-validation-error@4.0.2(zod@3.25.76):
+  zod-validation-error@4.0.2(zod@4.3.6):
     dependencies:
-      zod: 3.25.76
+      zod: 4.3.6
 
   zod@3.25.76: {}
 
   zod@4.3.6: {}
+
+  zustand@5.0.12(@types/react@19.2.14)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.4
+      use-sync-external-store: 1.6.0(react@19.2.4)

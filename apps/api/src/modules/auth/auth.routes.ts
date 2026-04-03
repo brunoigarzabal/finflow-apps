@@ -1,12 +1,21 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
+import { env } from '../../env.js'
 import {
   registerBody,
   loginBody,
   tokenResponse,
   profileResponse,
 } from './auth.schemas.js'
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60,
+}
 import {
   createUser,
   authenticateUser,
@@ -34,6 +43,7 @@ export async function authRoutes(app: FastifyInstance) {
         { expiresIn: '7d' },
       )
 
+      reply.setCookie('token', token, COOKIE_OPTIONS)
       return reply.status(201).send({ token })
     },
   )
@@ -56,7 +66,22 @@ export async function authRoutes(app: FastifyInstance) {
         { expiresIn: '7d' },
       )
 
+      reply.setCookie('token', token, COOKIE_OPTIONS)
       return reply.send({ token })
+    },
+  )
+
+  typedApp.post(
+    '/logout',
+    {
+      schema: {
+        tags: ['Auth'],
+        summary: 'Clear authentication cookie',
+      },
+    },
+    async (_request, reply) => {
+      reply.clearCookie('token', { path: '/' })
+      return reply.send({ success: true })
     },
   )
 

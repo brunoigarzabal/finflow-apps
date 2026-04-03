@@ -1,4 +1,5 @@
 import fastify from 'fastify'
+import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
 import swagger from '@fastify/swagger'
@@ -23,7 +24,12 @@ export async function buildApp() {
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
 
-  app.register(cors)
+  app.register(cors, {
+    origin: true,
+    credentials: true,
+  })
+
+  app.register(cookie)
 
   app.register(swagger, {
     openapi: {
@@ -46,7 +52,13 @@ export async function buildApp() {
 
   app.register(swaggerUi, { routePrefix: '/docs' })
 
-  app.register(jwt, { secret: env.JWT_SECRET })
+  app.register(jwt, {
+    secret: env.JWT_SECRET,
+    cookie: {
+      cookieName: 'token',
+      signed: false,
+    },
+  })
 
   app.register(prismaPlugin)
   app.register(errorHandler)

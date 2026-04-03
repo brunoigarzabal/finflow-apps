@@ -9,68 +9,141 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as PublicSignUpRouteImport } from './routes/_public/sign-up'
+import { Route as PublicSignInRouteImport } from './routes/_public/sign-in'
 
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignInRoute = SignInRouteImport.update({
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const PublicSignUpRoute = PublicSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicSignInRoute = PublicSignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => PublicRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/sign-in': typeof PublicSignInRoute
+  '/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRoutesByTo {
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/sign-in': typeof PublicSignInRoute
+  '/sign-up': typeof PublicSignUpRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
+  '/_public/sign-in': typeof PublicSignInRoute
+  '/_public/sign-up': typeof PublicSignUpRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/sign-in' | '/sign-up'
+  fullPaths: '/' | '/sign-in' | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/sign-up'
-  id: '__root__' | '/sign-in' | '/sign-up'
+  to: '/' | '/sign-in' | '/sign-up'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/_public'
+    | '/_public/sign-in'
+    | '/_public/sign-up'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sign-in': {
-      id: '/sign-in'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_public/sign-up': {
+      id: '/_public/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof PublicSignUpRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/sign-in': {
+      id: '/_public/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof PublicSignInRouteImport
+      parentRoute: typeof PublicRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
+interface PublicRouteChildren {
+  PublicSignInRoute: typeof PublicSignInRoute
+  PublicSignUpRoute: typeof PublicSignUpRoute
+}
+
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicSignInRoute: PublicSignInRoute,
+  PublicSignUpRoute: PublicSignUpRoute,
+}
+
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
