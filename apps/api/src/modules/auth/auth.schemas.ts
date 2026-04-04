@@ -11,6 +11,10 @@ export const loginBody = z.object({
   password: z.string(),
 })
 
+export const googleLoginBody = z.object({
+  idToken: z.string(),
+})
+
 export const tokenResponse = z.object({
   token: z.string(),
 })

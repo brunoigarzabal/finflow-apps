@@ -6,6 +6,7 @@ const envSchema = z.object({
   DATABASE_URL: z.url(),
   JWT_SECRET: z.string(),
   PORT: z.coerce.number().default(3333),
+  GOOGLE_CLIENT_ID: z.string(),
 })
 
 export const env = envSchema.parse(process.env)

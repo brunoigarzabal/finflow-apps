@@ -44,7 +44,7 @@ export async function authenticateUser(
     where: { email: input.email },
   })
 
-  if (!user) {
+  if (!user || !user.passwordHash) {
     throw new BadRequest('Invalid credentials')
   }
 

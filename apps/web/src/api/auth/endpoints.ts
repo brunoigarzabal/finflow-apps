@@ -2,6 +2,7 @@ import { httpClient } from '@/lib/httpClient'
 
 import { AUTH_ENDPOINTS } from './config'
 import type {
+  GoogleLoginBody,
   LoginBody,
   RegisterBody,
   TokenResponse,
@@ -18,6 +19,12 @@ export const register = (body: RegisterBody) =>
   httpClient
     .unauthorized()
     .post(AUTH_ENDPOINTS.register, { json: body })
+    .json<TokenResponse>()
+
+export const googleLogin = (body: GoogleLoginBody) =>
+  httpClient
+    .unauthorized()
+    .post(AUTH_ENDPOINTS.google, { json: body })
     .json<TokenResponse>()
 
 export const getProfile = () =>

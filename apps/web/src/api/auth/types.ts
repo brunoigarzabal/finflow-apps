@@ -3,6 +3,10 @@ export type LoginBody = {
   password: string
 }
 
+export type GoogleLoginBody = {
+  idToken: string
+}
+
 export type RegisterBody = {
   name: string
   email: string

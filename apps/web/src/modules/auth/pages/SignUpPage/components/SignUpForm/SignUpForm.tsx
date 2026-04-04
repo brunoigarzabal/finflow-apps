@@ -14,6 +14,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldSeparator,
 } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
 import { HTTPError } from 'ky'
@@ -21,6 +22,7 @@ import { Fragment } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useRegister } from '@/api/auth'
+import { GoogleLoginButton } from '@/modules/auth/components'
 import { signUpSchema, type SignUpFormData } from '@/modules/auth/schemas'
 
 export const SignUpForm = () => {
@@ -61,6 +63,14 @@ export const SignUpForm = () => {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
+              <Field>
+                <GoogleLoginButton
+                  setError={(message) => setError('root', { message })}
+                />
+              </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                Or continue with email
+              </FieldSeparator>
               {errors.root && <FieldError>{errors.root.message}</FieldError>}
               <Field>
                 <FieldLabel htmlFor="name">Full Name</FieldLabel>
@@ -133,10 +143,6 @@ export const SignUpForm = () => {
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
-        and <a href="#">Privacy Policy</a>.
-      </FieldDescription>
     </Fragment>
   )
 }
