@@ -18,7 +18,7 @@ export const GoogleLoginButton = ({ setError }: Props) => {
     } catch (error) {
       if (error instanceof HTTPError) {
         const body = await error.response.json<{ message?: string }>()
-        setError(body.message ?? 'Google login failed')
+        setError(body.message ?? 'Falha no login com Google')
       }
     }
   }
@@ -27,7 +27,7 @@ export const GoogleLoginButton = ({ setError }: Props) => {
     <Fragment>
       <GoogleLogin
         onSuccess={handleSuccess}
-        onError={() => setError('Google login failed')}
+        onError={() => setError('Falha no login com Google')}
         width="100%"
         shape="pill"
         theme="outline"

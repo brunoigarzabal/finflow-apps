@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@workspace/ui/components/card'
+import { Alert, AlertDescription } from '@workspace/ui/components/alert'
 import {
   Field,
   FieldDescription,
@@ -45,7 +46,7 @@ export const SignUpForm = () => {
       if (error instanceof HTTPError) {
         const responseBody = await error.response.json<{ message?: string }>()
         setError('root', {
-          message: responseBody.message ?? 'Registration failed',
+          message: responseBody.message ?? 'Falha no cadastro',
         })
       }
     }
@@ -55,9 +56,9 @@ export const SignUpForm = () => {
     <Fragment>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">Crie sua conta</CardTitle>
           <CardDescription>
-            Enter your details below to create your account
+            Preencha seus dados abaixo para criar sua conta
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,26 +70,30 @@ export const SignUpForm = () => {
                 />
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Or continue with email
+                Ou continue com e-mail
               </FieldSeparator>
-              {errors.root && <FieldError>{errors.root.message}</FieldError>}
+              {errors.root && (
+                <Alert variant="destructive">
+                  <AlertDescription>{errors.root.message}</AlertDescription>
+                </Alert>
+              )}
               <Field>
-                <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                <FieldLabel htmlFor="name">Nome completo</FieldLabel>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="João Silva"
                   aria-invalid={!!errors.name}
                   {...register('name')}
                 />
                 {errors.name && <FieldError>{errors.name.message}</FieldError>}
               </Field>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">E-mail</FieldLabel>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="m@exemplo.com"
                   aria-invalid={!!errors.email}
                   {...register('email')}
                 />
@@ -99,7 +104,7 @@ export const SignUpForm = () => {
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <FieldLabel htmlFor="password">Senha</FieldLabel>
                     <Input
                       id="password"
                       type="password"
@@ -112,7 +117,7 @@ export const SignUpForm = () => {
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirmPassword">
-                      Confirm Password
+                      Confirmar senha
                     </FieldLabel>
                     <Input
                       id="confirmPassword"
@@ -126,17 +131,17 @@ export const SignUpForm = () => {
                   </Field>
                 </Field>
                 <FieldDescription>
-                  Must be at least 6 characters long.
+                  Deve ter pelo menos 6 caracteres.
                 </FieldDescription>
               </Field>
               <Field>
                 <Button type="submit" disabled={registerMutation.isPending}>
                   {registerMutation.isPending
-                    ? 'Creating account...'
-                    : 'Create Account'}
+                    ? 'Criando conta...'
+                    : 'Criar conta'}
                 </Button>
                 <FieldDescription className="text-center">
-                  Already have an account? <Link to="/sign-in">Sign in</Link>
+                  Já tem uma conta? <Link to="/sign-in">Entrar</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

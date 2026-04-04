@@ -15,7 +15,7 @@ export async function createUser(prisma: PrismaClient, input: CreateUserInput) {
   })
 
   if (existing) {
-    throw new Conflict('Email already in use')
+    throw new Conflict('E-mail já está em uso')
   }
 
   const passwordHash = await hash(input.password)
@@ -45,13 +45,13 @@ export async function authenticateUser(
   })
 
   if (!user || !user.passwordHash) {
-    throw new BadRequest('Invalid credentials')
+    throw new BadRequest('Credenciais inválidas')
   }
 
   const validPassword = await verify(user.passwordHash, input.password)
 
   if (!validPassword) {
-    throw new BadRequest('Invalid credentials')
+    throw new BadRequest('Credenciais inválidas')
   }
 
   return user
@@ -69,7 +69,7 @@ export async function getUserById(prisma: PrismaClient, userId: string) {
   })
 
   if (!user) {
-    throw new Unauthorized('User not found')
+    throw new Unauthorized('Usuário não encontrado')
   }
 
   return user

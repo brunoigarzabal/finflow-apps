@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@workspace/ui/components/card'
+import { Alert, AlertDescription } from '@workspace/ui/components/alert'
 import {
   Field,
   FieldDescription,
@@ -44,7 +45,7 @@ export const SignInForm = () => {
       if (error instanceof HTTPError) {
         const body = await error.response.json<{ message?: string }>()
         setError('root', {
-          message: body.message ?? 'Invalid credentials',
+          message: body.message ?? 'Credenciais inválidas',
         })
       }
     }
@@ -54,9 +55,9 @@ export const SignInForm = () => {
     <Fragment>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Bem-vindo de volta</CardTitle>
           <CardDescription>
-            Login with your Apple or Google account
+            Entre com sua conta Apple ou Google
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -70,22 +71,26 @@ export const SignInForm = () => {
                       fill="currentColor"
                     />
                   </svg>
-                  Login with Apple
+                  Entrar com Apple
                 </Button>
                 <GoogleLoginButton
                   setError={(message) => setError('root', { message })}
                 />
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Or continue with
+                Ou continue com
               </FieldSeparator>
-              {errors.root && <FieldError>{errors.root.message}</FieldError>}
+              {errors.root && (
+                <Alert variant="destructive">
+                  <AlertDescription>{errors.root.message}</AlertDescription>
+                </Alert>
+              )}
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">E-mail</FieldLabel>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="m@exemplo.com"
                   aria-invalid={!!errors.email}
                   {...register('email')}
                 />
@@ -95,12 +100,12 @@ export const SignInForm = () => {
               </Field>
               <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">Senha</FieldLabel>
                   <a
                     href="#"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Esqueceu sua senha?
                   </a>
                 </div>
                 <Input
@@ -115,10 +120,10 @@ export const SignInForm = () => {
               </Field>
               <Field>
                 <Button type="submit" disabled={login.isPending}>
-                  {login.isPending ? 'Logging in...' : 'Login'}
+                  {login.isPending ? 'Entrando...' : 'Entrar'}
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link to="/sign-up">Sign up</Link>
+                  Não tem uma conta? <Link to="/sign-up">Cadastre-se</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

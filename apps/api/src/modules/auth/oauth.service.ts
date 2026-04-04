@@ -84,7 +84,7 @@ export async function verifyGoogleToken(idToken: string, clientId: string) {
   const payload = ticket.getPayload()
 
   if (!payload || !payload.email || !payload.email_verified) {
-    throw new BadRequest('Invalid Google token or unverified email')
+    throw new BadRequest('Token do Google inválido ou e-mail não verificado')
   }
 
   return {
