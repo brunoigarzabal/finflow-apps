@@ -2,6 +2,7 @@ import { hash, verify } from 'argon2'
 import type { PrismaClient } from '../../../generated/prisma/client.js'
 
 import { BadRequest, Conflict, Unauthorized } from '../../errors/index.js'
+import { seedCategories } from './seed-categories.js'
 
 interface CreateUserInput {
   name: string
@@ -20,12 +21,18 @@ export async function createUser(prisma: PrismaClient, input: CreateUserInput) {
 
   const passwordHash = await hash(input.password)
 
-  const user = await prisma.user.create({
-    data: {
-      name: input.name,
-      email: input.email,
-      passwordHash,
-    },
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        name: input.name,
+        email: input.email,
+        passwordHash,
+      },
+    })
+
+    await seedCategories(tx, created.id)
+
+    return created
   })
 
   return user

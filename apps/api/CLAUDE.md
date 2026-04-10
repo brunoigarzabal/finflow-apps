@@ -36,7 +36,8 @@ src/
     │   ├── auth.routes.ts
     │   ├── auth.schemas.ts
     │   ├── auth.service.ts
-    │   └── oauth.service.ts
+    │   ├── oauth.service.ts
+    │   └── seed-categories.ts  # Default categories seeded on user creation
     └── health/            # Health check endpoint
 ```
 
@@ -82,16 +83,27 @@ src/
 3. `findOrCreateOAuthUser()` handles three cases:
    - Account exists (by `providerAccountId`) → return user
    - User exists (by email) → link account in a transaction
-   - Neither → create user + account in a transaction
+   - Neither → create user + account + seed default categories in a transaction
+
+### Default categories
+
+`seedCategories(prisma, userId)` in `seed-categories.ts` creates 16 default categories (12 expense + 4 income) for a new user. Called inside the registration transaction for both email/password and Google OAuth flows. Idempotent via `createMany({ skipDuplicates: true })`.
 
 ### Database models
 
 ```
-User: id, name, email, passwordHash?, avatarUrl?, accounts[]
-Account: id, provider (enum: GOOGLE), providerAccountId, userId
+User:        id, name, email, passwordHash?, avatarUrl?, accounts[], bankAccounts[], categories[], transactions[]
+Account:     id, provider (enum: GOOGLE), providerAccountId, userId
+BankAccount: id, name, type (enum: CHECKING|SAVINGS|CASH|OTHER), color, icon, initialBalance, currentBalance, archived, userId
+Category:    id, name, type (enum: INCOME|EXPENSE), color, icon, isDefault, userId — unique(userId, name, type)
+Transaction: id, type (enum: INCOME|EXPENSE|TRANSFER), amount (Int, centavos), description, date, isPaid, notes?, transferId?, userId, bankAccountId, categoryId
 ```
 
+**Monetary values are stored as `Int` in centavos** (e.g. R$10,50 = `1050`). Never use floats for money.
+
 `passwordHash` is nullable — OAuth-only users have no password. The `Account` table allows multiple providers per user. Adding a new provider: add enum value, add verification function, add route.
+
+Deleting a `Category` that has `Transaction` records is blocked (`onDelete: Restrict`) — reassign or delete transactions first.
 
 ## Module pattern
 

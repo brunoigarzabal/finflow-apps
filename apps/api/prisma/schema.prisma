@@ -16,13 +16,34 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  accounts Account[]
+  accounts     Account[]
+  bankAccounts BankAccount[]
+  categories   Category[]
+  transactions Transaction[]
 
   @@map("users")
 }
 
 enum AccountProvider {
   GOOGLE
+}
+
+enum BankAccountType {
+  CHECKING
+  SAVINGS
+  CASH
+  OTHER
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
 }
 
 model Account {
@@ -35,4 +56,71 @@ model Account {
 
   @@unique([provider, userId])
   @@map("accounts")
+}
+
+model BankAccount {
+  id             String          @id @default(uuid())
+  name           String
+  type           BankAccountType
+  color          String          @default("#6366f1")
+  icon           String          @default("wallet-02")
+  initialBalance Int             @default(0) @map("initial_balance")
+  currentBalance Int             @default(0) @map("current_balance")
+  archived       Boolean         @default(false)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  transactions Transaction[]
+
+  @@map("bank_accounts")
+}
+
+model Category {
+  id        String       @id @default(uuid())
+  name      String
+  type      CategoryType
+  color     String       @default("#6366f1")
+  icon      String       @default("tag-02")
+  isDefault Boolean      @default(false) @map("is_default")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  transactions Transaction[]
+
+  @@unique([userId, name, type])
+  @@map("categories")
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  type        TransactionType
+  amount      Int
+  description String
+  date        DateTime        @db.Date
+  isPaid      Boolean         @default(true) @map("is_paid")
+  notes       String?
+  transferId  String?         @map("transfer_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String      @map("user_id")
+
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  bankAccountId String      @map("bank_account_id")
+
+  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId    String      @map("category_id")
+
+  @@index([userId, date])
+  @@index([userId, bankAccountId])
+  @@index([userId, categoryId])
+  @@index([transferId])
+  @@map("transactions")
 }

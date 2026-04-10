@@ -5,6 +5,7 @@ import type {
 } from '../../../generated/prisma/client.js'
 
 import { BadRequest } from '../../errors/index.js'
+import { seedCategories } from './seed-categories.js'
 
 const googleClient = new OAuth2Client()
 
@@ -70,6 +71,8 @@ export async function findOrCreateOAuthUser(
         userId: created.id,
       },
     })
+
+    await seedCategories(tx, created.id)
 
     return created
   })
