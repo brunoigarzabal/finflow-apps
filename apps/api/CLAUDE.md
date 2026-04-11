@@ -38,6 +38,8 @@ src/
     │   ├── auth.service.ts
     │   ├── oauth.service.ts
     │   └── seed-categories.ts  # Default categories seeded on user creation
+    ├── bank-account/      # Bank account CRUD (soft delete via archived)
+    ├── category/          # Category CRUD (soft delete via archived)
     └── health/            # Health check endpoint
 ```
 
@@ -50,7 +52,7 @@ src/
 5. `prismaPlugin` — decorates `app.prisma`
 6. `errorHandler` — global error handler
 7. `authPlugin` — decorates `request.getCurrentUserId()`
-8. Route modules registered with prefixes (`/auth`, `/health`)
+8. Route modules registered with prefixes (`/auth`, `/health`, `/bank-accounts`, `/categories`)
 
 ## Authentication system
 
@@ -70,6 +72,18 @@ src/
 | POST | `/auth/logout` | No | Clear token cookie |
 | GET | `/auth/profile` | Yes | Get current user profile |
 | GET | `/health` | No | Health check |
+| GET | `/bank-accounts` | Yes | List bank accounts |
+| GET | `/bank-accounts/:id` | Yes | Get bank account by ID |
+| POST | `/bank-accounts` | Yes | Create bank account |
+| PATCH | `/bank-accounts/:id` | Yes | Update bank account |
+| DELETE | `/bank-accounts/:id` | Yes | Archive bank account |
+| PATCH | `/bank-accounts/:id/restore` | Yes | Restore archived bank account |
+| GET | `/categories` | Yes | List categories |
+| GET | `/categories/:id` | Yes | Get category by ID |
+| POST | `/categories` | Yes | Create category |
+| PATCH | `/categories/:id` | Yes | Update category |
+| DELETE | `/categories/:id` | Yes | Archive category |
+| PATCH | `/categories/:id/restore` | Yes | Restore archived category |
 
 ### Email/password flow
 
@@ -95,7 +109,7 @@ src/
 User:        id, name, email, passwordHash?, avatarUrl?, accounts[], bankAccounts[], categories[], transactions[]
 Account:     id, provider (enum: GOOGLE), providerAccountId, userId
 BankAccount: id, name, type (enum: CHECKING|SAVINGS|CASH|OTHER), color, icon, initialBalance, currentBalance, archived, userId
-Category:    id, name, type (enum: INCOME|EXPENSE), color, icon, isDefault, userId — unique(userId, name, type)
+Category:    id, name, type (enum: INCOME|EXPENSE), color, icon, isDefault, archived, userId — unique(userId, name, type)
 Transaction: id, type (enum: INCOME|EXPENSE|TRANSFER), amount (Int, centavos), description, date, isPaid, notes?, transferId?, userId, bankAccountId, categoryId
 ```
 

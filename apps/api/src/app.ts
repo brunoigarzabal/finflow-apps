@@ -18,6 +18,7 @@ import authPlugin from './plugins/auth.js'
 import healthModule from './modules/health/index.js'
 import authModule from './modules/auth/index.js'
 import bankAccountModule from './modules/bank-account/index.js'
+import categoryModule from './modules/category/index.js'
 
 export async function buildApp() {
   const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>()
@@ -68,6 +69,7 @@ export async function buildApp() {
   app.register(healthModule, { prefix: '/health' })
   app.register(authModule, { prefix: '/auth' })
   app.register(bankAccountModule, { prefix: '/bank-accounts' })
+  app.register(categoryModule, { prefix: '/categories' })
 
   return app
 }
