@@ -6,11 +6,17 @@ import {
   updateTransactionBody,
   listTransactionsQuery,
   summaryQuery,
+  summaryByCategoryQuery,
+  summaryByPeriodQuery,
+  balanceOverTimeQuery,
   transactionIdParam,
   transactionResponse,
   transactionDetailResponse,
   transactionListResponse,
   summaryResponse,
+  summaryByCategoryResponse,
+  summaryByPeriodResponse,
+  balanceOverTimeResponse,
 } from './transaction.schemas.js'
 import {
   listTransactions,
@@ -19,6 +25,9 @@ import {
   updateTransaction,
   deleteTransaction,
   getSummary,
+  getSummaryByCategory,
+  getSummaryByPeriod,
+  getBalanceOverTime,
 } from './transaction.service.js'
 
 export async function transactionRoutes(app: FastifyInstance) {
@@ -38,6 +47,57 @@ export async function transactionRoutes(app: FastifyInstance) {
     async (request) => {
       const userId = await request.getCurrentUserId()
       return getSummary(app.prisma, userId, request.query)
+    },
+  )
+
+  typedApp.get(
+    '/summary-by-category',
+    {
+      schema: {
+        tags: ['Transactions'],
+        summary: 'Get transaction summary grouped by category',
+        security: [{ bearer: [] }],
+        querystring: summaryByCategoryQuery,
+        response: { 200: summaryByCategoryResponse },
+      },
+    },
+    async (request) => {
+      const userId = await request.getCurrentUserId()
+      return getSummaryByCategory(app.prisma, userId, request.query)
+    },
+  )
+
+  typedApp.get(
+    '/summary-by-period',
+    {
+      schema: {
+        tags: ['Transactions'],
+        summary: 'Get transaction summary grouped by month',
+        security: [{ bearer: [] }],
+        querystring: summaryByPeriodQuery,
+        response: { 200: summaryByPeriodResponse },
+      },
+    },
+    async (request) => {
+      const userId = await request.getCurrentUserId()
+      return getSummaryByPeriod(app.prisma, userId, request.query)
+    },
+  )
+
+  typedApp.get(
+    '/balance-over-time',
+    {
+      schema: {
+        tags: ['Transactions'],
+        summary: 'Get daily balance evolution over a period',
+        security: [{ bearer: [] }],
+        querystring: balanceOverTimeQuery,
+        response: { 200: balanceOverTimeResponse },
+      },
+    },
+    async (request) => {
+      const userId = await request.getCurrentUserId()
+      return getBalanceOverTime(app.prisma, userId, request.query)
     },
   )
 

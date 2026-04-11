@@ -1,10 +1,14 @@
-import type {
+import {
   Prisma,
-  PrismaClient,
+  type PrismaClient,
 } from '../../../generated/prisma/client.js'
-import type { TransactionType } from '../../../generated/prisma/enums.js'
+import type {
+  CategoryType,
+  TransactionType,
+} from '../../../generated/prisma/enums.js'
 
 import { BadRequest, NotFound } from '../../errors/index.js'
+import { formatDateLocal, resolveDateRange } from '../../lib/date.js'
 
 type TransactionClient = Prisma.TransactionClient
 type PrismaArg = PrismaClient | TransactionClient
@@ -17,6 +21,33 @@ const transactionInclude = {
     select: { id: true, name: true, color: true, icon: true },
   },
 } as const
+
+function computeNet(
+  aggregations: {
+    type: TransactionType
+    isTransferOut: boolean | null
+    _sum: { amount: number | null }
+  }[],
+): number {
+  let net = 0
+  for (const agg of aggregations) {
+    const sum = agg._sum.amount ?? 0
+    if (agg.type === 'INCOME') {
+      net += sum
+    } else if (agg.type === 'EXPENSE') {
+      net -= sum
+    } else if (agg.type === 'TRANSFER') {
+      net += agg.isTransferOut ? -sum : sum
+    }
+  }
+  return net
+}
+
+function bankAccountSqlFilter(bankAccountId?: string) {
+  return bankAccountId
+    ? Prisma.sql`AND bank_account_id = ${bankAccountId}`
+    : Prisma.empty
+}
 
 async function recalculateBalance(
   prisma: PrismaArg,
@@ -33,21 +64,9 @@ async function recalculateBalance(
     _sum: { amount: true },
   })
 
-  let net = 0
-  for (const agg of aggregations) {
-    const sum = agg._sum.amount ?? 0
-    if (agg.type === 'INCOME') {
-      net += sum
-    } else if (agg.type === 'EXPENSE') {
-      net -= sum
-    } else if (agg.type === 'TRANSFER') {
-      net += agg.isTransferOut ? -sum : sum
-    }
-  }
-
   await prisma.bankAccount.update({
     where: { id: bankAccountId },
-    data: { currentBalance: account.initialBalance + net },
+    data: { currentBalance: account.initialBalance + computeNet(aggregations) },
   })
 }
 
@@ -108,13 +127,10 @@ export async function listTransactions(
   userId: string,
   input: ListTransactionsInput,
 ) {
-  const now = new Date()
-  const startDate = input.startDate
-    ? new Date(input.startDate)
-    : new Date(now.getFullYear(), now.getMonth(), 1)
-  const endDate = input.endDate
-    ? new Date(input.endDate)
-    : new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const { startDate, endDate } = resolveDateRange(
+    input.startDate,
+    input.endDate,
+  )
 
   const where = {
     userId,
@@ -468,13 +484,10 @@ export async function getSummary(
   userId: string,
   input: SummaryInput,
 ) {
-  const now = new Date()
-  const startDate = input.startDate
-    ? new Date(input.startDate)
-    : new Date(now.getFullYear(), now.getMonth(), 1)
-  const endDate = input.endDate
-    ? new Date(input.endDate)
-    : new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const { startDate, endDate } = resolveDateRange(
+    input.startDate,
+    input.endDate,
+  )
 
   const where = {
     userId,
@@ -514,4 +527,223 @@ export async function getSummary(
       balance: totalIncome - totalExpense,
     },
   }
+}
+
+interface SummaryByCategoryInput {
+  type: CategoryType
+  bankAccountId?: string
+  startDate?: string
+  endDate?: string
+}
+
+export async function getSummaryByCategory(
+  prisma: PrismaClient,
+  userId: string,
+  input: SummaryByCategoryInput,
+) {
+  const { startDate, endDate } = resolveDateRange(
+    input.startDate,
+    input.endDate,
+  )
+
+  const where = {
+    userId,
+    isPaid: true,
+    type: input.type,
+    date: { gte: startDate, lte: endDate },
+    ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
+  }
+
+  const aggregations = await prisma.transaction.groupBy({
+    by: ['categoryId'],
+    where,
+    _sum: { amount: true },
+    _count: { id: true },
+    orderBy: { _sum: { amount: 'desc' } },
+  })
+
+  if (aggregations.length === 0) {
+    return { summaryByCategory: [], total: 0 }
+  }
+
+  const categoryIds = aggregations.map((a) => a.categoryId)
+  const categories = await prisma.category.findMany({
+    where: { id: { in: categoryIds } },
+    select: { id: true, name: true, color: true, icon: true },
+  })
+  const categoryMap = new Map(categories.map((c) => [c.id, c]))
+
+  const total = aggregations.reduce((sum, a) => sum + (a._sum.amount ?? 0), 0)
+
+  const summaryByCategory = aggregations.map((agg) => {
+    const category = categoryMap.get(agg.categoryId)
+    const totalAmount = agg._sum.amount ?? 0
+    return {
+      categoryId: agg.categoryId,
+      categoryName: category?.name ?? '',
+      categoryColor: category?.color ?? '',
+      categoryIcon: category?.icon ?? '',
+      totalAmount,
+      transactionCount: agg._count.id,
+      percentageOfTotal:
+        total > 0 ? Math.round((totalAmount / total) * 1000) / 10 : 0,
+    }
+  })
+
+  return { summaryByCategory, total }
+}
+
+interface SummaryByPeriodInput {
+  bankAccountId?: string
+  months: number
+}
+
+export async function getSummaryByPeriod(
+  prisma: PrismaClient,
+  userId: string,
+  input: SummaryByPeriodInput,
+) {
+  const now = new Date()
+  const startDate = new Date(
+    now.getFullYear(),
+    now.getMonth() - input.months + 1,
+    1,
+  )
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+  const rows = await prisma.$queryRaw<
+    { month: string; type: TransactionType; total: number }[]
+  >`
+    SELECT
+      TO_CHAR(DATE_TRUNC('month', date), 'YYYY-MM') AS month,
+      type,
+      SUM(amount)::int AS total
+    FROM transactions
+    WHERE user_id = ${userId}
+      AND is_paid = true
+      AND type IN ('INCOME', 'EXPENSE')
+      AND date >= ${startDate}
+      AND date <= ${endDate}
+      ${bankAccountSqlFilter(input.bankAccountId)}
+    GROUP BY DATE_TRUNC('month', date), type
+  `
+
+  const dataMap = new Map<string, { totalIncome: number; totalExpense: number }>()
+  for (const row of rows) {
+    const entry = dataMap.get(row.month) ?? { totalIncome: 0, totalExpense: 0 }
+    if (row.type === 'INCOME') {
+      entry.totalIncome += Number(row.total)
+    } else if (row.type === 'EXPENSE') {
+      entry.totalExpense += Number(row.total)
+    }
+    dataMap.set(row.month, entry)
+  }
+
+  const summaryByPeriod: {
+    month: string
+    totalIncome: number
+    totalExpense: number
+    balance: number
+  }[] = []
+
+  for (let i = 0; i < input.months; i++) {
+    const d = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1)
+    const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const entry = dataMap.get(month) ?? { totalIncome: 0, totalExpense: 0 }
+    summaryByPeriod.push({
+      month,
+      totalIncome: entry.totalIncome,
+      totalExpense: entry.totalExpense,
+      balance: entry.totalIncome - entry.totalExpense,
+    })
+  }
+
+  return { summaryByPeriod }
+}
+
+interface BalanceOverTimeInput {
+  bankAccountId?: string
+  startDate?: string
+  endDate?: string
+}
+
+export async function getBalanceOverTime(
+  prisma: PrismaClient,
+  userId: string,
+  input: BalanceOverTimeInput,
+) {
+  const { startDate, endDate } = resolveDateRange(
+    input.startDate,
+    input.endDate,
+  )
+
+  const accountWhere = {
+    userId,
+    archived: false,
+    ...(input.bankAccountId ? { id: input.bankAccountId } : {}),
+  }
+
+  const transactionWhere = {
+    userId,
+    isPaid: true,
+    ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
+  }
+
+  const [accountAgg, priorAgg, dailyRows] = await Promise.all([
+    prisma.bankAccount.aggregate({
+      where: accountWhere,
+      _sum: { initialBalance: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['type', 'isTransferOut'],
+      where: { ...transactionWhere, date: { lt: startDate } },
+      _sum: { amount: true },
+    }),
+    prisma.$queryRaw<
+      { date: string; type: TransactionType; is_transfer_out: boolean | null; total: number }[]
+    >`
+      SELECT
+        date::text AS date,
+        type,
+        is_transfer_out,
+        SUM(amount)::int AS total
+      FROM transactions
+      WHERE user_id = ${userId}
+        AND is_paid = true
+        AND date >= ${startDate}
+        AND date <= ${endDate}
+        ${bankAccountSqlFilter(input.bankAccountId)}
+      GROUP BY date, type, is_transfer_out
+    `,
+  ])
+
+  const initialBalanceSum = accountAgg._sum.initialBalance ?? 0
+  const openingBalance = initialBalanceSum + computeNet(priorAgg)
+
+  const dailyNetMap = new Map<string, number>()
+  for (const row of dailyRows) {
+    const dateStr = row.date
+    const current = dailyNetMap.get(dateStr) ?? 0
+    const amount = Number(row.total)
+    if (row.type === 'INCOME') {
+      dailyNetMap.set(dateStr, current + amount)
+    } else if (row.type === 'EXPENSE') {
+      dailyNetMap.set(dateStr, current - amount)
+    } else if (row.type === 'TRANSFER') {
+      dailyNetMap.set(dateStr, current + (row.is_transfer_out ? -amount : amount))
+    }
+  }
+
+  const balanceOverTime: { date: string; balance: number }[] = []
+  let runningBalance = openingBalance
+  const current = new Date(startDate)
+
+  while (current <= endDate) {
+    const dateStr = formatDateLocal(current)
+    runningBalance += dailyNetMap.get(dateStr) ?? 0
+    balanceOverTime.push({ date: dateStr, balance: runningBalance })
+    current.setDate(current.getDate() + 1)
+  }
+
+  return { balanceOverTime }
 }

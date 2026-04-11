@@ -1,6 +1,9 @@
 import { z } from 'zod'
 
-import { TransactionType } from '../../../generated/prisma/enums.js'
+import {
+  CategoryType,
+  TransactionType,
+} from '../../../generated/prisma/enums.js'
 
 const transactionType = z.enum(TransactionType)
 const transactionAmount = z.int().min(1)
@@ -56,14 +59,14 @@ export const transactionIdParam = z.object({
   id: z.uuid(),
 })
 
-const bankAccountBasic = z.object({
+export const bankAccountBasic = z.object({
   id: z.uuid(),
   name: z.string(),
   color: z.string(),
   icon: z.string(),
 })
 
-const categoryBasic = z.object({
+export const categoryBasic = z.object({
   id: z.uuid(),
   name: z.string(),
   color: z.string(),
@@ -112,4 +115,57 @@ export const summaryResponse = z.object({
     totalExpense: z.int(),
     balance: z.int(),
   }),
+})
+
+export const summaryByCategoryQuery = z.object({
+  type: z.enum(CategoryType),
+  bankAccountId: z.uuid().optional(),
+  startDate: transactionDate.optional(),
+  endDate: transactionDate.optional(),
+})
+
+export const summaryByCategoryResponse = z.object({
+  summaryByCategory: z.array(
+    z.object({
+      categoryId: z.uuid(),
+      categoryName: z.string(),
+      categoryColor: z.string(),
+      categoryIcon: z.string(),
+      totalAmount: z.int(),
+      transactionCount: z.int(),
+      percentageOfTotal: z.number(),
+    }),
+  ),
+  total: z.int(),
+})
+
+export const summaryByPeriodQuery = z.object({
+  bankAccountId: z.uuid().optional(),
+  months: z.coerce.number().int().min(2).max(24).default(12),
+})
+
+export const summaryByPeriodResponse = z.object({
+  summaryByPeriod: z.array(
+    z.object({
+      month: z.string(),
+      totalIncome: z.int(),
+      totalExpense: z.int(),
+      balance: z.int(),
+    }),
+  ),
+})
+
+export const balanceOverTimeQuery = z.object({
+  bankAccountId: z.uuid().optional(),
+  startDate: transactionDate.optional(),
+  endDate: transactionDate.optional(),
+})
+
+export const balanceOverTimeResponse = z.object({
+  balanceOverTime: z.array(
+    z.object({
+      date: z.string(),
+      balance: z.int(),
+    }),
+  ),
 })

@@ -52,7 +52,7 @@ src/
 5. `prismaPlugin` — decorates `app.prisma`
 6. `errorHandler` — global error handler
 7. `authPlugin` — decorates `request.getCurrentUserId()`
-8. Route modules registered with prefixes (`/auth`, `/health`, `/bank-accounts`, `/categories`)
+8. Route modules registered with prefixes (`/auth`, `/health`, `/bank-accounts`, `/categories`, `/transactions`, `/dashboard`)
 
 ## Authentication system
 
@@ -84,6 +84,16 @@ src/
 | PATCH | `/categories/:id` | Yes | Update category |
 | DELETE | `/categories/:id` | Yes | Archive category |
 | PATCH | `/categories/:id/restore` | Yes | Restore archived category |
+| GET | `/transactions` | Yes | List transactions (paginated) |
+| GET | `/transactions/:id` | Yes | Get transaction by ID |
+| POST | `/transactions` | Yes | Create transaction |
+| PATCH | `/transactions/:id` | Yes | Update transaction |
+| DELETE | `/transactions/:id` | Yes | Delete transaction |
+| GET | `/transactions/summary` | Yes | Get income/expense summary for period |
+| GET | `/transactions/summary-by-category` | Yes | Get summary grouped by category |
+| GET | `/transactions/summary-by-period` | Yes | Get monthly summary over N months |
+| GET | `/transactions/balance-over-time` | Yes | Get daily balance evolution |
+| GET | `/dashboard` | Yes | Get consolidated dashboard data |
 
 ### Email/password flow
 

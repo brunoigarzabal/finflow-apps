@@ -20,6 +20,7 @@ import authModule from './modules/auth/index.js'
 import bankAccountModule from './modules/bank-account/index.js'
 import categoryModule from './modules/category/index.js'
 import transactionModule from './modules/transaction/index.js'
+import dashboardModule from './modules/dashboard/index.js'
 
 export async function buildApp() {
   const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>()
@@ -72,6 +73,7 @@ export async function buildApp() {
   app.register(bankAccountModule, { prefix: '/bank-accounts' })
   app.register(categoryModule, { prefix: '/categories' })
   app.register(transactionModule, { prefix: '/transactions' })
+  app.register(dashboardModule, { prefix: '/dashboard' })
 
   return app
 }
