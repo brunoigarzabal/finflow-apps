@@ -106,8 +106,9 @@ model Transaction {
   date        DateTime        @db.Date
   isPaid      Boolean         @default(true) @map("is_paid")
   notes       String?
-  transferId  String?         @map("transfer_id")
-  createdAt   DateTime        @default(now()) @map("created_at")
+  transferId    String?  @map("transfer_id")
+  isTransferOut Boolean? @map("is_transfer_out")
+  createdAt     DateTime @default(now()) @map("created_at")
   updatedAt   DateTime        @updatedAt @map("updated_at")
 
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
