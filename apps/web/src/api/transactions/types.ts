@@ -14,6 +14,49 @@ export type Transaction = {
   bankAccountId: string
 }
 
+export type TransactionDetail = {
+  id: string
+  type: TransactionType
+  amount: number
+  description: string
+  date: string
+  isPaid: boolean
+  notes: string | null
+  transferId: string | null
+  createdAt: string
+  updatedAt: string
+  bankAccount: { id: string; name: string; color: string; icon: string }
+  category: { id: string; name: string; color: string; icon: string }
+  relatedTransaction: {
+    id: string
+    amount: number
+    type: TransactionType
+    bankAccount: { id: string; name: string; color: string; icon: string }
+  } | null
+}
+
+export type CreateTransactionBody = {
+  type: TransactionType
+  amount: number
+  description: string
+  date: string
+  bankAccountId: string
+  categoryId: string
+  isPaid: boolean
+  notes?: string
+  destinationBankAccountId?: string
+}
+
+export type UpdateTransactionBody = {
+  amount?: number
+  description?: string
+  date?: string
+  bankAccountId?: string
+  categoryId?: string
+  isPaid?: boolean
+  notes?: string | null
+}
+
 export type TransactionSummary = {
   totalIncome: number
   totalExpense: number
@@ -44,6 +87,7 @@ export type ListTransactionsParams = {
   startDate?: string
   endDate?: string
   bankAccountId?: string
+  categoryId?: string
   page?: number
   perPage?: number
 }
