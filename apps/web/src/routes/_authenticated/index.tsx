@@ -1,29 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Fragment } from 'react'
 
-import { useLogout } from '@/api/auth'
+import { DashboardPage } from '@/modules/dashboard'
 
 export const Route = createFileRoute('/_authenticated/')({
-  component: HomePage,
+  component: DashboardPage,
 })
-
-function HomePage() {
-  const logout = useLogout()
-
-  return (
-    <Fragment>
-      <div className="flex min-h-svh items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <h1 className="text-2xl font-bold">Bem-vindo ao FinFlow</h1>
-          <p className="text-muted-foreground">Você está autenticado.</p>
-          <button
-            onClick={() => logout.mutate(undefined)}
-            className="text-sm text-primary underline-offset-4 hover:underline"
-          >
-            Sair
-          </button>
-        </div>
-      </div>
-    </Fragment>
-  )
-}

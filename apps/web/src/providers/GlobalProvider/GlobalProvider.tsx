@@ -2,6 +2,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import { QueryClientProvider, type QueryClient } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 
+import { Toaster } from '@workspace/ui/components/sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { GOOGLE_CLIENT_ID } from '@/config/env'
 
@@ -16,7 +17,10 @@ export const GlobalProvider = ({
 }: GlobalProviderProps) => (
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <ThemeProvider defaultTheme="light" storageKey="@finflow/theme">
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster richColors />
+      </QueryClientProvider>
     </ThemeProvider>
   </GoogleOAuthProvider>
 )
