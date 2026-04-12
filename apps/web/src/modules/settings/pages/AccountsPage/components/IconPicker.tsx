@@ -1,39 +1,9 @@
 import { cn } from '@workspace/ui/lib/utils'
-import {
-  Wallet02Icon,
-  BankIcon,
-  CreditCardIcon,
-  MoneyBag01Icon,
-  PiggyBankIcon,
-  Cash01Icon,
-  Coins01Icon,
-  ChartBarLineIcon,
-  Home01Icon,
-  ShoppingBag01Icon,
-  Car01Icon,
-  Airplane01Icon,
-} from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
-import type { HugeiconsIconProps } from '@hugeicons/react'
 
-type HugeIcon = HugeiconsIconProps['icon']
+import { ICON_MAP, getIconByName } from '@/lib/icons'
 
-const ICONS: Record<string, HugeIcon> = {
-  'wallet-02': Wallet02Icon,
-  bank: BankIcon,
-  'credit-card': CreditCardIcon,
-  'money-bag-01': MoneyBag01Icon,
-  'piggy-bank': PiggyBankIcon,
-  'cash-01': Cash01Icon,
-  coin: Coins01Icon,
-  'chart-bar-01': ChartBarLineIcon,
-  'home-01': Home01Icon,
-  'shopping-bag-01': ShoppingBag01Icon,
-  'car-01': Car01Icon,
-  'airplane-01': Airplane01Icon,
-}
-
-const ICON_NAMES = Object.keys(ICONS)
+const ICON_NAMES = Object.keys(ICON_MAP)
 
 type Props = {
   value: string
@@ -54,7 +24,7 @@ export const IconPicker = ({ value, onChange }: Props) => (
         title={name}
       >
         <HugeiconsIcon
-          icon={ICONS[name]}
+          icon={ICON_MAP[name]}
           strokeWidth={1.5}
           className="size-5"
         />
@@ -63,5 +33,4 @@ export const IconPicker = ({ value, onChange }: Props) => (
   </div>
 )
 
-export const getIconByName = (name: string): HugeIcon =>
-  ICONS[name] ?? Wallet02Icon
+export { getIconByName }
