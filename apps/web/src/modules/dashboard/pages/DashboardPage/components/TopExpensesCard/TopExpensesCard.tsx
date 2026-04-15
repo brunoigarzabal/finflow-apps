@@ -52,15 +52,16 @@ export const TopExpensesCard = () => {
           </p>
         ) : (
           <Fragment>
-            <ResponsiveContainer width="100%" height={160}>
+            <ResponsiveContainer width="100%" height={150}>
               <PieChart>
                 <Pie
                   data={items}
                   dataKey="total"
                   nameKey="categoryName"
-                  innerRadius={50}
-                  outerRadius={75}
-                  paddingAngle={2}
+                  innerRadius={45}
+                  outerRadius={68}
+                  paddingAngle={3}
+                  strokeWidth={0}
                 >
                   {items.map((item, index) => (
                     <Cell
@@ -86,7 +87,7 @@ export const TopExpensesCard = () => {
               </PieChart>
             </ResponsiveContainer>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {items.map((item, index) => (
                 <div
                   key={item.categoryId ?? index}
@@ -94,7 +95,7 @@ export const TopExpensesCard = () => {
                 >
                   <div className="flex items-center gap-2">
                     <div
-                      className="size-3 shrink-0 rounded-full"
+                      className="size-2.5 shrink-0 rounded-full"
                       style={{
                         backgroundColor: isHidden
                           ? GRAY_COLOR
@@ -105,7 +106,7 @@ export const TopExpensesCard = () => {
                       {item.categoryName ?? 'Sem categoria'}
                     </span>
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
                     {item.percentage.toFixed(1)}%
                   </span>
                 </div>

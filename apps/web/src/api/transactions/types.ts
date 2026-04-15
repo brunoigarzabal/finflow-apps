@@ -7,11 +7,12 @@ export type Transaction = {
   type: TransactionType
   isPaid: boolean
   date: string
-  categoryId: string | null
-  categoryName: string | null
-  categoryIcon: string | null
-  categoryColor: string | null
-  bankAccountId: string
+  notes: string | null
+  transferId: string | null
+  createdAt: string
+  updatedAt: string
+  bankAccount: { id: string; name: string; color: string; icon: string }
+  category: { id: string; name: string; color: string; icon: string }
 }
 
 export type TransactionDetail = {
@@ -58,9 +59,13 @@ export type UpdateTransactionBody = {
 }
 
 export type TransactionSummary = {
+  previousBalance: number
   totalIncome: number
   totalExpense: number
   balance: number
+  pendingIncome: number
+  pendingExpense: number
+  pendingBalance: number
 }
 
 export type SummaryByCategoryItem = {
@@ -78,7 +83,12 @@ export type SummaryByCategoryResponse = {
 
 export type TransactionListResponse = {
   transactions: Transaction[]
-  total: number
+  pagination: {
+    page: number
+    perPage: number
+    total: number
+    totalPages: number
+  }
 }
 
 export type ListTransactionsParams = {

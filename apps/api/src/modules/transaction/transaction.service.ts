@@ -1,7 +1,4 @@
-import {
-  Prisma,
-  type PrismaClient,
-} from '../../../generated/prisma/client.js'
+import { Prisma, type PrismaClient } from '../../../generated/prisma/client.js'
 import type {
   CategoryType,
   TransactionType,
@@ -22,25 +19,35 @@ const transactionInclude = {
   },
 } as const
 
-function computeNet(
-  aggregations: {
-    type: TransactionType
-    isTransferOut: boolean | null
-    _sum: { amount: number | null }
-  }[],
-): number {
-  let net = 0
+type AggregationRow = {
+  type: TransactionType
+  isTransferOut: boolean | null
+  _sum: { amount: number | null }
+}
+
+function splitIncomeExpense(aggregations: AggregationRow[]) {
+  let income = 0
+  let expense = 0
   for (const agg of aggregations) {
     const sum = agg._sum.amount ?? 0
     if (agg.type === 'INCOME') {
-      net += sum
+      income += sum
     } else if (agg.type === 'EXPENSE') {
-      net -= sum
+      expense += sum
     } else if (agg.type === 'TRANSFER') {
-      net += agg.isTransferOut ? -sum : sum
+      if (agg.isTransferOut) {
+        expense += sum
+      } else {
+        income += sum
+      }
     }
   }
-  return net
+  return { income, expense }
+}
+
+function computeNet(aggregations: AggregationRow[]): number {
+  const { income, expense } = splitIncomeExpense(aggregations)
+  return income - expense
 }
 
 function bankAccountSqlFilter(bankAccountId?: string) {
@@ -51,7 +58,7 @@ function bankAccountSqlFilter(bankAccountId?: string) {
 
 async function recalculateBalance(
   prisma: PrismaArg,
-  bankAccountId: string,
+  bankAccountId: string
 ): Promise<void> {
   const account = await prisma.bankAccount.findUniqueOrThrow({
     where: { id: bankAccountId },
@@ -74,7 +81,7 @@ async function validateBankAccount(
   prisma: PrismaArg,
   userId: string,
   bankAccountId: string,
-  label = 'Conta bancária',
+  label = 'Conta bancária'
 ) {
   const account = await prisma.bankAccount.findUnique({
     where: { id: bankAccountId },
@@ -94,7 +101,7 @@ async function validateBankAccount(
 async function validateCategory(
   prisma: PrismaArg,
   userId: string,
-  categoryId: string,
+  categoryId: string
 ) {
   const category = await prisma.category.findUnique({
     where: { id: categoryId },
@@ -125,11 +132,11 @@ interface ListTransactionsInput {
 export async function listTransactions(
   prisma: PrismaClient,
   userId: string,
-  input: ListTransactionsInput,
+  input: ListTransactionsInput
 ) {
   const { startDate, endDate } = resolveDateRange(
     input.startDate,
-    input.endDate,
+    input.endDate
   )
 
   const where = {
@@ -145,7 +152,7 @@ export async function listTransactions(
     prisma.transaction.findMany({
       where,
       include: transactionInclude,
-      orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
       skip: (input.page - 1) * input.perPage,
       take: input.perPage,
     }),
@@ -166,7 +173,7 @@ export async function listTransactions(
 export async function getTransaction(
   prisma: PrismaClient,
   userId: string,
-  id: string,
+  id: string
 ) {
   const transaction = await prisma.transaction.findUnique({
     where: { id },
@@ -214,18 +221,14 @@ interface CreateTransactionInput {
 export async function createTransaction(
   prisma: PrismaClient,
   userId: string,
-  input: CreateTransactionInput,
+  input: CreateTransactionInput
 ) {
   if (input.type === 'TRANSFER' && !input.destinationBankAccountId) {
-    throw new BadRequest(
-      'Conta de destino é obrigatória para transferências',
-    )
+    throw new BadRequest('Conta de destino é obrigatória para transferências')
   }
 
   if (input.type !== 'TRANSFER' && input.destinationBankAccountId) {
-    throw new BadRequest(
-      'Conta de destino só é permitida para transferências',
-    )
+    throw new BadRequest('Conta de destino só é permitida para transferências')
   }
 
   if (
@@ -246,7 +249,7 @@ export async function createTransaction(
         tx,
         userId,
         input.destinationBankAccountId!,
-        'Conta de destino',
+        'Conta de destino'
       )
 
       const transferId = crypto.randomUUID()
@@ -338,7 +341,7 @@ export async function updateTransaction(
   prisma: PrismaClient,
   userId: string,
   id: string,
-  input: UpdateTransactionInput,
+  input: UpdateTransactionInput
 ) {
   return prisma.$transaction(async (tx) => {
     const existing = await tx.transaction.findUnique({ where: { id } })
@@ -349,7 +352,7 @@ export async function updateTransaction(
 
     if (existing.type === 'TRANSFER' && input.bankAccountId) {
       throw new BadRequest(
-        'Não é possível alterar a conta de uma transferência',
+        'Não é possível alterar a conta de uma transferência'
       )
     }
 
@@ -436,7 +439,7 @@ export async function updateTransaction(
 export async function deleteTransaction(
   prisma: PrismaClient,
   userId: string,
-  id: string,
+  id: string
 ) {
   await prisma.$transaction(async (tx) => {
     const existing = await tx.transaction.findUnique({ where: { id } })
@@ -482,49 +485,66 @@ interface SummaryInput {
 export async function getSummary(
   prisma: PrismaClient,
   userId: string,
-  input: SummaryInput,
+  input: SummaryInput
 ) {
   const { startDate, endDate } = resolveDateRange(
     input.startDate,
-    input.endDate,
+    input.endDate
   )
 
-  const where = {
-    userId,
-    isPaid: true,
-    date: { gte: startDate, lte: endDate },
-    ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
-  }
+  const dateFilter = { gte: startDate, lte: endDate }
+  const accountFilter = input.bankAccountId
+    ? { bankAccountId: input.bankAccountId }
+    : {}
 
-  const aggregations = await prisma.transaction.groupBy({
-    by: ['type', 'isTransferOut'],
-    where,
-    _sum: { amount: true },
-  })
+  const [accountsAgg, priorAggs, paidAggs, pendingAggs] = await Promise.all([
+    prisma.bankAccount.aggregate({
+      where: {
+        userId,
+        archived: false,
+        ...(input.bankAccountId ? { id: input.bankAccountId } : {}),
+      },
+      _sum: { initialBalance: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['type', 'isTransferOut'],
+      where: {
+        userId,
+        isPaid: true,
+        date: { lt: startDate },
+        ...accountFilter,
+      },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['type', 'isTransferOut'],
+      where: { userId, isPaid: true, date: dateFilter, ...accountFilter },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['type', 'isTransferOut'],
+      where: { userId, isPaid: false, date: dateFilter, ...accountFilter },
+      _sum: { amount: true },
+    }),
+  ])
 
-  let totalIncome = 0
-  let totalExpense = 0
+  const { income: totalIncome, expense: totalExpense } =
+    splitIncomeExpense(paidAggs)
+  const { income: pendingIncome, expense: pendingExpense } =
+    splitIncomeExpense(pendingAggs)
 
-  for (const agg of aggregations) {
-    const sum = agg._sum.amount ?? 0
-    if (agg.type === 'INCOME') {
-      totalIncome += sum
-    } else if (agg.type === 'EXPENSE') {
-      totalExpense += sum
-    } else if (agg.type === 'TRANSFER') {
-      if (agg.isTransferOut) {
-        totalExpense += sum
-      } else {
-        totalIncome += sum
-      }
-    }
-  }
+  const initialBalance = accountsAgg._sum.initialBalance ?? 0
+  const previousBalance = initialBalance + computeNet(priorAggs)
 
   return {
     summary: {
+      previousBalance,
       totalIncome,
       totalExpense,
       balance: totalIncome - totalExpense,
+      pendingIncome,
+      pendingExpense,
+      pendingBalance: pendingIncome - pendingExpense,
     },
   }
 }
@@ -539,11 +559,11 @@ interface SummaryByCategoryInput {
 export async function getSummaryByCategory(
   prisma: PrismaClient,
   userId: string,
-  input: SummaryByCategoryInput,
+  input: SummaryByCategoryInput
 ) {
   const { startDate, endDate } = resolveDateRange(
     input.startDate,
-    input.endDate,
+    input.endDate
   )
 
   const where = {
@@ -601,13 +621,13 @@ interface SummaryByPeriodInput {
 export async function getSummaryByPeriod(
   prisma: PrismaClient,
   userId: string,
-  input: SummaryByPeriodInput,
+  input: SummaryByPeriodInput
 ) {
   const now = new Date()
   const startDate = new Date(
     now.getFullYear(),
     now.getMonth() - input.months + 1,
-    1,
+    1
   )
   const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
@@ -628,7 +648,10 @@ export async function getSummaryByPeriod(
     GROUP BY DATE_TRUNC('month', date), type
   `
 
-  const dataMap = new Map<string, { totalIncome: number; totalExpense: number }>()
+  const dataMap = new Map<
+    string,
+    { totalIncome: number; totalExpense: number }
+  >()
   for (const row of rows) {
     const entry = dataMap.get(row.month) ?? { totalIncome: 0, totalExpense: 0 }
     if (row.type === 'INCOME') {
@@ -670,11 +693,11 @@ interface BalanceOverTimeInput {
 export async function getBalanceOverTime(
   prisma: PrismaClient,
   userId: string,
-  input: BalanceOverTimeInput,
+  input: BalanceOverTimeInput
 ) {
   const { startDate, endDate } = resolveDateRange(
     input.startDate,
-    input.endDate,
+    input.endDate
   )
 
   const accountWhere = {
@@ -700,7 +723,12 @@ export async function getBalanceOverTime(
       _sum: { amount: true },
     }),
     prisma.$queryRaw<
-      { date: string; type: TransactionType; is_transfer_out: boolean | null; total: number }[]
+      {
+        date: string
+        type: TransactionType
+        is_transfer_out: boolean | null
+        total: number
+      }[]
     >`
       SELECT
         date::text AS date,
@@ -730,7 +758,10 @@ export async function getBalanceOverTime(
     } else if (row.type === 'EXPENSE') {
       dailyNetMap.set(dateStr, current - amount)
     } else if (row.type === 'TRANSFER') {
-      dailyNetMap.set(dateStr, current + (row.is_transfer_out ? -amount : amount))
+      dailyNetMap.set(
+        dateStr,
+        current + (row.is_transfer_out ? -amount : amount)
+      )
     }
   }
 

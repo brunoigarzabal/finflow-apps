@@ -26,7 +26,7 @@ export const TransactionHeader = ({
     <Fragment>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Lançamentos</h1>
+          <h1 className="hidden text-2xl font-bold sm:block">Lançamentos</h1>
           <NewTransactionDropdown onSelect={onNewTransaction} />
         </div>
 
@@ -42,7 +42,7 @@ export const TransactionHeader = ({
               className="size-4"
             />
           </Button>
-          <span className="min-w-[10rem] text-center text-sm font-medium capitalize">
+          <span className="min-w-[10rem] rounded-full bg-muted px-4 py-1 text-center text-sm font-semibold capitalize">
             {monthLabel}
           </span>
           <Button

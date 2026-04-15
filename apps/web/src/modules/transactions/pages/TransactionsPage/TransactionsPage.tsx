@@ -17,7 +17,7 @@ import {
   type FilterValues,
 } from './components/TransactionFilters'
 import { TransactionFooter } from './components/TransactionFooter'
-import { TransactionFormDialog } from './components/TransactionFormDialog'
+import { TransactionFormDialog } from '@/modules/transactions/components/TransactionFormDialog'
 import { TransactionHeader } from './components/TransactionHeader'
 import { TransactionList } from './components/TransactionList'
 
@@ -137,7 +137,6 @@ export const TransactionsPage = () => {
         <TransactionFooter
           summary={summaryData}
           isLoading={isLoadingSummary}
-          onNewTransaction={handleNewTransaction}
         />
       </div>
 

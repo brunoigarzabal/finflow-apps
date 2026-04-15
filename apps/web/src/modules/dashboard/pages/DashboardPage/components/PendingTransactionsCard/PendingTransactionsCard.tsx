@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
+import { cn } from '@workspace/ui/lib/utils'
 import { Fragment } from 'react'
 
 import type { TransactionType } from '@/api/transactions'
@@ -25,6 +26,11 @@ type Props = {
 const TITLE: Record<Props['type'], string> = {
   EXPENSE: 'Contas a pagar',
   INCOME: 'Contas a receber',
+}
+
+const AMOUNT_CLASS: Record<Props['type'], string> = {
+  EXPENSE: 'text-red-600 dark:text-red-400',
+  INCOME: 'text-green-600 dark:text-green-400',
 }
 
 const formatShortDate = (dateStr: string) => {
@@ -49,7 +55,7 @@ export const PendingTransactionsCard = ({ type }: Props) => {
         <CardTitle className="text-base font-semibold">{TITLE[type]}</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex flex-col">
+      <CardContent className="flex flex-col gap-1">
         {isLoading ? (
           <Fragment>
             {Array.from({ length: 3 }).map((_, i) => (
@@ -74,16 +80,16 @@ export const PendingTransactionsCard = ({ type }: Props) => {
           </p>
         ) : (
           transactions.map((transaction) => {
-            const icon = getIconByName(transaction.categoryIcon ?? '')
-            const color = transaction.categoryColor ?? '#94a3b8'
+            const icon = getIconByName(transaction.category.icon)
+            const color = transaction.category.color
             return (
               <div
                 key={transaction.id}
-                className="flex items-center justify-between rounded-xl px-3 py-2"
+                className="flex items-center justify-between rounded-xl px-3 py-2 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex size-8 items-center justify-center rounded-full"
+                    className="flex size-8 shrink-0 items-center justify-center rounded-full"
                     style={{ backgroundColor: color }}
                   >
                     <HugeiconsIcon
@@ -103,7 +109,7 @@ export const PendingTransactionsCard = ({ type }: Props) => {
                 </div>
                 <HiddenValue
                   value={formatCurrency(transaction.amount)}
-                  className="text-sm font-medium"
+                  className={cn('text-sm font-semibold', AMOUNT_CLASS[type])}
                 />
               </div>
             )

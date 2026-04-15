@@ -7,7 +7,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { Fragment } from 'react'
@@ -27,9 +26,25 @@ export const BalanceCard = () => {
   const accounts = data?.bankAccounts ?? []
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-semibold">Saldo total</CardTitle>
+    <Card className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+      <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-primary/8" />
+      <div className="pointer-events-none absolute -right-4 top-16 size-28 rounded-full bg-primary/5" />
+
+      <CardHeader className="relative flex flex-row items-start justify-between pb-3">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Saldo total
+          </span>
+          {isLoading ? (
+            <Skeleton className="h-10 w-52" />
+          ) : (
+            <HiddenValue
+              value={formatCurrency(data?.totalBalance ?? 0)}
+              className="text-4xl font-bold tracking-tight"
+            />
+          )}
+        </div>
         <Button variant="ghost" size="icon-sm" onClick={toggleHidden}>
           <HugeiconsIcon
             icon={isHidden ? ViewOffIcon : EyeIcon}
@@ -42,53 +57,47 @@ export const BalanceCard = () => {
         </Button>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="relative flex flex-col gap-4">
         {isLoading ? (
-          <Fragment>
-            <Skeleton className="h-8 w-36" />
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-            </div>
-          </Fragment>
+          <div className="flex flex-wrap gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-44 rounded-2xl" />
+            ))}
+          </div>
         ) : (
           <Fragment>
-            <HiddenValue
-              value={formatCurrency(data?.totalBalance ?? 0)}
-              className="text-3xl font-bold"
-            />
-
             {accounts.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Nenhuma conta cadastrada
               </p>
             ) : (
-              <div className="flex flex-col">
+              <div className="flex flex-wrap gap-3">
                 {accounts.map((account) => {
                   const icon = getIconByName(account.icon)
                   return (
                     <div
                       key={account.id}
-                      className="flex items-center justify-between rounded-xl px-3 py-2"
+                      className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm"
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex size-8 items-center justify-center rounded-full"
-                          style={{ backgroundColor: account.color }}
-                        >
-                          <HugeiconsIcon
-                            icon={icon}
-                            strokeWidth={1.5}
-                            className="size-4 text-white"
-                          />
-                        </div>
-                        <span className="text-sm">{account.name}</span>
+                      <div
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full"
+                        style={{ backgroundColor: account.color }}
+                      >
+                        <HugeiconsIcon
+                          icon={icon}
+                          strokeWidth={1.5}
+                          className="size-4 text-white"
+                        />
                       </div>
-                      <HiddenValue
-                        value={formatCurrency(account.currentBalance)}
-                        className="text-sm font-medium"
-                      />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-muted-foreground">
+                          {account.name}
+                        </span>
+                        <HiddenValue
+                          value={formatCurrency(account.currentBalance)}
+                          className="text-sm font-semibold"
+                        />
+                      </div>
                     </div>
                   )
                 })}
@@ -98,7 +107,7 @@ export const BalanceCard = () => {
         )}
       </CardContent>
 
-      <CardFooter>
+      <CardFooter className="relative">
         <Link
           to="/settings/accounts"
           className="text-sm text-muted-foreground underline-offset-4 hover:underline"

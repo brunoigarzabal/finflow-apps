@@ -1,4 +1,4 @@
-import { CheckmarkCircle02Icon, Clock01Icon } from '@hugeicons/core-free-icons'
+import { ThumbsDownIcon, ThumbsUpIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { cn } from '@workspace/ui/lib/utils'
 import { Fragment } from 'react'
@@ -19,7 +19,7 @@ export const TransactionItem = ({
   onTogglePaid,
 }: Props) => {
   const amountClass = cn(
-    'text-sm font-semibold whitespace-nowrap',
+    'text-sm font-bold whitespace-nowrap tabular-nums',
     transaction.type === 'INCOME' && 'text-emerald-500',
     transaction.type === 'TRANSFER' && 'text-blue-500'
   )
@@ -31,40 +31,46 @@ export const TransactionItem = ({
         ? '- '
         : ''
 
-  const categoryIcon = transaction.categoryIcon
-    ? getIconByName(transaction.categoryIcon)
-    : null
+  const categoryIcon = getIconByName(transaction.category.icon)
+  const bankAccountIcon = getIconByName(transaction.bankAccount.icon)
 
   return (
     <Fragment>
       <button
         type="button"
-        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50"
+        className="flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/50"
         onClick={() => onEdit(transaction)}
       >
-        {categoryIcon && (
+        <span
+          className="flex size-9 shrink-0 items-center justify-center rounded-full ring-2 ring-background"
+          style={{ backgroundColor: transaction.category.color }}
+        >
+          <HugeiconsIcon
+            icon={categoryIcon}
+            strokeWidth={2}
+            className="size-4.5 text-white"
+          />
+        </span>
+
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+          {transaction.description}
+        </span>
+
+        <span className="hidden flex-1 items-center justify-center gap-1.5 sm:flex">
           <span
-            className="flex size-8 shrink-0 items-center justify-center rounded-full"
-            style={{ backgroundColor: transaction.categoryColor ?? '#6366f1' }}
+            className="flex size-6 shrink-0 items-center justify-center rounded-full"
+            style={{ backgroundColor: transaction.bankAccount.color }}
           >
             <HugeiconsIcon
-              icon={categoryIcon}
+              icon={bankAccountIcon}
               strokeWidth={2}
-              className="size-4 text-white"
+              className="size-3.5 text-white"
             />
           </span>
-        )}
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-sm font-medium">
-            {transaction.description}
+          <span className="truncate text-xs text-muted-foreground">
+            {transaction.bankAccount.name}
           </span>
-          {transaction.categoryName && (
-            <span className="truncate text-xs text-muted-foreground">
-              {transaction.categoryName}
-            </span>
-          )}
-        </div>
+        </span>
 
         <span className={amountClass}>
           {amountPrefix}
@@ -81,7 +87,7 @@ export const TransactionItem = ({
           title={transaction.isPaid ? 'Pago' : 'Pendente'}
         >
           <HugeiconsIcon
-            icon={transaction.isPaid ? CheckmarkCircle02Icon : Clock01Icon}
+            icon={transaction.isPaid ? ThumbsUpIcon : ThumbsDownIcon}
             strokeWidth={2}
             className={cn(
               'size-5',

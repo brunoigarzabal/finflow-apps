@@ -27,12 +27,11 @@ import type { Category } from '@/api/categories'
 import { useCreateTransaction, useUpdateTransaction } from '@/api/transactions'
 import type { Transaction, TransactionType } from '@/api/transactions'
 import { MoneyInput } from '@/components/common/MoneyInput'
-
 import {
   transactionSchema,
   transferSchema,
   type TransactionFormData,
-} from '../../../schemas/transactionSchema'
+} from '@/modules/transactions/schemas/transactionSchema'
 
 const TYPE_CONFIG: Record<
   TransactionType,
@@ -135,8 +134,8 @@ export const TransactionFormDialog = ({
           amount: transaction.amount,
           description: transaction.description,
           date: transaction.date.slice(0, 10),
-          bankAccountId: transaction.bankAccountId,
-          categoryId: transaction.categoryId ?? '',
+          bankAccountId: transaction.bankAccount.id,
+          categoryId: transaction.category.id,
           isPaid: transaction.isPaid,
           notes: '',
         })

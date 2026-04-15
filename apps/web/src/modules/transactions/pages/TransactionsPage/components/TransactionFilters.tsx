@@ -55,7 +55,7 @@ export const TransactionFilters = ({
 
   return (
     <Fragment>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <Input
           placeholder="Buscar..."
           value={filters.search}

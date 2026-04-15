@@ -25,11 +25,14 @@ export const TransactionGroup = ({
 
   return (
     <Fragment>
-      <div className="flex flex-col gap-1">
-        <p className="px-1 text-xs font-medium text-muted-foreground uppercase">
-          {formattedDate}
-        </p>
-        <div className="flex flex-col divide-y divide-border rounded-lg border bg-card">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3 px-1">
+          <p className="whitespace-nowrap text-xs font-semibold text-muted-foreground uppercase">
+            {formattedDate}
+          </p>
+          <hr className="flex-1 border-border" />
+        </div>
+        <div className="flex flex-col divide-y divide-border rounded-xl border bg-card">
           {transactions.map((transaction) => (
             <TransactionItem
               key={transaction.id}

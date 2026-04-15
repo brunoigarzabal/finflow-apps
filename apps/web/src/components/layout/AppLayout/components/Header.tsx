@@ -13,7 +13,7 @@ export const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 h-14 border-b bg-background/80 backdrop-blur-md">
-      <div className="flex h-full items-center justify-between px-4">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"

@@ -45,8 +45,8 @@ export const TransactionList = ({
   if (filtered.length === 0) {
     return (
       <Fragment>
-        <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/30 py-16 text-center">
+          <p className="text-sm font-medium text-muted-foreground">
             {search
               ? 'Nenhum lançamento encontrado para esta busca.'
               : 'Nenhum lançamento neste mês.'}
