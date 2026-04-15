@@ -43,6 +43,22 @@ export const MobileNav = ({ open, onOpenChange }: Props) => (
         >
           Relatórios
         </Link>
+        <Link
+          to="/settings/accounts"
+          className="rounded-md px-3 py-2 text-sm text-muted-foreground"
+          activeProps={{ className: 'text-foreground font-medium bg-accent' }}
+          onClick={() => onOpenChange(false)}
+        >
+          Contas
+        </Link>
+        <Link
+          to="/settings/categories"
+          className="rounded-md px-3 py-2 text-sm text-muted-foreground"
+          activeProps={{ className: 'text-foreground font-medium bg-accent' }}
+          onClick={() => onOpenChange(false)}
+        >
+          Categorias
+        </Link>
       </nav>
     </SheetContent>
   </Sheet>

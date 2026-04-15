@@ -46,8 +46,8 @@ export const UserMenu = () => {
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Link to="/settings/accounts">Configurações</Link>
+        <DropdownMenuItem render={<Link to="/profile" />}>
+          Minha Conta
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout.mutate(undefined)}>

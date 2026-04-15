@@ -1,7 +1,7 @@
 import {
-  ArrowDown01Icon,
-  ArrowUp01Icon,
-  Exchange01Icon,
+  Add01Icon,
+  ArrowDataTransferHorizontalIcon,
+  MinusSignIcon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
@@ -19,21 +19,21 @@ type Action = {
 const ACTIONS: Action[] = [
   {
     label: 'Despesa',
-    icon: ArrowDown01Icon,
+    icon: MinusSignIcon,
     colorClass: 'text-red-600 dark:text-red-400',
     bgClass: 'bg-red-100 dark:bg-red-900/30',
     href: '/transactions',
   },
   {
     label: 'Receita',
-    icon: ArrowUp01Icon,
+    icon: Add01Icon,
     colorClass: 'text-green-600 dark:text-green-400',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
     href: '/transactions',
   },
   {
     label: 'Transferência',
-    icon: Exchange01Icon,
+    icon: ArrowDataTransferHorizontalIcon,
     colorClass: 'text-blue-600 dark:text-blue-400',
     bgClass: 'bg-blue-100 dark:bg-blue-900/30',
     href: '/transactions',

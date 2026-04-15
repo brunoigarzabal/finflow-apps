@@ -21,7 +21,7 @@ export async function listBankAccounts(
   return prisma.bankAccount.findMany({
     where: {
       userId,
-      ...(includeArchived ? {} : { archived: false }),
+      archived: includeArchived,
     },
     orderBy: { name: 'asc' },
   })
