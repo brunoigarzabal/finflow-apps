@@ -12,8 +12,8 @@ import { Skeleton } from '@workspace/ui/components/skeleton'
 import { Fragment } from 'react'
 
 import { useDashboard } from '@/api/dashboard'
+import { BankAccountIcon } from '@/components/common/BankAccountIcon'
 import { formatCurrency } from '@/lib/formatCurrency'
-import { getIconByName } from '@/lib/icons'
 import { usePrivacyStore } from '@/store'
 
 import { HiddenValue } from '../HiddenValue'
@@ -28,12 +28,12 @@ export const BalanceCard = () => {
   return (
     <Card className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
-      <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-primary/8" />
-      <div className="pointer-events-none absolute -right-4 top-16 size-28 rounded-full bg-primary/5" />
+      <div className="pointer-events-none absolute -top-12 -right-12 size-48 rounded-full bg-primary/8" />
+      <div className="pointer-events-none absolute top-16 -right-4 size-28 rounded-full bg-primary/5" />
 
       <CardHeader className="relative flex flex-row items-start justify-between pb-3">
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
             Saldo total
           </span>
           {isLoading ? (
@@ -72,35 +72,28 @@ export const BalanceCard = () => {
               </p>
             ) : (
               <div className="flex flex-wrap gap-3">
-                {accounts.map((account) => {
-                  const icon = getIconByName(account.icon)
-                  return (
-                    <div
-                      key={account.id}
-                      className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm"
-                    >
-                      <div
-                        className="flex size-9 shrink-0 items-center justify-center rounded-full"
-                        style={{ backgroundColor: account.color }}
-                      >
-                        <HugeiconsIcon
-                          icon={icon}
-                          strokeWidth={1.5}
-                          className="size-4 text-white"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-xs text-muted-foreground">
-                          {account.name}
-                        </span>
-                        <HiddenValue
-                          value={formatCurrency(account.currentBalance)}
-                          className="text-sm font-semibold"
-                        />
-                      </div>
+                {accounts.map((account) => (
+                  <div
+                    key={account.id}
+                    className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm"
+                  >
+                    <BankAccountIcon
+                      icon={account.icon}
+                      color={account.color}
+                      className="size-9"
+                      iconClassName="size-4"
+                    />
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-muted-foreground">
+                        {account.name}
+                      </span>
+                      <HiddenValue
+                        value={formatCurrency(account.currentBalance)}
+                        className="text-sm font-semibold"
+                      />
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </Fragment>

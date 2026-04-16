@@ -1,18 +1,18 @@
 import { MoreVerticalIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@workspace/ui/components/button'
-import { cn } from '@workspace/ui/lib/utils'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
+import { cn } from '@workspace/ui/lib/utils'
 
 import type { BankAccount } from '@/api/bank-accounts'
+import { BankAccountIcon } from '@/components/common/BankAccountIcon'
 import { formatAccountType } from '@/lib/formatAccountType'
 import { formatCurrency } from '@/lib/formatCurrency'
-import { getIconByName } from '@/lib/icons'
 
 type Props = {
   account: BankAccount
@@ -21,22 +21,17 @@ type Props = {
 }
 
 export const AccountItem = ({ account, onEdit, onArchive }: Props) => {
-  const icon = getIconByName(account.icon)
   const isNegative = account.currentBalance < 0
 
   return (
     <div className="flex items-center justify-between rounded-xl px-3 py-2">
       <div className="flex items-center gap-3">
-        <div
-          className="flex size-10 items-center justify-center rounded-full"
-          style={{ backgroundColor: account.color }}
-        >
-          <HugeiconsIcon
-            icon={icon}
-            strokeWidth={1.5}
-            className="size-5 text-white"
-          />
-        </div>
+        <BankAccountIcon
+          icon={account.icon}
+          color={account.color}
+          className="size-10"
+          iconClassName="size-5"
+        />
         <div className="flex flex-col">
           <span className="text-sm font-medium">{account.name}</span>
           <span className="text-xs text-muted-foreground">
@@ -47,7 +42,10 @@ export const AccountItem = ({ account, onEdit, onArchive }: Props) => {
 
       <div className="flex items-center gap-2">
         <span
-          className={cn('text-sm font-medium', isNegative && 'text-destructive')}
+          className={cn(
+            'text-sm font-medium',
+            isNegative && 'text-destructive'
+          )}
         >
           {formatCurrency(account.currentBalance)}
         </span>

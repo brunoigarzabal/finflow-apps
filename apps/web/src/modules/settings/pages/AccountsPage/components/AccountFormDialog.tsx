@@ -16,16 +16,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@workspace/ui/components/select'
-import { useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
+import { cn } from '@workspace/ui/lib/utils'
+import { Fragment, useEffect, useState } from 'react'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { useCreateBankAccount, useUpdateBankAccount } from '@/api/bank-accounts'
 import type { BankAccount } from '@/api/bank-accounts'
 import { MoneyInput } from '@/components/common/MoneyInput'
+import {
+  getInstitutionFromIcon,
+  parseInstitutionIcon,
+  toInstitutionIcon,
+  type FinancialInstitution,
+} from '@/config/financialInstitutions'
 import { ACCOUNT_ICON_NAMES } from '@/lib/icons'
 
-import { ColorPicker, IconPicker } from '../../../components'
+import {
+  ColorPicker,
+  FinancialInstitutionPicker,
+  IconPicker,
+} from '../../../components'
 import {
   bankAccountSchema,
   type BankAccountFormData,
@@ -36,6 +47,13 @@ const ACCOUNT_TYPE_OPTIONS = [
   { value: 'SAVINGS', label: 'Poupança' },
   { value: 'CASH', label: 'Dinheiro' },
   { value: 'OTHER', label: 'Outro' },
+]
+
+type IconTab = 'institution' | 'generic'
+
+const ICON_TABS: { value: IconTab; label: string }[] = [
+  { value: 'institution', label: 'Instituições financeiras' },
+  { value: 'generic', label: 'Ícones genéricos' },
 ]
 
 function accountToFormData(account: BankAccount): BankAccountFormData {
@@ -56,6 +74,9 @@ const DEFAULT_VALUES: BankAccountFormData = {
   initialBalance: 0,
 }
 
+const resolveInitialTab = (icon: string): IconTab =>
+  parseInstitutionIcon(icon) ? 'institution' : 'generic'
+
 type Props = {
   account?: BankAccount | null
   open: boolean
@@ -66,25 +87,50 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
   const isEditing = !!account
   const create = useCreateBankAccount()
   const update = useUpdateBankAccount()
+  const [activeTab, setActiveTab] = useState<IconTab>('generic')
 
   const {
     register,
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<BankAccountFormData>({
     resolver: zodResolver(bankAccountSchema),
     defaultValues: DEFAULT_VALUES,
   })
 
+  const currentIcon = useWatch({ control, name: 'icon' })
+  const currentName = useWatch({ control, name: 'name' })
+
   useEffect(() => {
-    if (open) {
-      reset(account ? accountToFormData(account) : DEFAULT_VALUES)
-    }
+    if (!open) return
+    const initial = account ? accountToFormData(account) : DEFAULT_VALUES
+    reset(initial)
+    setActiveTab(resolveInitialTab(initial.icon))
   }, [open, account, reset])
 
   const isPending = create.isPending || update.isPending
+
+  const handleTabChange = (next: IconTab) => {
+    if (next === activeTab) return
+    setActiveTab(next)
+    if (next === 'generic' && parseInstitutionIcon(currentIcon)) {
+      setValue('icon', DEFAULT_VALUES.icon, { shouldValidate: true })
+    }
+  }
+
+  const handleInstitutionSelect = (institution: FinancialInstitution) => {
+    const previousInstitution = getInstitutionFromIcon(currentIcon)
+    setValue('icon', toInstitutionIcon(institution.id), {
+      shouldValidate: true,
+    })
+    setValue('color', institution.color, { shouldValidate: true })
+    if (!currentName || currentName === previousInstitution?.name) {
+      setValue('name', institution.name, { shouldValidate: true })
+    }
+  }
 
   const onSubmit = (data: BankAccountFormData) => {
     if (isEditing && account) {
@@ -125,6 +171,40 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="flex gap-2 rounded-full bg-muted p-1">
+            {ICON_TABS.map((tab) => {
+              const isActive = activeTab === tab.value
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => handleTabChange(tab.value)}
+                  className={cn(
+                    'flex-1 cursor-pointer rounded-full px-3 py-1.5 text-xs font-medium transition-colors sm:text-sm',
+                    isActive
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {activeTab === 'institution' && (
+            <Controller
+              name="icon"
+              control={control}
+              render={({ field }) => (
+                <FinancialInstitutionPicker
+                  value={field.value}
+                  onChange={handleInstitutionSelect}
+                />
+              )}
+            />
+          )}
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="name">Nome</Label>
             <Input
@@ -180,31 +260,38 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Cor</Label>
-            <Controller
-              name="color"
-              control={control}
-              render={({ field }) => (
-                <ColorPicker value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label>Ícone</Label>
-            <Controller
-              name="icon"
-              control={control}
-              render={({ field }) => (
-                <IconPicker
-                  value={field.value}
-                  onChange={field.onChange}
-                  icons={ACCOUNT_ICON_NAMES}
+          {activeTab === 'generic' && (
+            <Fragment>
+              <div className="flex flex-col gap-1.5">
+                <Label>Cor</Label>
+                <Controller
+                  name="color"
+                  control={control}
+                  render={({ field }) => (
+                    <ColorPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Ícone</Label>
+                <Controller
+                  name="icon"
+                  control={control}
+                  render={({ field }) => (
+                    <IconPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      icons={ACCOUNT_ICON_NAMES}
+                    />
+                  )}
+                />
+              </div>
+            </Fragment>
+          )}
 
           <DialogFooter>
             <Button

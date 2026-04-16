@@ -10,12 +10,7 @@ import {
 } from '@workspace/ui/components/dropdown-menu'
 
 import { useProfile, useLogout } from '@/api/auth'
-
-function getInitials(name: string): string {
-  const words = name.trim().split(/\s+/)
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase()
-  return (words[0][0] + words[words.length - 1][0]).toUpperCase()
-}
+import { getInitials } from '@/lib/getInitials'
 
 export const UserMenu = () => {
   const { data } = useProfile()
