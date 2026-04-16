@@ -139,14 +139,20 @@ export async function listTransactions(
     input.endDate
   )
 
-  const where = {
+  const baseWhere = {
     userId,
     date: { gte: startDate, lte: endDate },
-    ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
     ...(input.categoryId ? { categoryId: input.categoryId } : {}),
     ...(input.type ? { type: input.type } : {}),
     ...(input.isPaid !== undefined ? { isPaid: input.isPaid } : {}),
   }
+
+  const where: Prisma.TransactionWhereInput = input.bankAccountId
+    ? { ...baseWhere, bankAccountId: input.bankAccountId }
+    : {
+        ...baseWhere,
+        OR: [{ type: { not: 'TRANSFER' } }, { isTransferOut: true }],
+      }
 
   const [transactions, total] = await Promise.all([
     prisma.transaction.findMany({
@@ -159,8 +165,32 @@ export async function listTransactions(
     prisma.transaction.count({ where }),
   ])
 
+  const transferIds = transactions
+    .filter((t) => t.type === 'TRANSFER' && t.transferId)
+    .map((t) => t.transferId as string)
+
+  const relatedRecords = transferIds.length
+    ? await prisma.transaction.findMany({
+        where: { transferId: { in: transferIds } },
+        include: { bankAccount: transactionInclude.bankAccount },
+      })
+    : []
+
+  const enrichedTransactions = transactions.map((t) => {
+    if (t.type !== 'TRANSFER' || !t.transferId) {
+      return { ...t, relatedBankAccount: null }
+    }
+    const pair = relatedRecords.find(
+      (r) => r.transferId === t.transferId && r.id !== t.id
+    )
+    return {
+      ...t,
+      relatedBankAccount: pair?.bankAccount ?? null,
+    }
+  })
+
   return {
-    transactions,
+    transactions: enrichedTransactions,
     pagination: {
       page: input.page,
       perPage: input.perPage,
@@ -212,7 +242,7 @@ interface CreateTransactionInput {
   description: string
   date: string
   bankAccountId: string
-  categoryId: string
+  categoryId?: string
   isPaid: boolean
   notes?: string | null
   destinationBankAccountId?: string
@@ -231,6 +261,10 @@ export async function createTransaction(
     throw new BadRequest('Conta de destino só é permitida para transferências')
   }
 
+  if (input.type !== 'TRANSFER' && !input.categoryId) {
+    throw new BadRequest('Categoria é obrigatória')
+  }
+
   if (
     input.type === 'TRANSFER' &&
     input.bankAccountId === input.destinationBankAccountId
@@ -240,7 +274,9 @@ export async function createTransaction(
 
   return prisma.$transaction(async (tx) => {
     await validateBankAccount(tx, userId, input.bankAccountId)
-    await validateCategory(tx, userId, input.categoryId)
+    if (input.categoryId) {
+      await validateCategory(tx, userId, input.categoryId)
+    }
 
     const dateValue = new Date(input.date)
 
@@ -576,26 +612,33 @@ export async function getSummaryByCategory(
 
   const aggregations = await prisma.transaction.groupBy({
     by: ['categoryId'],
-    where,
+    where: { ...where, categoryId: { not: null } },
     _sum: { amount: true },
     _count: { id: true },
     orderBy: { _sum: { amount: 'desc' } },
   })
 
-  if (aggregations.length === 0) {
+  const categorizedAggregations = aggregations.filter(
+    (a): a is typeof a & { categoryId: string } => a.categoryId !== null,
+  )
+
+  if (categorizedAggregations.length === 0) {
     return { summaryByCategory: [], total: 0 }
   }
 
-  const categoryIds = aggregations.map((a) => a.categoryId)
+  const categoryIds = categorizedAggregations.map((a) => a.categoryId)
   const categories = await prisma.category.findMany({
     where: { id: { in: categoryIds } },
     select: { id: true, name: true, color: true, icon: true },
   })
   const categoryMap = new Map(categories.map((c) => [c.id, c]))
 
-  const total = aggregations.reduce((sum, a) => sum + (a._sum.amount ?? 0), 0)
+  const total = categorizedAggregations.reduce(
+    (sum, a) => sum + (a._sum.amount ?? 0),
+    0,
+  )
 
-  const summaryByCategory = aggregations.map((agg) => {
+  const summaryByCategory = categorizedAggregations.map((agg) => {
     const category = categoryMap.get(agg.categoryId)
     const totalAmount = agg._sum.amount ?? 0
     return {

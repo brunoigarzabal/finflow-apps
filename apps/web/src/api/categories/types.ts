@@ -1,7 +1,9 @@
+export type CategoryType = 'INCOME' | 'EXPENSE'
+
 export type Category = {
   id: string
   name: string
-  type: 'INCOME' | 'EXPENSE'
+  type: CategoryType
   color: string
   icon: string
   isDefault: boolean
@@ -15,6 +17,15 @@ export type CategoryListResponse = {
 }
 
 export type ListCategoriesParams = {
-  type?: 'INCOME' | 'EXPENSE'
+  type?: CategoryType
   archived?: boolean
 }
+
+export type CreateCategoryBody = {
+  name: string
+  type: CategoryType
+  color: string
+  icon: string
+}
+
+export type UpdateCategoryBody = Partial<CreateCategoryBody>

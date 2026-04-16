@@ -39,7 +39,7 @@ export const dashboardResponse = z.object({
       date: z.date(),
       isPaid: z.boolean(),
       bankAccount: bankAccountBasic,
-      category: categoryBasic,
+      category: categoryBasic.nullable(),
     }),
   ),
 })

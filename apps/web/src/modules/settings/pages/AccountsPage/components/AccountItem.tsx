@@ -12,8 +12,7 @@ import {
 import type { BankAccount } from '@/api/bank-accounts'
 import { formatAccountType } from '@/lib/formatAccountType'
 import { formatCurrency } from '@/lib/formatCurrency'
-
-import { getIconByName } from './IconPicker'
+import { getIconByName } from '@/lib/icons'
 
 type Props = {
   account: BankAccount

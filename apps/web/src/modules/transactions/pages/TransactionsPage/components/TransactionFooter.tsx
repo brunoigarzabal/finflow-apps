@@ -20,9 +20,9 @@ type StatRowProps = {
 }
 
 const StatRow = ({ label, value, isLoading, valueClass }: StatRowProps) => (
-  <div className="flex items-center justify-between gap-12">
+  <div className="flex items-center justify-end gap-12">
     <span className="text-sm text-muted-foreground">{label}</span>
-    <span className={cn('text-sm tabular-nums', valueClass)}>
+    <span className={cn('text-sm text-gray-500 tabular-nums', valueClass)}>
       {isLoading ? '—' : formatCurrency(value)}
     </span>
   </div>
@@ -77,15 +77,16 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
             </Fragment>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-end gap-5">
             <div className="flex flex-col gap-1.5">
               <StatRow
                 label="saldo"
                 value={balance}
                 isLoading={isLoading}
                 valueClass={cn(
-                  'font-bold text-base',
-                  !isLoading && (balance >= 0 ? 'text-emerald-500' : 'text-red-500')
+                  'text-base font-bold',
+                  !isLoading &&
+                    (balance >= 0 ? 'text-emerald-500' : 'text-red-500')
                 )}
               />
               <StatRow

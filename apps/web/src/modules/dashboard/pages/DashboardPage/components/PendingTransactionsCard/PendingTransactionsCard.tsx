@@ -80,8 +80,11 @@ export const PendingTransactionsCard = ({ type }: Props) => {
           </p>
         ) : (
           transactions.map((transaction) => {
-            const icon = getIconByName(transaction.category.icon)
-            const color = transaction.category.color
+            const icon = getIconByName(
+              transaction.category?.icon ?? transaction.bankAccount.icon
+            )
+            const color =
+              transaction.category?.color ?? transaction.bankAccount.color
             return (
               <div
                 key={transaction.id}

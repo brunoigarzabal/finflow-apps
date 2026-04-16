@@ -23,14 +23,13 @@ import { toast } from 'sonner'
 import { useCreateBankAccount, useUpdateBankAccount } from '@/api/bank-accounts'
 import type { BankAccount } from '@/api/bank-accounts'
 import { MoneyInput } from '@/components/common/MoneyInput'
+import { ACCOUNT_ICON_NAMES } from '@/lib/icons'
 
+import { ColorPicker, IconPicker } from '../../../components'
 import {
   bankAccountSchema,
   type BankAccountFormData,
 } from '../../../schemas/bankAccountSchema'
-
-import { ColorPicker } from './ColorPicker'
-import { IconPicker } from './IconPicker'
 
 const ACCOUNT_TYPE_OPTIONS = [
   { value: 'CHECKING', label: 'Conta corrente' },
@@ -198,7 +197,11 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
               name="icon"
               control={control}
               render={({ field }) => (
-                <IconPicker value={field.value} onChange={field.onChange} />
+                <IconPicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  icons={ACCOUNT_ICON_NAMES}
+                />
               )}
             />
           </div>

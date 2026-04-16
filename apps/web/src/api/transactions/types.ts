@@ -9,10 +9,17 @@ export type Transaction = {
   date: string
   notes: string | null
   transferId: string | null
+  isTransferOut: boolean | null
   createdAt: string
   updatedAt: string
   bankAccount: { id: string; name: string; color: string; icon: string }
-  category: { id: string; name: string; color: string; icon: string }
+  category: { id: string; name: string; color: string; icon: string } | null
+  relatedBankAccount: {
+    id: string
+    name: string
+    color: string
+    icon: string
+  } | null
 }
 
 export type TransactionDetail = {
@@ -24,10 +31,11 @@ export type TransactionDetail = {
   isPaid: boolean
   notes: string | null
   transferId: string | null
+  isTransferOut: boolean | null
   createdAt: string
   updatedAt: string
   bankAccount: { id: string; name: string; color: string; icon: string }
-  category: { id: string; name: string; color: string; icon: string }
+  category: { id: string; name: string; color: string; icon: string } | null
   relatedTransaction: {
     id: string
     amount: number
@@ -42,7 +50,7 @@ export type CreateTransactionBody = {
   description: string
   date: string
   bankAccountId: string
-  categoryId: string
+  categoryId?: string
   isPaid: boolean
   notes?: string
   destinationBankAccountId?: string

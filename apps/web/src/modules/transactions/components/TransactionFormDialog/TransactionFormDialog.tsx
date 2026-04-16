@@ -1,5 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  Calendar01Icon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+} from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@workspace/ui/components/button'
+import { Calendar } from '@workspace/ui/components/calendar'
 import {
   Dialog,
   DialogContent,
@@ -10,6 +17,11 @@ import {
 import { Input } from '@workspace/ui/components/input'
 import { Label } from '@workspace/ui/components/label'
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@workspace/ui/components/popover'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,8 +29,9 @@ import {
   SelectValue,
 } from '@workspace/ui/components/select'
 import { cn } from '@workspace/ui/lib/utils'
-import { format } from 'date-fns'
-import { Fragment, useEffect, useMemo } from 'react'
+import { format, parse } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -66,15 +79,15 @@ const TYPE_CONFIG: Record<
   },
 }
 
-const DEFAULT_VALUES: TransactionFormData = {
+const buildDefaultValues = (type: TransactionType): TransactionFormData => ({
   amount: 0,
-  description: '',
+  description: type === 'TRANSFER' ? 'Transferência' : '',
   date: format(new Date(), 'yyyy-MM-dd'),
   bankAccountId: '',
   categoryId: '',
   isPaid: true,
   notes: '',
-}
+})
 
 type Props = {
   open: boolean
@@ -102,10 +115,11 @@ export const TransactionFormDialog = ({
   const create = useCreateTransaction()
   const update = useUpdateTransaction()
 
-  const categoryType = type === 'TRANSFER' ? 'EXPENSE' : type
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
+
   const filteredCategories = useMemo(
-    () => categories.filter((c) => c.type === categoryType),
-    [categories, categoryType]
+    () => (isTransfer ? [] : categories.filter((c) => c.type === type)),
+    [categories, type, isTransfer]
   )
 
   const {
@@ -117,7 +131,7 @@ export const TransactionFormDialog = ({
     formState: { errors },
   } = useForm<TransactionFormData>({
     resolver: zodResolver(isTransfer ? transferSchema : transactionSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: buildDefaultValues(type),
   })
 
   const selectedBankAccountId = watch('bankAccountId')
@@ -130,20 +144,33 @@ export const TransactionFormDialog = ({
   useEffect(() => {
     if (open) {
       if (transaction) {
+        const isEditingTransfer = transaction.type === 'TRANSFER'
+        const originId =
+          isEditingTransfer && transaction.isTransferOut === false
+            ? (transaction.relatedBankAccount?.id ?? transaction.bankAccount.id)
+            : transaction.bankAccount.id
+        const destinationId =
+          isEditingTransfer && transaction.isTransferOut === false
+            ? transaction.bankAccount.id
+            : transaction.relatedBankAccount?.id
+
         reset({
           amount: transaction.amount,
           description: transaction.description,
           date: transaction.date.slice(0, 10),
-          bankAccountId: transaction.bankAccount.id,
-          categoryId: transaction.category.id,
+          bankAccountId: originId,
+          categoryId: transaction.category?.id ?? '',
           isPaid: transaction.isPaid,
           notes: '',
+          ...(isEditingTransfer && destinationId
+            ? { destinationBankAccountId: destinationId }
+            : {}),
         })
       } else {
-        reset(DEFAULT_VALUES)
+        reset(buildDefaultValues(type))
       }
     }
-  }, [open, transaction, reset])
+  }, [open, transaction, type, reset])
 
   const isPending = create.isPending || update.isPending
 
@@ -157,7 +184,7 @@ export const TransactionFormDialog = ({
             description: data.description,
             date: data.date,
             bankAccountId: data.bankAccountId,
-            categoryId: data.categoryId,
+            ...(isTransfer ? {} : { categoryId: data.categoryId }),
             isPaid: data.isPaid,
             notes: data.notes || null,
           },
@@ -184,7 +211,7 @@ export const TransactionFormDialog = ({
           description: data.description,
           date: data.date,
           bankAccountId: data.bankAccountId,
-          categoryId: data.categoryId,
+          ...(isTransfer ? {} : { categoryId: data.categoryId }),
           isPaid: data.isPaid,
           notes: data.notes || undefined,
           ...(data.destinationBankAccountId
@@ -230,26 +257,6 @@ export const TransactionFormDialog = ({
             className="flex flex-col gap-4"
           >
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="amount">Valor</Label>
-              <Controller
-                name="amount"
-                control={control}
-                render={({ field }) => (
-                  <MoneyInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    aria-invalid={!!errors.amount}
-                  />
-                )}
-              />
-              {errors.amount && (
-                <p className="text-xs text-destructive">
-                  {errors.amount.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
               <Label htmlFor="description">Descrição</Label>
               <Input
                 id="description"
@@ -264,74 +271,133 @@ export const TransactionFormDialog = ({
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="date">Data</Label>
-              <Input
-                id="date"
-                type="date"
-                aria-invalid={!!errors.date}
-                {...register('date')}
-              />
-              {errors.date && (
-                <p className="text-xs text-destructive">
-                  {errors.date.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label>Conta</Label>
-              <Controller
-                name="bankAccountId"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a conta">
-                        {(value) =>
-                          bankAccounts.find((a) => a.id === value)?.name ??
-                          'Selecione a conta'
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {bankAccounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.bankAccountId && (
-                <p className="text-xs text-destructive">
-                  {errors.bankAccountId.message}
-                </p>
-              )}
-            </div>
-
-            {isTransfer && (
-              <div className="flex flex-col gap-1.5">
-                <Label>Conta de destino</Label>
+            <div className="flex items-end gap-3">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label htmlFor="amount">Valor</Label>
                 <Controller
-                  name="destinationBankAccountId"
+                  name="amount"
                   control={control}
                   render={({ field }) => (
-                    <Select
-                      value={field.value ?? ''}
-                      onValueChange={field.onChange}
+                    <MoneyInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!errors.amount}
+                    />
+                  )}
+                />
+                {errors.amount && (
+                  <p className="text-xs text-destructive">
+                    {errors.amount.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label htmlFor="date">Data</Label>
+                <Controller
+                  name="date"
+                  control={control}
+                  render={({ field }) => {
+                    const selectedDate = field.value
+                      ? parse(field.value, 'yyyy-MM-dd', new Date())
+                      : undefined
+                    return (
+                      <Popover
+                        open={datePickerOpen}
+                        onOpenChange={setDatePickerOpen}
+                      >
+                        <PopoverTrigger
+                          id="date"
+                          type="button"
+                          aria-invalid={!!errors.date}
+                          className="flex h-9 w-full items-center justify-between rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-sm transition-[color,box-shadow,background-color] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
+                        >
+                          <span
+                            className={cn(
+                              !selectedDate && 'text-muted-foreground'
+                            )}
+                          >
+                            {selectedDate
+                              ? format(selectedDate, 'dd/MM/yyyy')
+                              : 'Selecione a data'}
+                          </span>
+                          <HugeiconsIcon
+                            icon={Calendar01Icon}
+                            strokeWidth={2}
+                            className="size-4 text-muted-foreground"
+                          />
+                        </PopoverTrigger>
+                        <PopoverContent align="start" className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            locale={ptBR}
+                            selected={selectedDate}
+                            onSelect={(date) => {
+                              if (date) {
+                                field.onChange(format(date, 'yyyy-MM-dd'))
+                                setDatePickerOpen(false)
+                              }
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )
+                  }}
+                />
+                {errors.date && (
+                  <p className="text-xs text-destructive">
+                    {errors.date.message}
+                  </p>
+                )}
+              </div>
+
+              {!isTransfer && (
+                <Controller
+                  name="isPaid"
+                  control={control}
+                  render={({ field }) => (
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={field.value}
+                      onClick={() => field.onChange(!field.value)}
+                      title={field.value ? 'Pago' : 'Pendente'}
+                      className="flex h-9 shrink-0 cursor-pointer items-center justify-center px-1"
                     >
+                      <HugeiconsIcon
+                        icon={field.value ? ThumbsUpIcon : ThumbsDownIcon}
+                        strokeWidth={2}
+                        className={cn(
+                          'size-5',
+                          field.value
+                            ? 'text-emerald-500'
+                            : 'text-muted-foreground'
+                        )}
+                      />
+                    </button>
+                  )}
+                />
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Label>{isTransfer ? 'Saiu da conta' : 'Conta'}</Label>
+                <Controller
+                  name="bankAccountId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione a conta de destino">
+                        <SelectValue placeholder="Selecione a conta">
                           {(value) =>
                             bankAccounts.find((a) => a.id === value)?.name ??
-                            'Selecione a conta de destino'
+                            'Selecione a conta'
                           }
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {destinationAccounts.map((account) => (
+                        {bankAccounts.map((account) => (
                           <SelectItem key={account.id} value={account.id}>
                             {account.name}
                           </SelectItem>
@@ -340,85 +406,101 @@ export const TransactionFormDialog = ({
                     </Select>
                   )}
                 />
-                {errors.destinationBankAccountId && (
+                {errors.bankAccountId && (
                   <p className="text-xs text-destructive">
-                    {errors.destinationBankAccountId.message}
+                    {errors.bankAccountId.message}
+                  </p>
+                )}
+              </div>
+
+              {isTransfer ? (
+                <div className="flex flex-1 flex-col gap-1.5">
+                  <Label>Entrou na conta</Label>
+                  <Controller
+                    name="destinationBankAccountId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value ?? ''}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione a conta de destino">
+                            {(value) =>
+                              bankAccounts.find((a) => a.id === value)?.name ??
+                              'Selecione a conta de destino'
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {destinationAccounts.map((account) => (
+                            <SelectItem key={account.id} value={account.id}>
+                              {account.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.destinationBankAccountId && (
+                    <p className="text-xs text-destructive">
+                      {errors.destinationBankAccountId.message}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-1 flex-col gap-1.5">
+                  <Label>Categoria</Label>
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Selecione a categoria">
+                            {(value) =>
+                              filteredCategories.find((c) => c.id === value)
+                                ?.name ?? 'Selecione a categoria'
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {filteredCategories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.categoryId && (
+                    <p className="text-xs text-destructive">
+                      {errors.categoryId.message}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {!isTransfer && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="notes">Notas</Label>
+                <Input
+                  id="notes"
+                  placeholder="Observações opcionais"
+                  {...register('notes')}
+                />
+                {errors.notes && (
+                  <p className="text-xs text-destructive">
+                    {errors.notes.message}
                   </p>
                 )}
               </div>
             )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label>Categoria</Label>
-              <Controller
-                name="categoryId"
-                control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a categoria">
-                        {(value) =>
-                          filteredCategories.find((c) => c.id === value)
-                            ?.name ?? 'Selecione a categoria'
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredCategories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.categoryId && (
-                <p className="text-xs text-destructive">
-                  {errors.categoryId.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Controller
-                name="isPaid"
-                control={control}
-                render={({ field }) => (
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={field.value}
-                    onClick={() => field.onChange(!field.value)}
-                    className={cn(
-                      'flex size-5 items-center justify-center rounded border transition-colors',
-                      field.value
-                        ? 'border-emerald-500 bg-emerald-500 text-white'
-                        : 'border-input'
-                    )}
-                  >
-                    {field.value && (
-                      <span className="text-xs font-bold">✓</span>
-                    )}
-                  </button>
-                )}
-              />
-              <Label className="cursor-pointer">Pago</Label>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="notes">Notas</Label>
-              <Input
-                id="notes"
-                placeholder="Observações opcionais"
-                {...register('notes')}
-              />
-              {errors.notes && (
-                <p className="text-xs text-destructive">
-                  {errors.notes.message}
-                </p>
-              )}
-            </div>
 
             <DialogFooter>
               {isEditing && transaction && onDelete && (

@@ -17,7 +17,7 @@ export const createTransactionBody = z.object({
   description: transactionDescription,
   date: transactionDate,
   bankAccountId: z.uuid(),
-  categoryId: z.uuid(),
+  categoryId: z.uuid().optional(),
   isPaid: z.boolean().default(true),
   notes: transactionNotes.nullable().optional(),
   destinationBankAccountId: z.uuid().optional(),
@@ -82,10 +82,15 @@ export const transactionResponse = z.object({
   isPaid: z.boolean(),
   notes: z.string().nullable(),
   transferId: z.string().nullable(),
+  isTransferOut: z.boolean().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
   bankAccount: bankAccountBasic,
-  category: categoryBasic,
+  category: categoryBasic.nullable(),
+})
+
+export const transactionListItem = transactionResponse.extend({
+  relatedBankAccount: bankAccountBasic.nullable(),
 })
 
 export const transactionDetailResponse = transactionResponse.extend({
@@ -100,7 +105,7 @@ export const transactionDetailResponse = transactionResponse.extend({
 })
 
 export const transactionListResponse = z.object({
-  transactions: z.array(transactionResponse),
+  transactions: z.array(transactionListItem),
   pagination: z.object({
     page: z.int(),
     perPage: z.int(),

@@ -22,7 +22,7 @@ export async function listCategories(
     where: {
       userId,
       ...(type ? { type } : {}),
-      ...(includeArchived ? {} : { archived: false }),
+      archived: includeArchived,
     },
     orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
   })

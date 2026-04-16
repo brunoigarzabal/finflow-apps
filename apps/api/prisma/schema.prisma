@@ -117,8 +117,8 @@ model Transaction {
   bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
   bankAccountId String      @map("bank_account_id")
 
-  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  categoryId    String      @map("category_id")
+  category      Category?   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId    String?     @map("category_id")
 
   @@index([userId, date])
   @@index([userId, bankAccountId])
