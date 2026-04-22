@@ -2,6 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Fragment } from 'react'
 
 export const Route = createFileRoute('/_authenticated/reports')({
+  head: () => ({
+    meta: [{ title: 'Relatórios | FinFlow' }],
+  }),
   component: ReportsPage,
 })
 

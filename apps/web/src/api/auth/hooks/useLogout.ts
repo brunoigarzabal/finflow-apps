@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router'
 
-import { defineMutation } from '@/lib/react-query'
+import { defineMutation, queryClient } from '@/lib/react-query'
 import { useAuthStore } from '@/store'
 
 import { AUTH_MUTATION_KEYS } from '../config'
@@ -15,6 +15,7 @@ export const useLogout = () => {
     mutationFn: logout,
   })({
     onSuccess: () => {
+      queryClient.clear()
       setAuthenticated(false)
       navigate({ to: '/sign-in' })
     },

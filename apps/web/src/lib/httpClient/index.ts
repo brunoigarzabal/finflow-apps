@@ -1,6 +1,7 @@
 import ky from 'ky'
 
 import { API_URL } from '@/config/env'
+import { queryClient } from '@/lib/react-query'
 import { useAuthStore } from '@/store'
 
 const base = ky.create({
@@ -15,6 +16,7 @@ export const httpClient = {
         afterResponse: [
           (_request, _options, response) => {
             if (response.status === 401) {
+              queryClient.clear()
               useAuthStore.getState().setAuthenticated(false)
               window.location.href = '/sign-in'
             }

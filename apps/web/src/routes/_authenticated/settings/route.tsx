@@ -2,6 +2,9 @@ import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router'
 import { Fragment } from 'react'
 
 export const Route = createFileRoute('/_authenticated/settings')({
+  head: () => ({
+    meta: [{ title: 'Configurações | FinFlow' }],
+  }),
   beforeLoad: ({ location }) => {
     if (
       location.pathname === '/settings' ||
