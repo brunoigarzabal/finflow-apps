@@ -27,7 +27,7 @@ export const TransactionGroup = ({
     <Fragment>
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3 px-1">
-          <p className="whitespace-nowrap text-xs font-semibold text-muted-foreground uppercase">
+          <p className="text-xs font-semibold whitespace-nowrap text-muted-foreground uppercase">
             {formattedDate}
           </p>
           <hr className="flex-1 border-border" />

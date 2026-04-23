@@ -24,24 +24,105 @@ pnpm --filter @finflow/api dev                         # start dev server (port 
 src/
 ├── server.ts              # Entry point — calls buildApp() and listens
 ├── app.ts                 # Fastify initialization, plugin registration order
-├── env.ts                 # Zod-validated environment variables
-├── errors/                # HttpError base class + BadRequest, Unauthorized, NotFound, Conflict
-├── lib/
-│   └── prisma.ts          # Prisma plugin — decorates app.prisma
-├── plugins/
-│   ├── auth.ts            # Decorates request.getCurrentUserId() via JWT
-│   └── error-handler.ts   # Global error handler (HttpError, ZodError, Fastify errors)
-└── modules/
-    ├── auth/              # Authentication module
-    │   ├── auth.routes.ts
-    │   ├── auth.schemas.ts
-    │   ├── auth.service.ts
-    │   ├── oauth.service.ts
-    │   └── seed-categories.ts  # Default categories seeded on user creation
-    ├── bank-account/      # Bank account CRUD (soft delete via archived)
-    ├── category/          # Category CRUD (soft delete via archived)
-    └── health/            # Health check endpoint
+│
+├── shared/                # FOLDER BY TYPE — cross-cutting infrastructure
+│   ├── config/
+│   │   └── env.ts         # Zod-validated environment variables
+│   ├── database/
+│   │   ├── prisma.ts      # Prisma plugin — decorates app.prisma
+│   │   ├── repositories/  # Data access layer
+│   │   │   ├── user.repository.ts
+│   │   │   ├── bank-account.repository.ts
+│   │   │   ├── category.repository.ts
+│   │   │   └── transaction.repository.ts
+│   │   └── index.ts
+│   ├── helpers/
+│   │   └── date.ts        # Date utilities (resolveDateRange, formatDateLocal)
+│   └── infra/http/
+│       ├── middlewares/
+│       │   ├── auth.ts    # Decorates request.getCurrentUserId() via JWT
+│       │   └── error-handler.ts  # Global error handler
+│       ├── errors/        # HttpError base class + BadRequest, Unauthorized, NotFound, Conflict
+│       └── index.ts
+│
+└── modules/               # FOLDER BY FEATURE — each module has use-case subfolders
+    ├── auth/
+    │   ├── register/          # handler + schema
+    │   ├── login/
+    │   ├── google-login/
+    │   ├── logout/
+    │   ├── get-profile/
+    │   ├── helpers/           # issueAuthToken, oauth.service, seedCategories
+    │   ├── routes.ts          # registers all use-case handlers
+    │   └── index.ts
+    ├── bank-account/
+    │   ├── create-bank-account/
+    │   ├── get-bank-account/
+    │   ├── list-bank-accounts/
+    │   ├── update-bank-account/
+    │   ├── archive-bank-account/
+    │   ├── restore-bank-account/
+    │   ├── schemas.ts         # shared schemas (bankAccountIdParam, bankAccountResponse)
+    │   ├── routes.ts
+    │   └── index.ts
+    ├── category/              # same pattern as bank-account
+    ├── transaction/
+    │   ├── create-transaction/
+    │   ├── get-transaction/
+    │   ├── list-transactions/
+    │   ├── update-transaction/
+    │   ├── delete-transaction/
+    │   ├── get-summary/
+    │   ├── get-summary-by-category/
+    │   ├── get-summary-by-period/
+    │   ├── get-balance-over-time/
+    │   ├── helpers/           # recalculateBalance, validateBankAccount, validateCategory
+    │   ├── schemas.ts
+    │   ├── routes.ts
+    │   └── index.ts
+    ├── dashboard/
+    │   ├── get-dashboard/
+    │   ├── routes.ts
+    │   └── index.ts
+    └── health/
+        ├── check-health/
+        ├── routes.ts
+        └── index.ts
 ```
+
+## Architecture patterns
+
+### Use-case pattern (handler + schema)
+
+Each use-case lives in its own subfolder under the module:
+
+```
+modules/<feature>/<use-case>/
+├── <use-case>.ts           # Fastify route handler (exports async function)
+└── <use-case>.schema.ts    # Zod schemas (body, params, query, response)
+```
+
+Handlers are registered as Fastify plugins via `app.register()` in the module's `routes.ts`.
+
+### Repository pattern
+
+Repositories in `shared/database/repositories/` encapsulate Prisma queries. Each is a factory function receiving a Prisma client:
+
+```ts
+const repo = bankAccountRepository(app.prisma)
+const account = await repo.findById(id)
+```
+
+Repositories accept both `PrismaClient` and `Prisma.TransactionClient` for use inside `$transaction()` blocks.
+
+### Module exports
+
+Each module exports its routes function via `index.ts` barrel:
+```ts
+export { authRoutes } from './routes.js'
+```
+
+Shared schemas within a module live in a `schemas.ts` at the module root.
 
 ## Plugin registration order (app.ts)
 
@@ -97,8 +178,8 @@ src/
 
 ### Email/password flow
 
-1. `createUser()` hashes password with Argon2, checks email uniqueness
-2. `authenticateUser()` verifies password hash, rejects OAuth-only users (null passwordHash)
+1. `register` handler hashes password with Argon2, checks email uniqueness
+2. `login` handler verifies password hash, rejects OAuth-only users (null passwordHash)
 
 ### Google OAuth flow
 
@@ -111,7 +192,7 @@ src/
 
 ### Default categories
 
-`seedCategories(prisma, userId)` in `seed-categories.ts` creates 16 default categories (12 expense + 4 income) for a new user. Called inside the registration transaction for both email/password and Google OAuth flows. Idempotent via `createMany({ skipDuplicates: true })`.
+`seedCategories(prisma, userId)` in `modules/auth/helpers/seed-categories.ts` creates 16 default categories (12 expense + 4 income) for a new user. Called inside the registration transaction for both email/password and Google OAuth flows. Idempotent via `createMany({ skipDuplicates: true })`.
 
 ### Database models
 
@@ -128,18 +209,6 @@ Transaction: id, type (enum: INCOME|EXPENSE|TRANSFER), amount (Int, centavos), d
 `passwordHash` is nullable — OAuth-only users have no password. The `Account` table allows multiple providers per user. Adding a new provider: add enum value, add verification function, add route.
 
 Deleting a `Category` that has `Transaction` records is blocked (`onDelete: Restrict`) — reassign or delete transactions first.
-
-## Module pattern
-
-Each module exports an async route registration function:
-
-```
-modules/<feature>/
-├── index.ts               # Barrel export
-├── <feature>.routes.ts    # Route handlers
-├── <feature>.schemas.ts   # Zod request/response schemas
-└── <feature>.service.ts   # Business logic (receives prisma as argument)
-```
 
 ## Error handling
 

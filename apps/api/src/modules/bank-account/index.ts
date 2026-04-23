@@ -1,3 +1,1 @@
-import { bankAccountRoutes } from './bank-account.routes.js'
-
-export default bankAccountRoutes
+export { bankAccountRoutes } from './routes.js'

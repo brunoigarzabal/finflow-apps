@@ -109,4 +109,5 @@ Uses `ky` with `credentials: 'include'` for httpOnly cookie auth:
 - MUST NOT: Overuse memoization; don't wrap everything in `memo`, `useMemo`, or `useCallback` without measured need.
 - MUST NOT: Trigger state updates during render; avoid setting state in render paths.
 - MUST NOT: Keep long-lived subscriptions without cleanup; prevent memory leaks.
+- MUST NOT: Typecast. Never use `as`
 - MUST NOT: Use excessive `margin` classes (e.g., `mb-*`, `mt-*`, `mr-*`, `ml-*`) when flexbox with `gap` is more appropriate.

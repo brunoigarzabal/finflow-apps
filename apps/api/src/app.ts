@@ -11,16 +11,16 @@ import {
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 
-import { env } from './env.js'
-import prismaPlugin from './lib/prisma.js'
-import errorHandler from './plugins/error-handler.js'
-import authPlugin from './plugins/auth.js'
-import healthModule from './modules/health/index.js'
-import authModule from './modules/auth/index.js'
-import bankAccountModule from './modules/bank-account/index.js'
-import categoryModule from './modules/category/index.js'
-import transactionModule from './modules/transaction/index.js'
-import dashboardModule from './modules/dashboard/index.js'
+import { env } from './shared/config/env.js'
+import prismaPlugin from './shared/database/prisma.js'
+import errorHandler from './shared/infra/http/middlewares/error-handler.js'
+import authPlugin from './shared/infra/http/middlewares/auth.js'
+import { healthRoutes } from './modules/health/index.js'
+import { authRoutes } from './modules/auth/index.js'
+import { bankAccountRoutes } from './modules/bank-account/index.js'
+import { categoryRoutes } from './modules/category/index.js'
+import { transactionRoutes } from './modules/transaction/index.js'
+import { dashboardRoutes } from './modules/dashboard/index.js'
 
 export async function buildApp() {
   const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>()
@@ -69,12 +69,12 @@ export async function buildApp() {
   app.register(errorHandler)
   app.register(authPlugin)
 
-  app.register(healthModule, { prefix: '/health' })
-  app.register(authModule, { prefix: '/auth' })
-  app.register(bankAccountModule, { prefix: '/bank-accounts' })
-  app.register(categoryModule, { prefix: '/categories' })
-  app.register(transactionModule, { prefix: '/transactions' })
-  app.register(dashboardModule, { prefix: '/dashboard' })
+  app.register(healthRoutes, { prefix: '/health' })
+  app.register(authRoutes, { prefix: '/auth' })
+  app.register(bankAccountRoutes, { prefix: '/bank-accounts' })
+  app.register(categoryRoutes, { prefix: '/categories' })
+  app.register(transactionRoutes, { prefix: '/transactions' })
+  app.register(dashboardRoutes, { prefix: '/dashboard' })
 
   return app
 }

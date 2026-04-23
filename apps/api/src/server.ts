@@ -1,4 +1,4 @@
-import { env } from './env.js'
+import { env } from './shared/config/env.js'
 import { buildApp } from './app.js'
 
 async function main() {

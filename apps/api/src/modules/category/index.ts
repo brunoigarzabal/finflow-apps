@@ -1,3 +1,1 @@
-import { categoryRoutes } from './category.routes.js'
-
-export default categoryRoutes
+export { categoryRoutes } from './routes.js'

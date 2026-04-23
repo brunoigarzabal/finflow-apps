@@ -10,6 +10,7 @@ import {
   useUpdateTransaction,
 } from '@/api/transactions'
 import type { Transaction, TransactionType } from '@/api/transactions'
+import { TransactionFormDialog } from '@/modules/transactions/components/TransactionFormDialog'
 
 import { DeleteTransactionDialog } from './components/DeleteTransactionDialog'
 import {
@@ -17,7 +18,6 @@ import {
   type FilterValues,
 } from './components/TransactionFilters'
 import { TransactionFooter } from './components/TransactionFooter'
-import { TransactionFormDialog } from '@/modules/transactions/components/TransactionFormDialog'
 import { TransactionHeader } from './components/TransactionHeader'
 import { TransactionList } from './components/TransactionList'
 
@@ -134,10 +134,7 @@ export const TransactionsPage = () => {
           />
         </div>
 
-        <TransactionFooter
-          summary={summaryData}
-          isLoading={isLoadingSummary}
-        />
+        <TransactionFooter summary={summaryData} isLoading={isLoadingSummary} />
       </div>
 
       <TransactionFormDialog
