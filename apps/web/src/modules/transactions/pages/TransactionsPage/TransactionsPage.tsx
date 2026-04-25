@@ -142,6 +142,7 @@ export const TransactionsPage = () => {
         onOpenChange={setFormDialogOpen}
         type={formDialogType}
         transaction={editingTransaction}
+        defaultCalendarMonth={currentMonth}
         bankAccounts={bankAccounts}
         categories={categories}
         onDelete={handleDeleteFromForm}
