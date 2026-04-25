@@ -40,13 +40,7 @@ export async function listTransactionsHandler(app: FastifyInstance) {
             OR: [{ type: { not: 'TRANSFER' } }, { isTransferOut: true }],
           }
 
-      const [transactions, total] = await Promise.all([
-        repo.findMany(where, {
-          skip: (input.page - 1) * input.perPage,
-          take: input.perPage,
-        }),
-        repo.count(where),
-      ])
+      const transactions = await repo.findMany(where)
 
       const transferIds = transactions
         .filter((t) => t.type === 'TRANSFER' && t.transferId)
@@ -71,12 +65,6 @@ export async function listTransactionsHandler(app: FastifyInstance) {
 
       return {
         transactions: enrichedTransactions,
-        pagination: {
-          page: input.page,
-          perPage: input.perPage,
-          total,
-          totalPages: Math.ceil(total / input.perPage),
-        },
       }
     },
   )

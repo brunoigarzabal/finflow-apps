@@ -91,12 +91,6 @@ export type SummaryByCategoryResponse = {
 
 export type TransactionListResponse = {
   transactions: Transaction[]
-  pagination: {
-    page: number
-    perPage: number
-    total: number
-    totalPages: number
-  }
 }
 
 export type ListTransactionsParams = {
@@ -106,8 +100,6 @@ export type ListTransactionsParams = {
   endDate?: string
   bankAccountId?: string
   categoryId?: string
-  page?: number
-  perPage?: number
 }
 
 export type SummaryParams = {

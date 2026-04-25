@@ -44,10 +44,9 @@ export const PendingTransactionsCard = ({ type }: Props) => {
     type,
     isPaid: false,
     startDate,
-    perPage: 5,
   })
 
-  const transactions = data?.transactions ?? []
+  const transactions = (data?.transactions ?? []).slice(0, 5)
 
   return (
     <Card>

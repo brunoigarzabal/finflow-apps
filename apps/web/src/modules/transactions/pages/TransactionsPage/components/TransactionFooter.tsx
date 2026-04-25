@@ -31,10 +31,14 @@ const StatRow = ({ label, value, isLoading, valueClass }: StatRowProps) => (
 export const TransactionFooter = ({ summary, isLoading }: Props) => {
   const [expanded, setExpanded] = useState(false)
 
-  const balance = summary?.balance ?? 0
+  const previousBalance = summary?.previousBalance ?? 0
+  const totalIncome = summary?.totalIncome ?? 0
+  const totalExpense = summary?.totalExpense ?? 0
   const pendingIncome = summary?.pendingIncome ?? 0
   const pendingExpense = summary?.pendingExpense ?? 0
-  const projected = balance + (pendingIncome - pendingExpense)
+
+  const currentBalance = previousBalance + totalIncome - totalExpense
+  const projected = currentBalance + pendingIncome - pendingExpense
 
   return (
     <Fragment>
@@ -44,7 +48,7 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
             <Fragment>
               <StatRow
                 label="saldo anterior"
-                value={summary?.previousBalance ?? 0}
+                value={previousBalance}
                 isLoading={isLoading}
               />
 
@@ -52,24 +56,24 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
 
               <StatRow
                 label="receita realizada"
-                value={summary?.totalIncome ?? 0}
+                value={totalIncome}
                 isLoading={isLoading}
                 valueClass="text-emerald-500 font-medium"
               />
               <StatRow
                 label="receita prevista"
-                value={(summary?.totalIncome ?? 0) + pendingIncome}
+                value={totalIncome + pendingIncome}
                 isLoading={isLoading}
               />
               <StatRow
                 label="despesa realizada"
-                value={-(summary?.totalExpense ?? 0)}
+                value={-totalExpense}
                 isLoading={isLoading}
                 valueClass="text-red-500 font-medium"
               />
               <StatRow
                 label="despesa prevista"
-                value={-((summary?.totalExpense ?? 0) + pendingExpense)}
+                value={-(totalExpense + pendingExpense)}
                 isLoading={isLoading}
               />
 
@@ -81,12 +85,12 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
             <div className="flex flex-col gap-1.5">
               <StatRow
                 label="saldo"
-                value={balance}
+                value={currentBalance}
                 isLoading={isLoading}
                 valueClass={cn(
                   'text-base font-bold',
                   !isLoading &&
-                    (balance >= 0 ? 'text-emerald-500' : 'text-red-500')
+                    (currentBalance >= 0 ? 'text-emerald-500' : 'text-red-500')
                 )}
               />
               <StatRow

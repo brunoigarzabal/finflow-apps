@@ -19,14 +19,14 @@ export function transactionRepository(prisma: PrismaArg) {
   return {
     findMany: (
       where: Prisma.TransactionWhereInput,
-      options: { skip: number; take: number },
+      options?: { skip?: number; take?: number },
     ) =>
       prisma.transaction.findMany({
         where,
         include: transactionInclude,
         orderBy: [{ date: 'asc' }, { createdAt: 'asc' }],
-        skip: options.skip,
-        take: options.take,
+        ...(options?.skip !== undefined ? { skip: options.skip } : {}),
+        ...(options?.take !== undefined ? { take: options.take } : {}),
       }),
 
     findById: (id: string) =>
