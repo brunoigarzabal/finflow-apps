@@ -10,6 +10,7 @@ import type { BankAccount } from '@/api/bank-accounts'
 import { AccountFormDialog } from './components/AccountFormDialog'
 import { AccountItem } from './components/AccountItem'
 import { AccountItemSkeleton } from './components/AccountItemSkeleton'
+import { AdjustBalanceDialog } from './components/AdjustBalanceDialog'
 import { ArchiveAccountDialog } from './components/ArchiveAccountDialog'
 
 export const AccountsPage = () => {
@@ -20,6 +21,8 @@ export const AccountsPage = () => {
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null)
   const [archiveDialogAccount, setArchiveDialogAccount] =
+    useState<BankAccount | null>(null)
+  const [adjustBalanceAccount, setAdjustBalanceAccount] =
     useState<BankAccount | null>(null)
   const [archivedExpanded, setArchivedExpanded] = useState(false)
 
@@ -39,6 +42,14 @@ export const AccountsPage = () => {
   const handleFormClose = useCallback((open: boolean) => {
     setFormDialogOpen(open)
     if (!open) setEditingAccount(null)
+  }, [])
+
+  const handleAdjustBalance = useCallback((account: BankAccount) => {
+    setAdjustBalanceAccount(account)
+  }, [])
+
+  const handleAdjustBalanceClose = useCallback((open: boolean) => {
+    if (!open) setAdjustBalanceAccount(null)
   }, [])
 
   const handleArchiveClose = useCallback((open: boolean) => {
@@ -85,6 +96,7 @@ export const AccountsPage = () => {
                 key={account.id}
                 account={account}
                 onEdit={handleEdit}
+                onAdjustBalance={handleAdjustBalance}
                 onArchive={setArchiveDialogAccount}
               />
             ))
@@ -134,6 +146,12 @@ export const AccountsPage = () => {
         account={editingAccount}
         open={formDialogOpen}
         onOpenChange={handleFormClose}
+      />
+
+      <AdjustBalanceDialog
+        account={adjustBalanceAccount}
+        open={!!adjustBalanceAccount}
+        onOpenChange={handleAdjustBalanceClose}
       />
 
       <ArchiveAccountDialog

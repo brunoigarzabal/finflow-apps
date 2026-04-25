@@ -17,10 +17,11 @@ import { formatCurrency } from '@/lib/formatCurrency'
 type Props = {
   account: BankAccount
   onEdit: (account: BankAccount) => void
+  onAdjustBalance: (account: BankAccount) => void
   onArchive: (account: BankAccount) => void
 }
 
-export const AccountItem = ({ account, onEdit, onArchive }: Props) => {
+export const AccountItem = ({ account, onEdit, onAdjustBalance, onArchive }: Props) => {
   const isNegative = account.currentBalance < 0
 
   return (
@@ -60,6 +61,9 @@ export const AccountItem = ({ account, onEdit, onArchive }: Props) => {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(account)}>
               Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAdjustBalance(account)}>
+              Ajustar saldo
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onArchive(account)}>
               Arquivar

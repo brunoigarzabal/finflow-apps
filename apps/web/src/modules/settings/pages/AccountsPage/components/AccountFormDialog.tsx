@@ -218,47 +218,52 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
             )}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label>Tipo</Label>
-            <Controller
-              name="type"
-              control={control}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o tipo">
-                      {(value: string) =>
-                        ACCOUNT_TYPE_OPTIONS.find((opt) => opt.value === value)
-                          ?.label ?? value
-                      }
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ACCOUNT_TYPE_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label>Saldo inicial</Label>
-            <Controller
-              name="initialBalance"
-              control={control}
-              render={({ field }) => (
-                <MoneyInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  aria-invalid={!!errors.initialBalance}
+          {!isEditing && (
+            <Fragment>
+              <div className="flex flex-col gap-1.5">
+                <Label>Tipo</Label>
+                <Controller
+                  name="type"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecione o tipo">
+                          {(value: string) =>
+                            ACCOUNT_TYPE_OPTIONS.find(
+                              (opt) => opt.value === value
+                            )?.label ?? value
+                          }
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACCOUNT_TYPE_OPTIONS.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Saldo inicial</Label>
+                <Controller
+                  name="initialBalance"
+                  control={control}
+                  render={({ field }) => (
+                    <MoneyInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      aria-invalid={!!errors.initialBalance}
+                    />
+                  )}
+                />
+              </div>
+            </Fragment>
+          )}
 
           {activeTab === 'generic' && (
             <Fragment>
