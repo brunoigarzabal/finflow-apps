@@ -9,7 +9,6 @@ import type { VirtualOccurrenceAction } from './TransactionItem'
 type Props = {
   transactions: Transaction[]
   isLoading: boolean
-  search: string
   onEdit: (transaction: Transaction) => void
   onTogglePaid: (transaction: Transaction) => void
   onVirtualAction: (
@@ -21,7 +20,6 @@ type Props = {
 export const TransactionList = ({
   transactions,
   isLoading,
-  search,
   onEdit,
   onTogglePaid,
   onVirtualAction,
@@ -42,27 +40,19 @@ export const TransactionList = ({
     )
   }
 
-  const filtered = search
-    ? transactions.filter((t) =>
-        t.description.toLowerCase().includes(search.toLowerCase())
-      )
-    : transactions
-
-  if (filtered.length === 0) {
+  if (transactions.length === 0) {
     return (
       <Fragment>
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/30 py-16 text-center">
           <p className="text-sm font-medium text-muted-foreground">
-            {search
-              ? 'Nenhum lançamento encontrado para esta busca.'
-              : 'Nenhum lançamento neste mês.'}
+            Nenhum lançamento neste mês.
           </p>
         </div>
       </Fragment>
     )
   }
 
-  const grouped = groupByDate(filtered)
+  const grouped = groupByDate(transactions)
 
   return (
     <Fragment>

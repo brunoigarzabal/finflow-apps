@@ -1,4 +1,4 @@
-import { endOfMonth, format, startOfMonth } from 'date-fns'
+import { useQueryStates } from 'nuqs'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -31,36 +31,29 @@ import {
   RecurringScopeDialog,
   type RecurringDeleteScope,
 } from './components/RecurringScopeDialog'
-import {
-  TransactionFilters,
-  type FilterValues,
-} from './components/TransactionFilters'
+import { TransactionFilters } from './components/TransactionFilters'
 import { TransactionFooter } from './components/TransactionFooter'
 import { TransactionHeader } from './components/TransactionHeader'
 import type { VirtualOccurrenceAction } from './components/TransactionItem'
 import { TransactionList } from './components/TransactionList'
-
-const DEFAULT_FILTERS: FilterValues = {
-  search: '',
-  type: '',
-  isPaid: '',
-  bankAccountId: '',
-  categoryId: '',
-}
-
-const resolveIsPaidFilter = (value: FilterValues['isPaid']) => {
-  if (value === 'PAID') return true
-  if (value === 'PENDING') return false
-  return undefined
-}
+import type { TransactionFilterValues } from './transactionQueryParams'
+import {
+  formatPeriod,
+  getPeriodDate,
+  getTransactionFilters,
+  toTransactionListParams,
+  toTransactionSummaryParams,
+  transactionQueryParsers,
+} from './transactionQueryParams'
 
 const toastError = (err: unknown, fallback: string) => {
   toast.error(err instanceof Error ? err.message : fallback)
 }
 
 export const TransactionsPage = () => {
-  const [currentMonth, setCurrentMonth] = useState(() => new Date())
-  const [filters, setFilters] = useState<FilterValues>(DEFAULT_FILTERS)
+  const [queryFilters, setQueryFilters] = useQueryStates(
+    transactionQueryParsers
+  )
 
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [formDialogType, setFormDialogType] =
@@ -93,27 +86,15 @@ export const TransactionsPage = () => {
     action?: 'submit-edit' | 'toggle-paid'
   } | null>(null)
 
-  const startDate = format(startOfMonth(currentMonth), 'yyyy-MM-dd')
-  const endDate = format(endOfMonth(currentMonth), 'yyyy-MM-dd')
-  const isPaidFilter = resolveIsPaidFilter(filters.isPaid)
-
-  const queryParams = {
-    startDate,
-    endDate,
-    ...(filters.type ? { type: filters.type } : {}),
-    ...(isPaidFilter === undefined ? {} : { isPaid: isPaidFilter }),
-    ...(filters.bankAccountId ? { bankAccountId: filters.bankAccountId } : {}),
-    ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
-  }
+  const currentMonth = getPeriodDate(queryFilters.period)
+  const filters = getTransactionFilters(queryFilters)
+  const queryParams = toTransactionListParams(queryFilters)
+  const summaryParams = toTransactionSummaryParams(queryFilters)
 
   const { data: transactionsData, isLoading: isLoadingTransactions } =
     useTransactions(queryParams)
   const { data: summaryData, isLoading: isLoadingSummary } =
-    useTransactionSummary({
-      startDate,
-      endDate,
-      bankAccountId: filters.bankAccountId || undefined,
-    })
+    useTransactionSummary(summaryParams)
   const { data: bankAccountsData } = useBankAccounts()
   const { data: categoriesData } = useCategories()
   const { data: recurringRulesData } = useRecurringRules()
@@ -130,6 +111,20 @@ export const TransactionsPage = () => {
   const recurringRules = useMemo(
     () => recurringRulesData?.recurringRules ?? [],
     [recurringRulesData?.recurringRules]
+  )
+
+  const handleMonthChange = useCallback(
+    (month: Date) => {
+      void setQueryFilters({ period: formatPeriod(month) })
+    },
+    [setQueryFilters]
+  )
+
+  const handleFilterChange = useCallback(
+    (values: TransactionFilterValues) => {
+      void setQueryFilters(values)
+    },
+    [setQueryFilters]
   )
 
   const resetEditState = useCallback(() => {
@@ -438,13 +433,13 @@ export const TransactionsPage = () => {
         <div className="flex flex-1 flex-col gap-6 overflow-auto p-6">
           <TransactionHeader
             currentMonth={currentMonth}
-            onMonthChange={setCurrentMonth}
+            onMonthChange={handleMonthChange}
             onNewTransaction={handleNewTransaction}
           />
 
           <TransactionFilters
             filters={filters}
-            onFilterChange={setFilters}
+            onFilterChange={handleFilterChange}
             bankAccounts={bankAccounts}
             categories={categories}
           />
@@ -452,7 +447,6 @@ export const TransactionsPage = () => {
           <TransactionList
             transactions={transactions}
             isLoading={isLoadingTransactions}
-            search={filters.search}
             onEdit={handleEdit}
             onTogglePaid={handleTogglePaid}
             onVirtualAction={handleVirtualAction}

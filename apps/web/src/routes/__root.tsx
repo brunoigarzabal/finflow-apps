@@ -4,6 +4,7 @@ import {
   Outlet,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
 import { Fragment } from 'react'
 
 import { RouteLoading } from '@/components/common/RouteLoading'
@@ -25,7 +26,9 @@ function RootComponent() {
   return (
     <Fragment>
       <HeadContent />
-      <Outlet />
+      <NuqsAdapter>
+        <Outlet />
+      </NuqsAdapter>
       <TanStackRouterDevtools position="bottom-right" />
     </Fragment>
   )

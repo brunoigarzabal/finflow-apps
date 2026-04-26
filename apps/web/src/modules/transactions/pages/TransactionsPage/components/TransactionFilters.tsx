@@ -1,4 +1,3 @@
-import { Input } from '@workspace/ui/components/input'
 import {
   Select,
   SelectContent,
@@ -10,7 +9,8 @@ import { Fragment } from 'react'
 
 import type { BankAccount } from '@/api/bank-accounts'
 import type { Category } from '@/api/categories'
-import type { TransactionType } from '@/api/transactions'
+
+import type { TransactionFilterValues } from '../transactionQueryParams'
 
 const TYPE_OPTIONS = [
   { value: 'ALL', label: 'Todos os tipos' },
@@ -25,17 +25,9 @@ const STATUS_OPTIONS = [
   { value: 'PENDING', label: 'Pendentes' },
 ]
 
-export type FilterValues = {
-  search: string
-  type: TransactionType | ''
-  isPaid: 'PAID' | 'PENDING' | ''
-  bankAccountId: string
-  categoryId: string
-}
-
 type Props = {
-  filters: FilterValues
-  onFilterChange: (filters: FilterValues) => void
+  filters: TransactionFilterValues
+  onFilterChange: (filters: TransactionFilterValues) => void
   bankAccounts: BankAccount[]
   categories: Category[]
 }
@@ -46,9 +38,9 @@ export const TransactionFilters = ({
   bankAccounts,
   categories,
 }: Props) => {
-  const update = <K extends keyof FilterValues>(
+  const update = <K extends keyof TransactionFilterValues>(
     key: K,
-    value: FilterValues[K]
+    value: TransactionFilterValues[K]
   ) => {
     onFilterChange({ ...filters, [key]: value })
   }
@@ -56,18 +48,11 @@ export const TransactionFilters = ({
   return (
     <Fragment>
       <div className="flex flex-wrap items-center gap-2">
-        <Input
-          placeholder="Buscar..."
-          value={filters.search}
-          onChange={(e) => update('search', e.target.value)}
-          className="max-w-[14rem]"
-        />
-
         <Select
-          value={filters.bankAccountId || 'ALL'}
-          onValueChange={(v) => update('bankAccountId', v === 'ALL' ? '' : v)}
+          value={filters.account || 'ALL'}
+          onValueChange={(v) => update('account', !v || v === 'ALL' ? '' : v)}
         >
-          <SelectTrigger className="w-[11rem]">
+          <SelectTrigger className="w-44">
             <SelectValue placeholder="Todas as contas">
               {(value) =>
                 value === 'ALL'
@@ -87,10 +72,10 @@ export const TransactionFilters = ({
         </Select>
 
         <Select
-          value={filters.categoryId || 'ALL'}
-          onValueChange={(v) => update('categoryId', v === 'ALL' ? '' : v)}
+          value={filters.category || 'ALL'}
+          onValueChange={(v) => update('category', !v || v === 'ALL' ? '' : v)}
         >
-          <SelectTrigger className="w-[11rem]">
+          <SelectTrigger className="w-44">
             <SelectValue placeholder="Todas as categorias">
               {(value) =>
                 value === 'ALL'
@@ -111,11 +96,16 @@ export const TransactionFilters = ({
 
         <Select
           value={filters.type || 'ALL'}
-          onValueChange={(v) =>
-            update('type', v === 'ALL' ? '' : (v as TransactionType))
-          }
+          onValueChange={(v) => {
+            if (v === 'INCOME' || v === 'EXPENSE' || v === 'TRANSFER') {
+              update('type', v)
+              return
+            }
+
+            update('type', '')
+          }}
         >
-          <SelectTrigger className="w-[10rem]">
+          <SelectTrigger className="w-40">
             <SelectValue placeholder="Todos os tipos">
               {(value) =>
                 TYPE_OPTIONS.find((o) => o.value === value)?.label ?? value
@@ -132,12 +122,17 @@ export const TransactionFilters = ({
         </Select>
 
         <Select
-          value={filters.isPaid || 'ALL'}
-          onValueChange={(v) =>
-            update('isPaid', v === 'ALL' ? '' : (v as 'PAID' | 'PENDING'))
-          }
+          value={filters.status || 'ALL'}
+          onValueChange={(v) => {
+            if (v === 'PAID' || v === 'PENDING') {
+              update('status', v)
+              return
+            }
+
+            update('status', '')
+          }}
         >
-          <SelectTrigger className="w-[10rem]">
+          <SelectTrigger className="w-40">
             <SelectValue placeholder="Todos os status">
               {(value) =>
                 STATUS_OPTIONS.find((o) => o.value === value)?.label ?? value
