@@ -73,9 +73,11 @@ export const BalanceCard = () => {
             ) : (
               <div className="flex flex-wrap gap-3">
                 {accounts.map((account) => (
-                  <div
+                  <Link
                     key={account.id}
-                    className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm"
+                    to="/transactions"
+                    search={{ account: account.id }}
+                    className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-primary/5"
                   >
                     <BankAccountIcon
                       icon={account.icon}
@@ -92,7 +94,7 @@ export const BalanceCard = () => {
                         className="text-sm font-semibold"
                       />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
