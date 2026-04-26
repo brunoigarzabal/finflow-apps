@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
-import { cn } from '@workspace/ui/lib/utils'
 import { Fragment } from 'react'
 
 import type { TransactionType } from '@/api/transactions'
@@ -26,11 +25,6 @@ type Props = {
 const TITLE: Record<Props['type'], string> = {
   EXPENSE: 'Contas a pagar',
   INCOME: 'Contas a receber',
-}
-
-const AMOUNT_CLASS: Record<Props['type'], string> = {
-  EXPENSE: 'text-red-600 dark:text-red-400',
-  INCOME: 'text-green-600 dark:text-green-400',
 }
 
 export const PendingTransactionsCard = ({ type }: Props) => {
@@ -108,7 +102,7 @@ export const PendingTransactionsCard = ({ type }: Props) => {
           </div>
           <HiddenValue
             value={formatCurrency(transaction.amount)}
-            className={cn('text-sm font-semibold', AMOUNT_CLASS[type])}
+            className="text-sm font-semibold"
           />
         </div>
       )
@@ -128,6 +122,7 @@ export const PendingTransactionsCard = ({ type }: Props) => {
       <CardFooter>
         <Link
           to="/transactions"
+          search={{ status: 'PENDING', type }}
           className="text-sm text-muted-foreground underline-offset-4 hover:underline"
         >
           ver mais
