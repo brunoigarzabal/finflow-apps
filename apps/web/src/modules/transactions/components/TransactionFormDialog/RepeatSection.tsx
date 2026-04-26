@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@workspace/ui/components/popover'
+import { Radio, RadioGroup } from '@workspace/ui/components/radio-group'
 import {
   Select,
   SelectContent,
@@ -98,26 +99,38 @@ export const RepeatSection = ({
     <section className="flex flex-col gap-3 border-t pt-4">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-semibold text-muted-foreground">Repetir</p>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
-          <input
-            type="radio"
-            checked={repeat?.type === 'recurring'}
-            onChange={selectRecurring}
-            className="size-4 accent-emerald-500"
-          />
-          É uma despesa fixa
-        </label>
-        {allowInstallment && (
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="radio"
-              checked={repeat?.type === 'installment'}
-              onChange={selectInstallment}
-              className="size-4 accent-emerald-500"
-            />
-            É um lançamento parcelado em
-          </label>
-        )}
+        <RadioGroup
+          value={repeat?.type}
+          onValueChange={(value) => {
+            if (value === 'recurring') {
+              selectRecurring()
+              return
+            }
+
+            if (value === 'installment') {
+              selectInstallment()
+            }
+          }}
+          className="w-fit"
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Radio id="repeat-type-recurring" value="recurring" />
+            <Label htmlFor="repeat-type-recurring" className="cursor-pointer">
+              É um lançamento fixo
+            </Label>
+          </div>
+          {allowInstallment && (
+            <div className="flex items-center gap-2 text-sm">
+              <Radio id="repeat-type-installment" value="installment" />
+              <Label
+                htmlFor="repeat-type-installment"
+                className="cursor-pointer"
+              >
+                É um lançamento parcelado em
+              </Label>
+            </div>
+          )}
+        </RadioGroup>
       </div>
 
       {repeat?.type === 'recurring' && (
