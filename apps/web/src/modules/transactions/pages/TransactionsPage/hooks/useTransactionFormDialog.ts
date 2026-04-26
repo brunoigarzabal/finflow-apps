@@ -84,31 +84,22 @@ export const useTransactionFormDialog = ({
   const handleRecurringSubmit = useCallback(
     (transaction: Transaction, body: UpdateTransactionBody) => {
       onRequestRecurringSubmit(transaction, body)
-      resetEditState()
       setFormDialogOpen(false)
     },
-    [onRequestRecurringSubmit, resetEditState]
+    [onRequestRecurringSubmit]
   )
 
   const handleInstallmentSubmit = useCallback(
     (transaction: Transaction, body: UpdateTransactionBody) => {
       onRequestInstallmentSubmit(transaction, body)
-      resetEditState()
       setFormDialogOpen(false)
     },
-    [onRequestInstallmentSubmit, resetEditState]
+    [onRequestInstallmentSubmit]
   )
 
-  const handleFormOpenChange = useCallback(
-    (open: boolean) => {
-      setFormDialogOpen(open)
-
-      if (!open) {
-        resetEditState()
-      }
-    },
-    [resetEditState]
-  )
+  const handleFormOpenChange = useCallback((open: boolean) => {
+    setFormDialogOpen(open)
+  }, [])
 
   const handleSimpleDeleteOpenChange = useCallback((open: boolean) => {
     if (!open) {
