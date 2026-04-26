@@ -17,6 +17,7 @@ export const listTransactionsQuery = z.object({
 })
 
 export const transactionListItem = transactionResponse.extend({
+  id: z.string(),
   relatedBankAccount: bankAccountBasic.nullable(),
 })
 

@@ -57,6 +57,40 @@ export async function updateTransactionHandler(app: FastifyInstance) {
           ...(input.notes !== undefined ? { notes: input.notes } : {}),
         }
 
+        if (input.scope === 'ALL_REMAINING' && existing.installmentGroupId) {
+          const remainingTransactions = await repo.findMany({
+            userId,
+            installmentGroupId: existing.installmentGroupId,
+            date: { gte: existing.date },
+          })
+
+          await repo.updateMany(
+            {
+              userId,
+              installmentGroupId: existing.installmentGroupId,
+              date: { gte: existing.date },
+            },
+            updateData,
+          )
+
+          const affectedAccountIds = new Set(
+            remainingTransactions.map((transaction) => transaction.bankAccountId),
+          )
+          if (input.bankAccountId) {
+            affectedAccountIds.add(input.bankAccountId)
+          }
+
+          for (const accountId of affectedAccountIds) {
+            await recalculateBalance(tx, accountId)
+          }
+
+          const updated = await repo.findById(request.params.id)
+          if (!updated) {
+            throw new NotFound('Transação não encontrada')
+          }
+          return updated
+        }
+
         if (existing.type === 'TRANSFER' && existing.transferId) {
           const pairedUpdateData = {
             ...(input.amount !== undefined ? { amount: input.amount } : {}),

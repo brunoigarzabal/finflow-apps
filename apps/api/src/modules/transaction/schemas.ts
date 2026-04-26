@@ -8,6 +8,8 @@ export const transactionIdParam = z.object({
   id: z.uuid(),
 })
 
+export const installmentScope = z.enum(['THIS', 'ALL_REMAINING'])
+
 export const bankAccountBasic = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -32,6 +34,10 @@ export const transactionResponse = z.object({
   notes: z.string().nullable(),
   transferId: z.string().nullable(),
   isTransferOut: z.boolean().nullable(),
+  installmentGroupId: z.uuid().nullable(),
+  installmentNumber: z.int().nullable(),
+  recurringRuleId: z.uuid().optional(),
+  isVirtual: z.boolean().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
   bankAccount: bankAccountBasic,

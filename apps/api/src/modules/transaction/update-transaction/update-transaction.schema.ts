@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { transactionIdParam, transactionResponse } from '../schemas.js'
+import { installmentScope, transactionIdParam, transactionResponse } from '../schemas.js'
 
 export const updateTransactionBody = z
   .object({
@@ -11,6 +11,7 @@ export const updateTransactionBody = z
     categoryId: z.uuid(),
     isPaid: z.boolean(),
     notes: z.string().trim().max(500).nullable(),
+    scope: installmentScope,
   })
   .partial()
 

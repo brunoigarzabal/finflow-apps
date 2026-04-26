@@ -16,10 +16,12 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  accounts     Account[]
-  bankAccounts BankAccount[]
-  categories   Category[]
-  transactions Transaction[]
+  accounts          Account[]
+  bankAccounts      BankAccount[]
+  categories        Category[]
+  transactions      Transaction[]
+  recurringRules    RecurringRule[]
+  installmentGroups InstallmentGroup[]
 
   @@map("users")
 }
@@ -44,6 +46,17 @@ enum TransactionType {
   INCOME
   EXPENSE
   TRANSFER
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  BIMONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  ANNUAL
 }
 
 model Account {
@@ -73,7 +86,8 @@ model BankAccount {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  transactions Transaction[]
+  transactions   Transaction[]
+  recurringRules RecurringRule[]
 
   @@map("bank_accounts")
 }
@@ -92,37 +106,103 @@ model Category {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")
 
-  transactions Transaction[]
+  transactions   Transaction[]
+  recurringRules RecurringRule[]
 
   @@unique([userId, name, type])
   @@map("categories")
 }
 
 model Transaction {
-  id          String          @id @default(uuid())
-  type        TransactionType
-  amount      Int
-  description String
-  date        DateTime        @db.Date
-  isPaid      Boolean         @default(true) @map("is_paid")
-  notes       String?
-  transferId    String?  @map("transfer_id")
-  isTransferOut Boolean? @map("is_transfer_out")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime        @updatedAt @map("updated_at")
+  id                String          @id @default(uuid())
+  type              TransactionType
+  amount            Int
+  description       String
+  date              DateTime        @db.Date
+  isPaid            Boolean         @default(true) @map("is_paid")
+  notes             String?
+  transferId        String?         @map("transfer_id")
+  isTransferOut     Boolean?        @map("is_transfer_out")
+  installmentNumber Int?            @map("installment_number")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
 
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        String      @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
 
   bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
   bankAccountId String      @map("bank_account_id")
 
-  category      Category?   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  categoryId    String?     @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId String?   @map("category_id")
+
+  installmentGroup   InstallmentGroup? @relation(fields: [installmentGroupId], references: [id], onDelete: SetNull)
+  installmentGroupId String?           @map("installment_group_id")
+
+  recurringOverride RecurringOverride?
 
   @@index([userId, date])
   @@index([userId, bankAccountId])
   @@index([userId, categoryId])
+  @@index([installmentGroupId])
   @@index([transferId])
   @@map("transactions")
+}
+
+model RecurringRule {
+  id          String             @id @default(uuid())
+  type        TransactionType
+  amount      Int
+  description String
+  frequency   RecurringFrequency
+  startDate   DateTime           @db.Date
+  endDate     DateTime?          @db.Date
+  isPaid      Boolean            @default(true) @map("is_paid")
+  notes       String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id])
+  bankAccountId String      @map("bank_account_id")
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @map("category_id")
+
+  overrides RecurringOverride[]
+
+  @@index([userId, startDate])
+  @@map("recurring_rules")
+}
+
+model RecurringOverride {
+  id             String   @id @default(uuid())
+  occurrenceDate DateTime @map("occurrence_date") @db.Date
+  isCancelled    Boolean  @default(false) @map("is_cancelled")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  recurringRule   RecurringRule @relation(fields: [recurringRuleId], references: [id], onDelete: Cascade)
+  recurringRuleId String        @map("recurring_rule_id")
+
+  transaction   Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  transactionId String?      @unique @map("transaction_id")
+
+  @@unique([recurringRuleId, occurrenceDate])
+  @@map("recurring_overrides")
+}
+
+model InstallmentGroup {
+  id          String   @id @default(uuid())
+  totalAmount Int      @map("total_amount")
+  count       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  transactions Transaction[]
+
+  @@map("installment_groups")
 }

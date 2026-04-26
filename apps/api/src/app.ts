@@ -21,6 +21,7 @@ import { bankAccountRoutes } from './modules/bank-account/index.js'
 import { categoryRoutes } from './modules/category/index.js'
 import { transactionRoutes } from './modules/transaction/index.js'
 import { dashboardRoutes } from './modules/dashboard/index.js'
+import { recurringRuleRoutes } from './modules/recurring-rule/index.js'
 
 export async function buildApp() {
   const app = fastify({ logger: true }).withTypeProvider<ZodTypeProvider>()
@@ -74,6 +75,7 @@ export async function buildApp() {
   app.register(bankAccountRoutes, { prefix: '/bank-accounts' })
   app.register(categoryRoutes, { prefix: '/categories' })
   app.register(transactionRoutes, { prefix: '/transactions' })
+  app.register(recurringRuleRoutes, { prefix: '/recurring-rules' })
   app.register(dashboardRoutes, { prefix: '/dashboard' })
 
   return app
