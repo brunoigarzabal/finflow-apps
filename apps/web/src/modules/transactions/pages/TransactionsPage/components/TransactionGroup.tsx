@@ -4,13 +4,20 @@ import { Fragment } from 'react'
 
 import type { Transaction } from '@/api/transactions'
 
-import { TransactionItem } from './TransactionItem'
+import {
+  TransactionItem,
+  type VirtualOccurrenceAction,
+} from './TransactionItem'
 
 type Props = {
   date: string
   transactions: Transaction[]
   onEdit: (transaction: Transaction) => void
   onTogglePaid: (transaction: Transaction) => void
+  onVirtualAction: (
+    action: VirtualOccurrenceAction,
+    transaction: Transaction
+  ) => void
 }
 
 export const TransactionGroup = ({
@@ -18,6 +25,7 @@ export const TransactionGroup = ({
   transactions,
   onEdit,
   onTogglePaid,
+  onVirtualAction,
 }: Props) => {
   const formattedDate = format(parseISO(date), "dd 'de' MMMM", {
     locale: ptBR,
@@ -39,6 +47,7 @@ export const TransactionGroup = ({
               transaction={transaction}
               onEdit={onEdit}
               onTogglePaid={onTogglePaid}
+              onVirtualAction={onVirtualAction}
             />
           ))}
         </div>

@@ -4,9 +4,15 @@ import type { PrismaClient } from '../../../../generated/prisma/client.js'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
-import { resolveDateRange } from '@/shared/helpers/date.js'
-import { getRecurringOccurrences, type RecurringOccurrence } from '../helpers/recurring-occurrences.js'
-import { splitIncomeExpense, computeNet } from '../helpers/recalculate-balance.js'
+import { addDays, resolveDateRange } from '@/shared/helpers/date.js'
+import {
+  getRecurringOccurrences,
+  type RecurringOccurrence,
+} from '../helpers/recurring-occurrences.js'
+import {
+  splitIncomeExpense,
+  computeNet,
+} from '../helpers/recalculate-balance.js'
 import { summaryQuery, summaryResponse } from './get-summary.schema.js'
 
 interface SummaryInput {
@@ -17,7 +23,7 @@ interface SummaryInput {
 
 function sumRecurringByStatus(
   occurrences: RecurringOccurrence[],
-  isPaid: boolean,
+  isPaid: boolean
 ) {
   const totals = { income: 0, expense: 0 }
   for (const occurrence of occurrences) {
@@ -31,11 +37,15 @@ function sumRecurringByStatus(
 export async function getSummary(
   prisma: PrismaClient,
   userId: string,
-  input: SummaryInput,
+  input: SummaryInput
 ) {
-  const { startDate, endDate } = resolveDateRange(input.startDate, input.endDate)
+  const { startDate, endDate } = resolveDateRange(
+    input.startDate,
+    input.endDate
+  )
 
   const dateFilter = { gte: startDate, lte: endDate }
+  const overdueDateFilter = { lt: startDate }
   const accountFilter = input.bankAccountId
     ? { bankAccountId: input.bankAccountId }
     : {}
@@ -43,7 +53,15 @@ export async function getSummary(
   const bankAccountRepo = bankAccountRepository(prisma)
   const transactionRepo = transactionRepository(prisma)
 
-  const [accountsAgg, priorAggs, paidAggs, pendingAggs, recurringOccurrences] = await Promise.all([
+  const [
+    accountsAgg,
+    priorAggs,
+    paidAggs,
+    pendingAggs,
+    overdueAggs,
+    recurringOccurrences,
+    overdueRecurringOccurrences,
+  ] = await Promise.all([
     bankAccountRepo.aggregate({
       userId,
       archived: false,
@@ -69,21 +87,48 @@ export async function getSummary(
       date: dateFilter,
       ...accountFilter,
     }),
+    transactionRepo.groupBy({
+      userId,
+      isPaid: false,
+      recurringOverride: null,
+      date: overdueDateFilter,
+      ...accountFilter,
+    }),
     getRecurringOccurrences(prisma, userId, startDate, endDate),
+    getRecurringOccurrences(
+      prisma,
+      userId,
+      new Date(0),
+      addDays(startDate, -1)
+    ),
   ])
 
   const recurringForAccount = input.bankAccountId
-    ? recurringOccurrences.filter((occurrence) => occurrence.bankAccountId === input.bankAccountId)
+    ? recurringOccurrences.filter(
+        (occurrence) => occurrence.bankAccountId === input.bankAccountId
+      )
     : recurringOccurrences
+  const overdueRecurringForAccount = input.bankAccountId
+    ? overdueRecurringOccurrences.filter(
+        (occurrence) => occurrence.bankAccountId === input.bankAccountId
+      )
+    : overdueRecurringOccurrences
 
   const paidRecurring = sumRecurringByStatus(recurringForAccount, true)
   const pendingRecurring = sumRecurringByStatus(recurringForAccount, false)
+  const overdueRecurring = sumRecurringByStatus(
+    overdueRecurringForAccount,
+    false
+  )
   const paidTotals = splitIncomeExpense(paidAggs)
   const pendingTotals = splitIncomeExpense(pendingAggs)
+  const overdueTotals = splitIncomeExpense(overdueAggs)
   const totalIncome = paidTotals.income + paidRecurring.income
   const totalExpense = paidTotals.expense + paidRecurring.expense
   const pendingIncome = pendingTotals.income + pendingRecurring.income
   const pendingExpense = pendingTotals.expense + pendingRecurring.expense
+  const overdueIncome = overdueTotals.income + overdueRecurring.income
+  const overdueExpense = overdueTotals.expense + overdueRecurring.expense
 
   const initialBalance = accountsAgg._sum.initialBalance ?? 0
   const previousBalance = initialBalance + computeNet(priorAggs)
@@ -97,6 +142,8 @@ export async function getSummary(
       pendingIncome,
       pendingExpense,
       pendingBalance: pendingIncome - pendingExpense,
+      overdueIncome,
+      overdueExpense,
     },
   }
 }
@@ -116,6 +163,6 @@ export async function getSummaryHandler(app: FastifyInstance) {
     async (request) => {
       const userId = await request.getCurrentUserId()
       return getSummary(app.prisma, userId, request.query)
-    },
+    }
   )
 }

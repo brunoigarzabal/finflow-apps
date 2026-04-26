@@ -36,6 +36,7 @@ export const transactionResponse = z.object({
   isTransferOut: z.boolean().nullable(),
   installmentGroupId: z.uuid().nullable(),
   installmentNumber: z.int().nullable(),
+  installmentCount: z.int().nullable().optional(),
   recurringRuleId: z.uuid().optional(),
   isVirtual: z.boolean().optional(),
   createdAt: z.date(),

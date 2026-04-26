@@ -3,6 +3,8 @@ import { httpClient } from '@/lib/httpClient'
 import { TRANSACTIONS_ENDPOINTS } from './config'
 import type {
   CreateTransactionBody,
+  CreateTransactionResponse,
+  DeleteTransactionBody,
   ListTransactionsParams,
   SummaryByCategoryParams,
   SummaryByCategoryResponse,
@@ -55,11 +57,11 @@ export const getTransaction = (id: string): Promise<TransactionDetail> =>
 
 export const createTransaction = (
   body: CreateTransactionBody
-): Promise<TransactionDetail> =>
+): Promise<CreateTransactionResponse> =>
   httpClient
     .authorized()
     .post(TRANSACTIONS_ENDPOINTS.create, { json: body })
-    .json<TransactionDetail>()
+    .json<CreateTransactionResponse>()
 
 export const updateTransaction = (
   id: string,
@@ -70,8 +72,11 @@ export const updateTransaction = (
     .patch(TRANSACTIONS_ENDPOINTS.update(id), { json: body })
     .json<TransactionDetail>()
 
-export const deleteTransaction = (id: string): Promise<void> =>
+export const deleteTransaction = (
+  id: string,
+  body?: DeleteTransactionBody
+): Promise<void> =>
   httpClient
     .authorized()
-    .delete(TRANSACTIONS_ENDPOINTS.delete(id))
+    .delete(TRANSACTIONS_ENDPOINTS.delete(id), { json: body ?? {} })
     .then(() => undefined)

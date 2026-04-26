@@ -3,7 +3,10 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
-import { transactionDetailResponse, transactionIdParam } from './get-transaction.schema.js'
+import {
+  transactionDetailResponse,
+  transactionIdParam,
+} from './get-transaction.schema.js'
 
 export async function getTransactionHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
@@ -30,11 +33,15 @@ export async function getTransactionHandler(app: FastifyInstance) {
       if (transaction.type === 'TRANSFER' && transaction.transferId) {
         relatedTransaction = await repo.findRelated(
           transaction.transferId,
-          transaction.id,
+          transaction.id
         )
       }
 
-      return { ...transaction, relatedTransaction }
-    },
+      return {
+        ...transaction,
+        installmentCount: transaction.installmentGroup?.count ?? null,
+        relatedTransaction,
+      }
+    }
   )
 }

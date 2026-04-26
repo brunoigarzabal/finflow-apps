@@ -1,5 +1,35 @@
 import { z } from 'zod'
 
+const recurringFrequencySchema = z.enum([
+  'DAILY',
+  'WEEKLY',
+  'BIWEEKLY',
+  'MONTHLY',
+  'BIMONTHLY',
+  'QUARTERLY',
+  'SEMIANNUAL',
+  'ANNUAL',
+])
+
+const installmentFrequencySchema = z.enum(['MONTHLY', 'BIMONTHLY', 'QUARTERLY'])
+
+export const recurringSchema = z.object({
+  type: z.literal('recurring'),
+  frequency: recurringFrequencySchema,
+  endDate: z.string().optional(),
+})
+
+export const installmentSchema = z.object({
+  type: z.literal('installment'),
+  count: z.number().int().min(2).max(72),
+  frequency: installmentFrequencySchema,
+})
+
+const repeatSchema = z.discriminatedUnion('type', [
+  recurringSchema,
+  installmentSchema,
+])
+
 const baseFields = {
   amount: z.number().int().min(1, 'Valor é obrigatório'),
   description: z
@@ -17,6 +47,7 @@ const baseFields = {
 export const transactionSchema = z.object({
   ...baseFields,
   categoryId: z.uuid('Categoria é obrigatória'),
+  repeat: repeatSchema.optional(),
 })
 
 export const transferSchema = z
@@ -32,3 +63,4 @@ export const transferSchema = z
 
 export type TransactionFormData = z.infer<typeof transactionSchema>
 export type TransferFormData = z.infer<typeof transferSchema>
+export type RepeatFormData = z.infer<typeof repeatSchema>

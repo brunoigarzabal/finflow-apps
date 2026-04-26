@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  ArrowUpDownIcon,
   Calendar01Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
@@ -37,8 +38,16 @@ import { toast } from 'sonner'
 
 import type { BankAccount } from '@/api/bank-accounts'
 import type { Category } from '@/api/categories'
+import { useUpdateRecurringRule } from '@/api/recurring-rules'
 import { useCreateTransaction, useUpdateTransaction } from '@/api/transactions'
-import type { Transaction, TransactionType } from '@/api/transactions'
+import type {
+  CreateTransactionBody,
+  InstallmentScope,
+  RecurringScope,
+  Transaction,
+  TransactionType,
+  UpdateTransactionBody,
+} from '@/api/transactions'
 import { MoneyInput } from '@/components/common/MoneyInput'
 import { today } from '@/lib/dates'
 import {
@@ -46,6 +55,8 @@ import {
   transferSchema,
   type TransactionFormData,
 } from '@/modules/transactions/schemas/transactionSchema'
+
+import { RepeatSection } from './RepeatSection'
 
 const TYPE_CONFIG: Record<
   TransactionType,
@@ -113,6 +124,99 @@ const buildDefaultValues = (
   }
 }
 
+const buildTransactionValues = (
+  transaction: Transaction
+): TransactionFormData => {
+  const isEditingTransfer = transaction.type === 'TRANSFER'
+  let originId = transaction.bankAccount.id
+  let destinationId = transaction.relatedBankAccount?.id
+
+  if (isEditingTransfer && transaction.isTransferOut === false) {
+    originId = transaction.relatedBankAccount?.id ?? transaction.bankAccount.id
+    destinationId = transaction.bankAccount.id
+  }
+
+  return {
+    amount: transaction.amount,
+    description: transaction.description,
+    date: transaction.date.slice(0, 10),
+    bankAccountId: originId,
+    categoryId: transaction.category?.id ?? '',
+    isPaid: transaction.isPaid,
+    notes: transaction.notes ?? '',
+    ...(isEditingTransfer && destinationId
+      ? { destinationBankAccountId: destinationId }
+      : {}),
+  }
+}
+
+const buildBaseSubmitBody = (
+  data: TransactionFormData,
+  isTransfer: boolean
+): UpdateTransactionBody => {
+  const body: UpdateTransactionBody = {
+    amount: data.amount,
+    description: data.description,
+    date: data.date,
+    bankAccountId: data.bankAccountId,
+    isPaid: data.isPaid,
+    notes: data.notes || null,
+  }
+
+  if (!isTransfer) {
+    body.categoryId = data.categoryId
+  }
+
+  if (data.repeat?.type === 'recurring') {
+    body.recurring = {
+      frequency: data.repeat.frequency,
+      ...(data.repeat.endDate ? { endDate: data.repeat.endDate } : {}),
+    }
+  }
+
+  return body
+}
+
+const buildCreateBody = (
+  data: TransactionFormData,
+  type: TransactionType,
+  isTransfer: boolean
+): CreateTransactionBody => {
+  const body: CreateTransactionBody = {
+    type,
+    amount: data.amount,
+    description: data.description,
+    date: data.date,
+    bankAccountId: data.bankAccountId,
+    isPaid: data.isPaid,
+    notes: data.notes || undefined,
+  }
+
+  if (!isTransfer) {
+    body.categoryId = data.categoryId
+  }
+
+  if (data.destinationBankAccountId) {
+    body.destinationBankAccountId = data.destinationBankAccountId
+  }
+
+  if (data.repeat?.type === 'recurring') {
+    body.recurring = {
+      frequency: data.repeat.frequency,
+      ...(data.repeat.endDate ? { endDate: data.repeat.endDate } : {}),
+    }
+  }
+
+  if (data.repeat?.type === 'installment') {
+    body.installment = {
+      count: data.repeat.count,
+      frequency: data.repeat.frequency,
+    }
+  }
+
+  return body
+}
+
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -122,7 +226,47 @@ type Props = {
   bankAccounts: BankAccount[]
   categories: Category[]
   onDelete?: (transaction: Transaction) => void
+  onRecurringSubmit?: (
+    transaction: Transaction,
+    body: UpdateTransactionBody
+  ) => void
+  onInstallmentSubmit?: (
+    transaction: Transaction,
+    body: UpdateTransactionBody
+  ) => void
+  recurringScope?: RecurringScope | null
+  installmentScope?: InstallmentScope | null
 }
+
+type FooterActionButtonProps = {
+  label: string
+  active: boolean
+  onClick: () => void
+  icon: typeof ArrowUpDownIcon
+}
+
+const FooterActionButton = ({
+  label,
+  active,
+  onClick,
+  icon,
+}: FooterActionButtonProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex cursor-pointer flex-col items-center gap-1 text-xs text-muted-foreground"
+  >
+    <span
+      className={cn(
+        'flex size-12 items-center justify-center rounded-full border bg-background transition-colors',
+        active && 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
+      )}
+    >
+      <HugeiconsIcon icon={icon} strokeWidth={2} className="size-5" />
+    </span>
+    {label}
+  </button>
+)
 
 export const TransactionFormDialog = ({
   open,
@@ -133,16 +277,24 @@ export const TransactionFormDialog = ({
   bankAccounts,
   categories,
   onDelete,
+  onRecurringSubmit,
+  onInstallmentSubmit,
+  recurringScope,
+  installmentScope,
 }: Props) => {
   const isEditing = !!transaction
   const isTransfer = type === 'TRANSFER'
+  const canConfigureRepeat = !isTransfer && !transaction?.recurringRuleId
   const config = TYPE_CONFIG[type]
 
   const create = useCreateTransaction()
   const update = useUpdateTransaction()
+  const updateRecurringRule = useUpdateRecurringRule()
 
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => new Date())
+  const [repeatOpen, setRepeatOpen] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
 
   const filteredCategories = useMemo(
     () => (isTransfer ? [] : categories.filter((c) => c.type === type)),
@@ -170,95 +322,101 @@ export const TransactionFormDialog = ({
   )
 
   useEffect(() => {
-    if (open) {
-      if (transaction) {
-        const isEditingTransfer = transaction.type === 'TRANSFER'
-        const originId =
-          isEditingTransfer && transaction.isTransferOut === false
-            ? (transaction.relatedBankAccount?.id ?? transaction.bankAccount.id)
-            : transaction.bankAccount.id
-        const destinationId =
-          isEditingTransfer && transaction.isTransferOut === false
-            ? transaction.bankAccount.id
-            : transaction.relatedBankAccount?.id
+    if (!open) return
 
-        reset({
-          amount: transaction.amount,
-          description: transaction.description,
-          date: transaction.date.slice(0, 10),
-          bankAccountId: originId,
-          categoryId: transaction.category?.id ?? '',
-          isPaid: transaction.isPaid,
-          notes: '',
-          ...(isEditingTransfer && destinationId
-            ? { destinationBankAccountId: destinationId }
-            : {}),
-        })
-      } else {
-        reset(buildDefaultValues(type, defaultCalendarMonth))
-      }
+    if (transaction) {
+      reset(buildTransactionValues(transaction))
+      setNotesOpen(Boolean(transaction.notes))
+      setRepeatOpen(false)
+      return
     }
+
+    reset(buildDefaultValues(type, defaultCalendarMonth))
+    setNotesOpen(false)
+    setRepeatOpen(false)
   }, [open, transaction, type, reset, defaultCalendarMonth])
 
-  const isPending = create.isPending || update.isPending
+  const amount = watch('amount')
+  const repeat = watch('repeat')
+
+  const isPending =
+    create.isPending || update.isPending || updateRecurringRule.isPending
 
   const onSubmit = (data: TransactionFormData) => {
-    if (isEditing && transaction) {
-      update.mutate(
+    if (!isEditing || !transaction) {
+      create.mutate(buildCreateBody(data, type, isTransfer), {
+        onSuccess: () => {
+          toast.success('Lançamento criado')
+          onOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof Error ? err.message : 'Erro ao criar lançamento'
+          )
+        },
+      })
+      return
+    }
+
+    const commonBody = buildBaseSubmitBody(data, isTransfer)
+
+    if (transaction.recurringRuleId && !recurringScope) {
+      onRecurringSubmit?.(transaction, commonBody)
+      return
+    }
+
+    if (transaction.recurringRuleId && recurringScope) {
+      updateRecurringRule.mutate(
         {
-          id: transaction.id,
+          id: transaction.recurringRuleId,
           body: {
-            amount: data.amount,
-            description: data.description,
-            date: data.date,
-            bankAccountId: data.bankAccountId,
-            ...(isTransfer ? {} : { categoryId: data.categoryId }),
-            isPaid: data.isPaid,
-            notes: data.notes || null,
+            ...commonBody,
+            scope: recurringScope,
+            occurrenceDate: transaction.date.slice(0, 10),
           },
         },
         {
           onSuccess: () => {
-            toast.success('Lançamento atualizado')
+            toast.success('Lançamento recorrente atualizado')
             onOpenChange(false)
           },
           onError: (err) => {
             toast.error(
               err instanceof Error
                 ? err.message
-                : 'Erro ao atualizar lançamento'
+                : 'Erro ao atualizar lançamento recorrente'
             )
           },
         }
       )
-    } else {
-      create.mutate(
-        {
-          type,
-          amount: data.amount,
-          description: data.description,
-          date: data.date,
-          bankAccountId: data.bankAccountId,
-          ...(isTransfer ? {} : { categoryId: data.categoryId }),
-          isPaid: data.isPaid,
-          notes: data.notes || undefined,
-          ...(data.destinationBankAccountId
-            ? { destinationBankAccountId: data.destinationBankAccountId }
-            : {}),
-        },
-        {
-          onSuccess: () => {
-            toast.success('Lançamento criado')
-            onOpenChange(false)
-          },
-          onError: (err) => {
-            toast.error(
-              err instanceof Error ? err.message : 'Erro ao criar lançamento'
-            )
-          },
-        }
-      )
+      return
     }
+
+    if (transaction.installmentGroupId && !installmentScope) {
+      onInstallmentSubmit?.(transaction, commonBody)
+      return
+    }
+
+    update.mutate(
+      {
+        id: transaction.id,
+        body: {
+          ...commonBody,
+          ...(installmentScope ? { scope: installmentScope } : {}),
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Lançamento atualizado')
+          onOpenChange(false)
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof Error ? err.message : 'Erro ao atualizar lançamento'
+          )
+        },
+      }
+    )
   }
 
   return (
@@ -524,7 +682,17 @@ export const TransactionFormDialog = ({
             )}
           </div>
 
-          {!isTransfer && (
+          {canConfigureRepeat && repeatOpen && (
+            <RepeatSection
+              control={control}
+              amount={amount}
+              repeat={repeat}
+              setValue={setValue}
+              allowInstallment={!isEditing}
+            />
+          )}
+
+          {!isTransfer && notesOpen && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="notes">Notas</Label>
               <Input
@@ -537,6 +705,25 @@ export const TransactionFormDialog = ({
                   {errors.notes.message}
                 </p>
               )}
+            </div>
+          )}
+
+          {!isTransfer && (
+            <div className="flex justify-center gap-6 py-2">
+              {canConfigureRepeat && (
+                <FooterActionButton
+                  label="Repetir"
+                  active={repeatOpen}
+                  onClick={() => setRepeatOpen((current) => !current)}
+                  icon={ArrowUpDownIcon}
+                />
+              )}
+              <FooterActionButton
+                label="Observação"
+                active={notesOpen}
+                onClick={() => setNotesOpen((current) => !current)}
+                icon={Calendar01Icon}
+              />
             </div>
           )}
 

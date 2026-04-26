@@ -36,9 +36,16 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
   const totalExpense = summary?.totalExpense ?? 0
   const pendingIncome = summary?.pendingIncome ?? 0
   const pendingExpense = summary?.pendingExpense ?? 0
+  const overdueIncome = summary?.overdueIncome ?? 0
+  const overdueExpense = summary?.overdueExpense ?? 0
 
   const currentBalance = previousBalance + totalIncome - totalExpense
-  const projected = currentBalance + pendingIncome - pendingExpense
+  const projected =
+    currentBalance +
+    pendingIncome -
+    pendingExpense +
+    overdueIncome -
+    overdueExpense
 
   return (
     <Fragment>

@@ -1,7 +1,12 @@
 import { z } from 'zod'
 
 import { RecurringFrequency } from '../../../generated/prisma/enums.js'
-import { bankAccountBasic, categoryBasic, transactionResponse, transactionType } from '../transaction/schemas.js'
+import {
+  bankAccountBasic,
+  categoryBasic,
+  transactionResponse,
+  transactionType,
+} from '../transaction/schemas.js'
 
 export const recurringRuleIdParam = z.object({
   id: z.uuid(),
@@ -32,6 +37,7 @@ export const listRecurringRulesResponse = z.object({
 export const updateRecurringRuleBody = z.object({
   scope: recurringScope,
   occurrenceDate: z.string().date(),
+  date: z.string().date().optional(),
   amount: z.int().min(1).optional(),
   description: z.string().trim().min(1).max(255).optional(),
   categoryId: z.uuid().optional(),

@@ -9,7 +9,11 @@ import { NotFound } from '@/shared/infra/http/errors/index.js'
 import { recalculateBalance } from '@/modules/transaction/helpers/recalculate-balance.js'
 import { validateBankAccount } from '@/modules/transaction/helpers/validate-bank-account.js'
 import { validateCategory } from '@/modules/transaction/helpers/validate-category.js'
-import { recurringRuleIdParam, updateRecurringRuleBody, updateRecurringRuleResponse } from '../schemas.js'
+import {
+  recurringRuleIdParam,
+  updateRecurringRuleBody,
+  updateRecurringRuleResponse,
+} from '../schemas.js'
 
 export async function updateRecurringRuleHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().patch(
@@ -28,6 +32,7 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
       const userId = await request.getCurrentUserId()
       const input = request.body
       const occurrenceDate = new Date(input.occurrenceDate)
+      const updatedDate = input.date ? new Date(input.date) : occurrenceDate
 
       return app.prisma.$transaction(async (tx) => {
         const recurringRuleRepo = recurringRuleRepository(tx)
@@ -69,7 +74,7 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
             type: rule.type,
             amount: sharedData.amount,
             description: sharedData.description,
-            date: occurrenceDate,
+            date: updatedDate,
             isPaid: sharedData.isPaid,
             notes: sharedData.notes,
             userId,
@@ -78,7 +83,10 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
           }
 
           const transaction = currentOverride?.transactionId
-            ? await transactionRepo.update(currentOverride.transactionId, transactionData)
+            ? await transactionRepo.update(
+                currentOverride.transactionId,
+                transactionData
+              )
             : await transactionRepo.create(transactionData)
 
           await recurringOverrideRepo.upsert(rule.id, occurrenceDate, {
@@ -86,7 +94,10 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
             transactionId: transaction.id,
           })
 
-          const affectedAccountIds = new Set([rule.bankAccountId, sharedData.bankAccountId])
+          const affectedAccountIds = new Set([
+            rule.bankAccountId,
+            sharedData.bankAccountId,
+          ])
           for (const accountId of affectedAccountIds) {
             await recalculateBalance(tx, accountId)
           }
@@ -103,7 +114,7 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
           amount: sharedData.amount,
           description: sharedData.description,
           frequency: rule.frequency,
-          startDate: occurrenceDate,
+          startDate: updatedDate,
           endDate: rule.endDate,
           isPaid: sharedData.isPaid,
           notes: sharedData.notes,
@@ -117,11 +128,11 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
             recurringRuleId: recurringRule.id,
             occurrenceDate: { gte: occurrenceDate },
           },
-          { recurringRuleId: newRecurringRule.id },
+          { recurringRuleId: newRecurringRule.id }
         )
 
         return { recurringRule: newRecurringRule }
       })
-    },
+    }
   )
 }

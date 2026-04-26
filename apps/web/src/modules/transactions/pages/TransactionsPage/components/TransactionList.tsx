@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 import type { Transaction } from '@/api/transactions'
 
 import { TransactionGroup } from './TransactionGroup'
+import type { VirtualOccurrenceAction } from './TransactionItem'
 
 type Props = {
   transactions: Transaction[]
@@ -11,6 +12,10 @@ type Props = {
   search: string
   onEdit: (transaction: Transaction) => void
   onTogglePaid: (transaction: Transaction) => void
+  onVirtualAction: (
+    action: VirtualOccurrenceAction,
+    transaction: Transaction
+  ) => void
 }
 
 export const TransactionList = ({
@@ -19,6 +24,7 @@ export const TransactionList = ({
   search,
   onEdit,
   onTogglePaid,
+  onVirtualAction,
 }: Props) => {
   if (isLoading) {
     return (
@@ -68,6 +74,7 @@ export const TransactionList = ({
             transactions={items}
             onEdit={onEdit}
             onTogglePaid={onTogglePaid}
+            onVirtualAction={onVirtualAction}
           />
         ))}
       </div>

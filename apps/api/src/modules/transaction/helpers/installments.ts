@@ -14,7 +14,9 @@ export interface InstallmentDraft {
   description: string
 }
 
-function monthsByFrequency(frequency: InstallmentFrequency): number {
+export function monthsByInstallmentFrequency(
+  frequency: RecurringFrequency
+): number {
   if (frequency === 'BIMONTHLY') {
     return 2
   }
@@ -33,12 +35,12 @@ export function buildInstallments(input: {
 }): InstallmentDraft[] {
   const baseAmount = Math.floor(input.amount / input.count)
   const remainder = input.amount % input.count
-  const months = monthsByFrequency(input.frequency)
+  const months = monthsByInstallmentFrequency(input.frequency)
 
   return Array.from({ length: input.count }, (_, index) => ({
     amount: baseAmount + (index === 0 ? remainder : 0),
     date: addMonthsPreservingDay(input.startDate, index * months),
     installmentNumber: index + 1,
-    description: `${input.description} (${index + 1}/${input.count})`,
+    description: input.description,
   }))
 }

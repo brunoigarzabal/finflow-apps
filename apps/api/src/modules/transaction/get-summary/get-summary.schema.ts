@@ -15,5 +15,7 @@ export const summaryResponse = z.object({
     pendingIncome: z.int(),
     pendingExpense: z.int(),
     pendingBalance: z.int(),
+    overdueIncome: z.int(),
+    overdueExpense: z.int(),
   }),
 })

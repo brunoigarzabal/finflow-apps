@@ -9,7 +9,10 @@ import { buildInstallments } from '../helpers/installments.js'
 import { recalculateBalance } from '../helpers/recalculate-balance.js'
 import { validateBankAccount } from '../helpers/validate-bank-account.js'
 import { validateCategory } from '../helpers/validate-category.js'
-import { createTransactionBody, createTransactionResponse } from './create-transaction.schema.js'
+import {
+  createTransactionBody,
+  createTransactionResponse,
+} from './create-transaction.schema.js'
 
 export async function createTransactionHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -28,11 +31,15 @@ export async function createTransactionHandler(app: FastifyInstance) {
       const input = request.body
 
       if (input.type === 'TRANSFER' && !input.destinationBankAccountId) {
-        throw new BadRequest('Conta de destino é obrigatória para transferências')
+        throw new BadRequest(
+          'Conta de destino é obrigatória para transferências'
+        )
       }
 
       if (input.type !== 'TRANSFER' && input.destinationBankAccountId) {
-        throw new BadRequest('Conta de destino só é permitida para transferências')
+        throw new BadRequest(
+          'Conta de destino só é permitida para transferências'
+        )
       }
 
       if (input.type !== 'TRANSFER' && !input.categoryId) {
@@ -40,11 +47,15 @@ export async function createTransactionHandler(app: FastifyInstance) {
       }
 
       if ((input.installment || input.recurring) && input.type === 'TRANSFER') {
-        throw new BadRequest('Transferências não suportam parcelamento ou recorrência')
+        throw new BadRequest(
+          'Transferências não suportam parcelamento ou recorrência'
+        )
       }
 
       if (input.recurring?.endDate && input.recurring.endDate < input.date) {
-        throw new BadRequest('Data final da recorrência deve ser maior ou igual à data inicial')
+        throw new BadRequest(
+          'Data final da recorrência deve ser maior ou igual à data inicial'
+        )
       }
 
       if (
@@ -93,6 +104,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
           const installmentGroup = await installmentGroupRepo.create({
             totalAmount: input.amount,
             count: input.installment.count,
+            frequency: input.installment.frequency,
             userId,
           })
 
@@ -134,7 +146,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
             tx,
             userId,
             input.destinationBankAccountId!,
-            'Conta de destino',
+            'Conta de destino'
           )
 
           const transferId = crypto.randomUUID()
@@ -168,8 +180,10 @@ export async function createTransactionHandler(app: FastifyInstance) {
           })
 
           if (input.isPaid) {
-            await recalculateBalance(tx, input.bankAccountId)
-            await recalculateBalance(tx, input.destinationBankAccountId!)
+            await Promise.all([
+              recalculateBalance(tx, input.bankAccountId),
+              recalculateBalance(tx, input.destinationBankAccountId!),
+            ])
           }
 
           return {
@@ -203,6 +217,6 @@ export async function createTransactionHandler(app: FastifyInstance) {
       })
 
       return reply.status(201).send(result)
-    },
+    }
   )
 }

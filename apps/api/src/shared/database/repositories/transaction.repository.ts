@@ -1,4 +1,7 @@
-import { Prisma, type PrismaClient } from '../../../../generated/prisma/client.js'
+import {
+  Prisma,
+  type PrismaClient,
+} from '../../../../generated/prisma/client.js'
 import type { TransactionType } from '../../../../generated/prisma/enums.js'
 
 type TransactionClient = Prisma.TransactionClient
@@ -11,6 +14,9 @@ const transactionInclude = {
   category: {
     select: { id: true, name: true, color: true, icon: true },
   },
+  installmentGroup: {
+    select: { count: true, frequency: true },
+  },
 } as const
 
 export { transactionInclude }
@@ -19,7 +25,7 @@ export function transactionRepository(prisma: PrismaArg) {
   return {
     findMany: (
       where: Prisma.TransactionWhereInput,
-      options?: { skip?: number; take?: number },
+      options?: { skip?: number; take?: number }
     ) =>
       prisma.transaction.findMany({
         where,
@@ -63,20 +69,23 @@ export function transactionRepository(prisma: PrismaArg) {
       prisma.transaction.create({ data, include: transactionInclude }),
 
     update: (id: string, data: Prisma.TransactionUncheckedUpdateInput) =>
-      prisma.transaction.update({ where: { id }, data, include: transactionInclude }),
+      prisma.transaction.update({
+        where: { id },
+        data,
+        include: transactionInclude,
+      }),
 
-    updateMany: (where: Prisma.TransactionWhereInput, data: Prisma.TransactionUncheckedUpdateManyInput) =>
-      prisma.transaction.updateMany({ where, data }),
+    updateMany: (
+      where: Prisma.TransactionWhereInput,
+      data: Prisma.TransactionUncheckedUpdateManyInput
+    ) => prisma.transaction.updateMany({ where, data }),
 
-    delete: (id: string) =>
-      prisma.transaction.delete({ where: { id } }),
+    delete: (id: string) => prisma.transaction.delete({ where: { id } }),
 
     deleteMany: (where: Prisma.TransactionWhereInput) =>
       prisma.transaction.deleteMany({ where }),
 
-    groupBy: (
-      where: Prisma.TransactionWhereInput,
-    ) =>
+    groupBy: (where: Prisma.TransactionWhereInput) =>
       prisma.transaction.groupBy({
         by: ['type', 'isTransferOut'],
         where,
@@ -91,7 +100,6 @@ export function transactionRepository(prisma: PrismaArg) {
         _count: { id: true },
         orderBy: { _sum: { amount: 'desc' } },
       }),
-
   }
 }
 

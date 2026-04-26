@@ -1,5 +1,8 @@
 import type { PrismaClient } from '../../../../generated/prisma/client.js'
-import type { RecurringFrequency, TransactionType } from '../../../../generated/prisma/enums.js'
+import type {
+  RecurringFrequency,
+  TransactionType,
+} from '../../../../generated/prisma/enums.js'
 
 import { recurringRuleInclude } from '@/shared/database/repositories/recurring-rule.repository.js'
 import { transactionInclude } from '@/shared/database/repositories/transaction.repository.js'
@@ -42,6 +45,7 @@ export type RecurringOccurrence = {
   isTransferOut: boolean | null
   installmentGroupId: string | null
   installmentNumber: number | null
+  installmentCount?: number | null
   createdAt: Date
   updatedAt: Date
   userId?: string
@@ -81,7 +85,7 @@ function nextOccurrenceDate(date: Date, frequency: RecurringFrequency): Date {
 export function calculateOccurrenceDates(
   rule: Pick<RecurringRuleWithRelations, 'startDate' | 'endDate' | 'frequency'>,
   periodStart: Date,
-  periodEnd: Date,
+  periodEnd: Date
 ): Date[] {
   const dates: Date[] = []
   const effectiveEnd =
@@ -99,7 +103,10 @@ export function calculateOccurrenceDates(
   return dates
 }
 
-function makeOverrideKey(recurringRuleId: string, occurrenceDate: Date): string {
+function makeOverrideKey(
+  recurringRuleId: string,
+  occurrenceDate: Date
+): string {
   return `${recurringRuleId}:${formatDateKey(occurrenceDate)}`
 }
 
@@ -109,7 +116,7 @@ function formatDateKey(date: Date): string {
 
 function makeVirtualOccurrence(
   rule: RecurringRuleWithRelations,
-  occurrenceDate: Date,
+  occurrenceDate: Date
 ): RecurringOccurrence {
   const date = formatDateKey(occurrenceDate)
 
@@ -125,6 +132,7 @@ function makeVirtualOccurrence(
     isTransferOut: null,
     installmentGroupId: null,
     installmentNumber: null,
+    installmentCount: null,
     createdAt: rule.createdAt,
     updatedAt: rule.updatedAt,
     bankAccountId: rule.bankAccountId,
@@ -140,7 +148,7 @@ export async function getRecurringOccurrences(
   prisma: PrismaClient,
   userId: string,
   periodStart: Date,
-  periodEnd: Date,
+  periodEnd: Date
 ): Promise<RecurringOccurrence[]> {
   const rules = await prisma.recurringRule.findMany({
     where: {
@@ -171,13 +179,17 @@ export async function getRecurringOccurrences(
     overrides.map((override) => [
       makeOverrideKey(override.recurringRuleId, override.occurrenceDate),
       override,
-    ]),
+    ])
   )
 
   const occurrences: RecurringOccurrence[] = []
 
   for (const rule of rules) {
-    const occurrenceDates = calculateOccurrenceDates(rule, periodStart, periodEnd)
+    const occurrenceDates = calculateOccurrenceDates(
+      rule,
+      periodStart,
+      periodEnd
+    )
 
     for (const occurrenceDate of occurrenceDates) {
       const override = overrideMap.get(makeOverrideKey(rule.id, occurrenceDate))
@@ -191,6 +203,8 @@ export async function getRecurringOccurrences(
           ...override.transaction,
           installmentGroupId: override.transaction.installmentGroupId,
           installmentNumber: override.transaction.installmentNumber,
+          installmentCount:
+            override.transaction.installmentGroup?.count ?? null,
           recurringRuleId: rule.id,
         })
         continue

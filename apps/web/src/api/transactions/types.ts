@@ -1,4 +1,48 @@
+import type { BankAccount } from '@/api/bank-accounts'
+import type { Category } from '@/api/categories'
+
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER'
+
+export type RecurringFrequency =
+  | 'DAILY'
+  | 'WEEKLY'
+  | 'BIWEEKLY'
+  | 'MONTHLY'
+  | 'BIMONTHLY'
+  | 'QUARTERLY'
+  | 'SEMIANNUAL'
+  | 'ANNUAL'
+
+export const FREQUENCY_LABELS: Record<RecurringFrequency, string> = {
+  DAILY: 'Diário',
+  WEEKLY: 'Semanal',
+  BIWEEKLY: 'Quinzenal',
+  MONTHLY: 'Mensal',
+  BIMONTHLY: 'Bimestral',
+  QUARTERLY: 'Trimestral',
+  SEMIANNUAL: 'Semestral',
+  ANNUAL: 'Anual',
+}
+
+export type InstallmentFrequency = 'MONTHLY' | 'BIMONTHLY' | 'QUARTERLY'
+export type InstallmentScope = 'THIS' | 'ALL_REMAINING'
+export type RecurringScope = 'THIS' | 'THIS_AND_FUTURE'
+
+export interface RecurringRule {
+  id: string
+  type: TransactionType
+  amount: number
+  description: string
+  frequency: RecurringFrequency
+  startDate: string
+  endDate: string | null
+  isPaid: boolean
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+  bankAccount: Pick<BankAccount, 'id' | 'name' | 'color' | 'icon'>
+  category: Pick<Category, 'id' | 'name' | 'color' | 'icon'>
+}
 
 export type Transaction = {
   id: string
@@ -20,6 +64,11 @@ export type Transaction = {
     color: string
     icon: string
   } | null
+  isVirtual?: boolean
+  recurringRuleId?: string
+  installmentGroupId?: string | null
+  installmentNumber?: number | null
+  installmentCount?: number | null
 }
 
 export type TransactionDetail = {
@@ -42,6 +91,11 @@ export type TransactionDetail = {
     type: TransactionType
     bankAccount: { id: string; name: string; color: string; icon: string }
   } | null
+  recurringRuleId?: string
+  isVirtual?: boolean
+  installmentGroupId?: string | null
+  installmentNumber?: number | null
+  installmentCount?: number | null
 }
 
 export type CreateTransactionBody = {
@@ -52,8 +106,36 @@ export type CreateTransactionBody = {
   bankAccountId: string
   categoryId?: string
   isPaid: boolean
-  notes?: string
+  notes?: string | null
   destinationBankAccountId?: string
+  recurring?: {
+    frequency: RecurringFrequency
+    endDate?: string
+  }
+  installment?: {
+    count: number
+    frequency: InstallmentFrequency
+  }
+}
+
+export type CreateTransactionResponse =
+  | TransactionDetail
+  | {
+      installmentGroup: {
+        id: string
+        totalAmount: number
+        count: number
+        frequency: RecurringFrequency
+        createdAt: string
+      }
+      transactions: Transaction[]
+    }
+  | {
+      recurringRule: RecurringRule
+    }
+
+export type DeleteTransactionBody = {
+  scope?: InstallmentScope
 }
 
 export type UpdateTransactionBody = {
@@ -64,6 +146,11 @@ export type UpdateTransactionBody = {
   categoryId?: string
   isPaid?: boolean
   notes?: string | null
+  scope?: InstallmentScope
+  recurring?: {
+    frequency: RecurringFrequency
+    endDate?: string
+  }
 }
 
 export type TransactionSummary = {
@@ -74,6 +161,8 @@ export type TransactionSummary = {
   pendingIncome: number
   pendingExpense: number
   pendingBalance: number
+  overdueIncome: number
+  overdueExpense: number
 }
 
 export type SummaryByCategoryItem = {

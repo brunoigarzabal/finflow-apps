@@ -5,7 +5,10 @@ import type { Prisma } from '../../../../generated/prisma/client.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { resolveDateRange } from '@/shared/helpers/date.js'
 import { getRecurringOccurrences } from '../helpers/recurring-occurrences.js'
-import { listTransactionsQuery, transactionListResponse } from './list-transactions.schema.js'
+import {
+  listTransactionsQuery,
+  transactionListResponse,
+} from './list-transactions.schema.js'
 
 export async function listTransactionsHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
@@ -24,7 +27,10 @@ export async function listTransactionsHandler(app: FastifyInstance) {
       const input = request.query
       const repo = transactionRepository(app.prisma)
 
-      const { startDate, endDate } = resolveDateRange(input.startDate, input.endDate)
+      const { startDate, endDate } = resolveDateRange(
+        input.startDate,
+        input.endDate
+      )
 
       const baseWhere: Prisma.TransactionWhereInput = {
         userId,
@@ -56,14 +62,16 @@ export async function listTransactionsHandler(app: FastifyInstance) {
         : []
 
       const enrichedTransactions = transactions.map((t) => {
+        const installmentCount = t.installmentGroup?.count ?? null
         if (t.type !== 'TRANSFER' || !t.transferId) {
-          return { ...t, relatedBankAccount: null }
+          return { ...t, installmentCount, relatedBankAccount: null }
         }
         const pair = relatedRecords.find(
-          (r) => r.transferId === t.transferId && r.id !== t.id,
+          (r) => r.transferId === t.transferId && r.id !== t.id
         )
         return {
           ...t,
+          installmentCount,
           relatedBankAccount: pair?.bankAccount ?? null,
         }
       })
@@ -75,7 +83,10 @@ export async function listTransactionsHandler(app: FastifyInstance) {
         if (input.categoryId && occurrence.categoryId !== input.categoryId) {
           return false
         }
-        if (input.bankAccountId && occurrence.bankAccountId !== input.bankAccountId) {
+        if (
+          input.bankAccountId &&
+          occurrence.bankAccountId !== input.bankAccountId
+        ) {
           return false
         }
         if (input.isPaid !== undefined && occurrence.isPaid !== input.isPaid) {
@@ -92,16 +103,15 @@ export async function listTransactionsHandler(app: FastifyInstance) {
       const transactionsWithRecurring = [
         ...enrichedTransactions,
         ...recurringListItems,
-      ]
-        .sort((a, b) => {
-          const dateDiff = b.date.getTime() - a.date.getTime()
-          if (dateDiff !== 0) {
-            return dateDiff
-          }
-          return b.createdAt.getTime() - a.createdAt.getTime()
-        })
+      ].sort((a, b) => {
+        const dateDiff = b.date.getTime() - a.date.getTime()
+        if (dateDiff !== 0) {
+          return dateDiff
+        }
+        return b.createdAt.getTime() - a.createdAt.getTime()
+      })
 
       return { transactions: transactionsWithRecurring }
-    },
+    }
   )
 }

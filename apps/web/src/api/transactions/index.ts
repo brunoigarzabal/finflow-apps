@@ -9,6 +9,11 @@ export type {
   Transaction,
   TransactionDetail,
   TransactionType,
+  RecurringFrequency,
+  RecurringRule,
+  InstallmentFrequency,
+  InstallmentScope,
+  RecurringScope,
   TransactionSummary,
   SummaryByCategoryItem,
   SummaryByCategoryResponse,
@@ -17,5 +22,8 @@ export type {
   SummaryParams,
   SummaryByCategoryParams,
   CreateTransactionBody,
+  CreateTransactionResponse,
   UpdateTransactionBody,
+  DeleteTransactionBody,
 } from './types'
+export { FREQUENCY_LABELS } from './types'

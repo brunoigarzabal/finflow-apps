@@ -194,10 +194,11 @@ model RecurringOverride {
 }
 
 model InstallmentGroup {
-  id          String   @id @default(uuid())
-  totalAmount Int      @map("total_amount")
+  id          String             @id @default(uuid())
+  totalAmount Int                @map("total_amount")
   count       Int
-  createdAt   DateTime @default(now()) @map("created_at")
+  frequency   RecurringFrequency @default(MONTHLY)
+  createdAt   DateTime           @default(now()) @map("created_at")
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String @map("user_id")

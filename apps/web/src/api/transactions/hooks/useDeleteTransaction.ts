@@ -2,28 +2,21 @@ import { useQueryClient } from '@tanstack/react-query'
 
 import { defineMutation } from '@/lib/react-query'
 
-import { BANK_ACCOUNTS_QUERY_KEYS } from '../../bank-accounts/config'
-import { DASHBOARD_QUERY_KEYS } from '../../dashboard/config'
-import { TRANSACTIONS_MUTATION_KEYS, TRANSACTIONS_QUERY_KEYS } from '../config'
+import { TRANSACTIONS_MUTATION_KEYS } from '../config'
 import { deleteTransaction } from '../endpoints'
+import { invalidateTransactionDependencies } from '../invalidateTransactionDependencies'
+import type { DeleteTransactionBody } from '../types'
 
 export const useDeleteTransaction = () => {
   const queryClient = useQueryClient()
 
   return defineMutation({
     mutationKey: TRANSACTIONS_MUTATION_KEYS.delete,
-    mutationFn: deleteTransaction,
+    mutationFn: ({ id, body }: { id: string; body?: DeleteTransactionBody }) =>
+      deleteTransaction(id, body),
   })({
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRANSACTIONS_QUERY_KEYS.list })
-      queryClient.invalidateQueries({
-        queryKey: TRANSACTIONS_QUERY_KEYS.summary,
-      })
-      queryClient.invalidateQueries({
-        queryKey: TRANSACTIONS_QUERY_KEYS.summaryByCategory,
-      })
-      queryClient.invalidateQueries({ queryKey: BANK_ACCOUNTS_QUERY_KEYS.list })
-      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.detail })
+      invalidateTransactionDependencies(queryClient)
     },
   })
 }
