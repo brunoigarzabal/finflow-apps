@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 
-import { AppLayout } from '@/components/layout/AppLayout'
 import { RouteLoading } from '@/components/common/RouteLoading'
+import { AppLayout } from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/store'
 
 export const Route = createFileRoute('/_authenticated')({
