@@ -6,6 +6,7 @@ import { useState } from 'react'
 
 import { MobileNav } from './MobileNav'
 import { SettingsMenu } from './SettingsMenu'
+import { ThemeToggle } from './ThemeToggle'
 import { UserMenu } from './UserMenu'
 
 export const Header = () => {
@@ -61,6 +62,7 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-1">
+          <ThemeToggle />
           <div className="hidden md:block">
             <SettingsMenu />
           </div>
