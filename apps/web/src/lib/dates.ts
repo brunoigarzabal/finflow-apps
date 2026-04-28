@@ -1,4 +1,4 @@
-import { addMonths, endOfMonth, format, parseISO, startOfMonth } from 'date-fns'
+import { addMonths, endOfMonth, format, startOfMonth } from 'date-fns'
 
 export const monthRange = (endMonthOffset = 0) => {
   const now = new Date()
@@ -15,6 +15,6 @@ export const currentAndNextMonthRange = () => monthRange(1)
 export const today = () => format(new Date(), 'yyyy-MM-dd')
 
 export const formatShortDate = (dateStr: string) => {
-  const date = parseISO(dateStr)
-  return format(date, 'dd/MM')
+  const [year, month, day] = dateStr.slice(0, 10).split('-').map(Number)
+  return format(new Date(year, month - 1, day), 'dd/MM')
 }
