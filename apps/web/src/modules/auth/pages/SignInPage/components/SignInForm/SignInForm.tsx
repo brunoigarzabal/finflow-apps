@@ -1,4 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { EyeIcon, ViewOffIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
 import { Alert, AlertDescription } from '@workspace/ui/components/alert'
 import { Button } from '@workspace/ui/components/button'
@@ -19,7 +21,7 @@ import {
 } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
 import { HTTPError } from 'ky'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useLogin } from '@/api/auth'
@@ -28,6 +30,7 @@ import { signInSchema, type SignInFormData } from '@/modules/auth/schemas'
 
 export const SignInForm = () => {
   const login = useLogin()
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -97,12 +100,31 @@ export const SignInForm = () => {
                     Esqueceu sua senha?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  aria-invalid={!!errors.password}
-                  {...register('password')}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="pr-10"
+                    aria-invalid={!!errors.password}
+                    {...register('password')}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-haspopup="true"
+                    className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground hover:text-foreground active:bg-transparent active:not-aria-[haspopup]:translate-y-0"
+                    onClick={() => setShowPassword((current) => !current)}
+                  >
+                    <HugeiconsIcon
+                      icon={showPassword ? ViewOffIcon : EyeIcon}
+                      className="size-4"
+                    />
+                    <span className="sr-only">
+                      {showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    </span>
+                  </Button>
+                </div>
                 {errors.password && (
                   <FieldError>{errors.password.message}</FieldError>
                 )}

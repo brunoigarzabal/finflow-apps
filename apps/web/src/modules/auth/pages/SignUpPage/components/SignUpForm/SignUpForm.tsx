@@ -1,4 +1,8 @@
+/* eslint-disable sonarjs/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { zodResolver } from '@hookform/resolvers/zod'
+import { EyeIcon, ViewOffIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
 import { Alert, AlertDescription } from '@workspace/ui/components/alert'
 import { Button } from '@workspace/ui/components/button'
@@ -19,7 +23,7 @@ import {
 } from '@workspace/ui/components/field'
 import { Input } from '@workspace/ui/components/input'
 import { HTTPError } from 'ky'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { useRegister } from '@/api/auth'
@@ -28,6 +32,8 @@ import { signUpSchema, type SignUpFormData } from '@/modules/auth/schemas'
 
 export const SignUpForm = () => {
   const registerMutation = useRegister()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const {
     register,
@@ -105,12 +111,31 @@ export const SignUpForm = () => {
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Senha</FieldLabel>
-                    <Input
-                      id="password"
-                      type="password"
-                      aria-invalid={!!errors.password}
-                      {...register('password')}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        aria-invalid={!!errors.password}
+                        {...register('password')}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-haspopup="true"
+                        className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground hover:text-foreground active:bg-transparent active:not-aria-[haspopup]:translate-y-0"
+                        onClick={() => setShowPassword((current) => !current)}
+                      >
+                        <HugeiconsIcon
+                          icon={showPassword ? ViewOffIcon : EyeIcon}
+                          className="size-4"
+                        />
+                        <span className="sr-only">
+                          {showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                        </span>
+                      </Button>
+                    </div>
                     {errors.password && (
                       <FieldError>{errors.password.message}</FieldError>
                     )}
@@ -119,12 +144,35 @@ export const SignUpForm = () => {
                     <FieldLabel htmlFor="confirmPassword">
                       Confirmar senha
                     </FieldLabel>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      aria-invalid={!!errors.confirmPassword}
-                      {...register('confirmPassword')}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        aria-invalid={!!errors.confirmPassword}
+                        {...register('confirmPassword')}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-haspopup="true"
+                        className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground hover:text-foreground active:bg-transparent active:not-aria-[haspopup]:translate-y-0"
+                        onClick={() =>
+                          setShowConfirmPassword((current) => !current)
+                        }
+                      >
+                        <HugeiconsIcon
+                          icon={showConfirmPassword ? ViewOffIcon : EyeIcon}
+                          className="size-4"
+                        />
+                        <span className="sr-only">
+                          {showConfirmPassword
+                            ? 'Ocultar senha'
+                            : 'Mostrar senha'}
+                        </span>
+                      </Button>
+                    </div>
                     {errors.confirmPassword && (
                       <FieldError>{errors.confirmPassword.message}</FieldError>
                     )}
