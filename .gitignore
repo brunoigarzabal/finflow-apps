@@ -21,6 +21,7 @@ coverage
 
 # Build Outputs
 dist
+apps/web/dev-dist
 
 # Debug
 npm-debug.log*

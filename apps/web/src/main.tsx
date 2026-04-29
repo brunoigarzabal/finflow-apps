@@ -2,6 +2,8 @@
 import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { toast } from 'sonner'
+import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import '@workspace/ui/globals.css'
 
@@ -25,17 +27,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
-function InnerApp() {
+const InnerApp = () => {
+  useRegisterSW({
+    onNeedRefresh() {
+      toast.info('Nova versão disponível. Recarregue a página para atualizar.')
+    },
+    onOfflineReady() {
+      toast.success('Modo offline pronto.')
+    },
+  })
+
   return <RouterProvider router={router} context={{ queryClient }} />
 }
 
-function App() {
-  return (
-    <GlobalProvider queryClient={queryClient}>
-      <InnerApp />
-    </GlobalProvider>
-  )
-}
+const App = () => (
+  <GlobalProvider queryClient={queryClient}>
+    <InnerApp />
+  </GlobalProvider>
+)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
