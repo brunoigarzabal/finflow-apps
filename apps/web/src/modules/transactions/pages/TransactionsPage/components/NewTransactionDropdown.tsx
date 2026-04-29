@@ -25,6 +25,8 @@ export const NewTransactionDropdown = ({ onSelect }: Props) => (
   <Fragment>
     <DropdownMenu>
       <DropdownMenuTrigger
+        openOnHover
+        aria-haspopup="menu"
         render={
           <button className="flex size-8 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground" />
         }

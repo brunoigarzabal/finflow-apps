@@ -23,6 +23,8 @@ export const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        openOnHover
+        aria-haspopup="menu"
         render={
           <button className="flex size-8 cursor-pointer items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground" />
         }

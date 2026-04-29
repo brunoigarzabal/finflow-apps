@@ -11,6 +11,8 @@ import {
 export const SettingsMenu = () => (
   <DropdownMenu>
     <DropdownMenuTrigger
+      openOnHover
+      aria-haspopup="menu"
       render={
         <button className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground" />
       }
