@@ -1,6 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/button'
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@workspace/ui/components/combobox'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -9,13 +19,6 @@ import {
 } from '@workspace/ui/components/dialog'
 import { Input } from '@workspace/ui/components/input'
 import { Label } from '@workspace/ui/components/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select'
 import { cn } from '@workspace/ui/lib/utils'
 import { Fragment, useEffect, useState } from 'react'
 import { useForm, Controller, useWatch } from 'react-hook-form'
@@ -87,7 +90,9 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
   const isEditing = !!account
   const create = useCreateBankAccount()
   const update = useUpdateBankAccount()
-  const [activeTab, setActiveTab] = useState<IconTab>('generic')
+  const [activeTab, setActiveTab] = useState<IconTab>(() =>
+    account ? resolveInitialTab(account.icon) : 'institution'
+  )
 
   const {
     register,
@@ -108,7 +113,9 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
     if (!open) return
     const initial = account ? accountToFormData(account) : DEFAULT_VALUES
     reset(initial)
-    setActiveTab(resolveInitialTab(initial.icon))
+    queueMicrotask(() => {
+      setActiveTab(account ? resolveInitialTab(initial.icon) : 'institution')
+    })
   }, [open, account, reset])
 
   const isPending = create.isPending || update.isPending
@@ -225,26 +232,44 @@ export const AccountFormDialog = ({ account, open, onOpenChange }: Props) => {
                 <Controller
                   name="type"
                   control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione o tipo">
-                          {(value: string) =>
-                            ACCOUNT_TYPE_OPTIONS.find(
-                              (opt) => opt.value === value
-                            )?.label ?? value
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ACCOUNT_TYPE_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
+                  render={({ field }) => {
+                    const selectedItem =
+                      ACCOUNT_TYPE_OPTIONS.find(
+                        (opt) => opt.value === field.value
+                      ) ?? null
+                    return (
+                      <Combobox
+                        value={selectedItem}
+                        onValueChange={(item) =>
+                          field.onChange(
+                            (item as { value: string } | null)?.value ?? ''
+                          )
+                        }
+                        items={ACCOUNT_TYPE_OPTIONS}
+                      >
+                        <ComboboxTrigger className="w-full">
+                          <ComboboxValue placeholder="Selecione o tipo" />
+                        </ComboboxTrigger>
+                        <ComboboxContent>
+                          <ComboboxInput placeholder="Buscar tipo..." />
+                          <ComboboxEmpty>Nenhum tipo encontrado.</ComboboxEmpty>
+                          <ComboboxList>
+                            {(item) => {
+                              const opt = item as {
+                                value: string
+                                label: string
+                              }
+                              return (
+                                <ComboboxItem key={opt.value} value={opt}>
+                                  {opt.label}
+                                </ComboboxItem>
+                              )
+                            }}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )
+                  }}
                 />
               </div>
 

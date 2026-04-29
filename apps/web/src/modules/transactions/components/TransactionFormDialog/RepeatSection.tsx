@@ -1,5 +1,15 @@
 import { Button } from '@workspace/ui/components/button'
 import { Calendar } from '@workspace/ui/components/calendar'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@workspace/ui/components/combobox'
 import { Input } from '@workspace/ui/components/input'
 import { Label } from '@workspace/ui/components/label'
 import {
@@ -8,13 +18,6 @@ import {
   PopoverTrigger,
 } from '@workspace/ui/components/popover'
 import { Radio, RadioGroup } from '@workspace/ui/components/radio-group'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select'
 import { cn } from '@workspace/ui/lib/utils'
 import { format, parse, startOfMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -47,15 +50,13 @@ const INSTALLMENT_FREQUENCIES: InstallmentFrequency[] = [
   'QUARTERLY',
 ]
 
-const getRecurringFrequencyLabel = (value: string) => {
-  const frequency = RECURRING_FREQUENCIES.find((item) => item === value)
-  return frequency ? FREQUENCY_LABELS[frequency] : 'Mensal'
-}
+type FrequencyOption = { value: string; label: string }
 
-const getInstallmentFrequencyLabel = (value: string) => {
-  const frequency = INSTALLMENT_FREQUENCIES.find((item) => item === value)
-  return frequency ? FREQUENCY_LABELS[frequency] : 'Meses'
-}
+const RECURRING_FREQUENCY_OPTIONS: FrequencyOption[] =
+  RECURRING_FREQUENCIES.map((f) => ({ value: f, label: FREQUENCY_LABELS[f] }))
+
+const INSTALLMENT_FREQUENCY_OPTIONS: FrequencyOption[] =
+  INSTALLMENT_FREQUENCIES.map((f) => ({ value: f, label: FREQUENCY_LABELS[f] }))
 
 type Props = {
   control: Control<TransactionFormData>
@@ -141,22 +142,41 @@ export const RepeatSection = ({
               <Controller
                 name="repeat.frequency"
                 control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Mensal">
-                        {getRecurringFrequencyLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RECURRING_FREQUENCIES.map((frequency) => (
-                        <SelectItem key={frequency} value={frequency}>
-                          {FREQUENCY_LABELS[frequency]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                render={({ field }) => {
+                  const selectedItem =
+                    RECURRING_FREQUENCY_OPTIONS.find(
+                      (o) => o.value === field.value
+                    ) ?? null
+                  return (
+                    <Combobox
+                      value={selectedItem}
+                      onValueChange={(item) =>
+                        field.onChange(
+                          (item as FrequencyOption | null)?.value ?? 'MONTHLY'
+                        )
+                      }
+                      items={RECURRING_FREQUENCY_OPTIONS}
+                    >
+                      <ComboboxTrigger className="w-full">
+                        <ComboboxValue placeholder="Mensal" />
+                      </ComboboxTrigger>
+                      <ComboboxContent>
+                        <ComboboxInput placeholder="Buscar..." />
+                        <ComboboxEmpty>Nenhuma opção encontrada.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(item) => {
+                            const opt = item as FrequencyOption
+                            return (
+                              <ComboboxItem key={opt.value} value={opt}>
+                                {opt.label}
+                              </ComboboxItem>
+                            )
+                          }}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  )
+                }}
               />
             </div>
             <Button
@@ -244,22 +264,41 @@ export const RepeatSection = ({
               <Controller
                 name="repeat.frequency"
                 control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Meses">
-                        {getInstallmentFrequencyLabel}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {INSTALLMENT_FREQUENCIES.map((frequency) => (
-                        <SelectItem key={frequency} value={frequency}>
-                          {FREQUENCY_LABELS[frequency]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                render={({ field }) => {
+                  const selectedItem =
+                    INSTALLMENT_FREQUENCY_OPTIONS.find(
+                      (o) => o.value === field.value
+                    ) ?? null
+                  return (
+                    <Combobox
+                      value={selectedItem}
+                      onValueChange={(item) =>
+                        field.onChange(
+                          (item as FrequencyOption | null)?.value ?? 'MONTHLY'
+                        )
+                      }
+                      items={INSTALLMENT_FREQUENCY_OPTIONS}
+                    >
+                      <ComboboxTrigger className="w-full">
+                        <ComboboxValue placeholder="Meses" />
+                      </ComboboxTrigger>
+                      <ComboboxContent>
+                        <ComboboxInput placeholder="Buscar..." />
+                        <ComboboxEmpty>Nenhuma opção encontrada.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(item) => {
+                            const opt = item as FrequencyOption
+                            return (
+                              <ComboboxItem key={opt.value} value={opt}>
+                                {opt.label}
+                              </ComboboxItem>
+                            )
+                          }}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  )
+                }}
               />
             </div>
 

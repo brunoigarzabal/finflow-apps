@@ -9,6 +9,16 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@workspace/ui/components/button'
 import { Calendar } from '@workspace/ui/components/calendar'
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from '@workspace/ui/components/combobox'
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -22,13 +32,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@workspace/ui/components/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@workspace/ui/components/select'
 import { cn } from '@workspace/ui/lib/utils'
 import { endOfMonth, format, parse, startOfDay, startOfMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -48,8 +51,10 @@ import type {
   TransactionType,
   UpdateTransactionBody,
 } from '@/api/transactions'
+import { BankAccountIcon } from '@/components/common/BankAccountIcon'
 import { MoneyInput } from '@/components/common/MoneyInput'
 import { today } from '@/lib/dates'
+import { getIconByName } from '@/lib/icons'
 import {
   transactionSchema,
   transferSchema,
@@ -321,6 +326,39 @@ export const TransactionFormDialog = ({
     [bankAccounts, selectedBankAccountId]
   )
 
+  const accountItems = useMemo(
+    () =>
+      bankAccounts.map((a) => ({
+        value: a.id,
+        label: a.name,
+        icon: a.icon,
+        color: a.color,
+      })),
+    [bankAccounts]
+  )
+
+  const destinationAccountItems = useMemo(
+    () =>
+      destinationAccounts.map((a) => ({
+        value: a.id,
+        label: a.name,
+        icon: a.icon,
+        color: a.color,
+      })),
+    [destinationAccounts]
+  )
+
+  const categoryItems = useMemo(
+    () =>
+      filteredCategories.map((c) => ({
+        value: c.id,
+        label: c.name,
+        icon: c.icon,
+        color: c.color,
+      })),
+    [filteredCategories]
+  )
+
   useEffect(() => {
     if (!open) return
 
@@ -585,25 +623,60 @@ export const TransactionFormDialog = ({
               <Controller
                 name="bankAccountId"
                 control={control}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a conta">
-                        {(value) =>
-                          bankAccounts.find((a) => a.id === value)?.name ??
-                          'Selecione a conta'
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {bankAccounts.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
+                render={({ field }) => {
+                  const selectedItem =
+                    accountItems.find((i) => i.value === field.value) ?? null
+                  return (
+                    <Combobox
+                      value={selectedItem}
+                      onValueChange={(item) =>
+                        field.onChange(
+                          (item as { value: string } | null)?.value ?? ''
+                        )
+                      }
+                      items={accountItems}
+                    >
+                      <ComboboxTrigger className="w-full">
+                        {selectedItem && (
+                          <BankAccountIcon
+                            icon={selectedItem.icon}
+                            color={selectedItem.color}
+                            className="size-4"
+                            iconClassName="size-2.5"
+                          />
+                        )}
+                        <ComboboxValue placeholder="Selecione a conta" />
+                      </ComboboxTrigger>
+                      <ComboboxContent className="min-w-64">
+                        <ComboboxInput placeholder="Buscar conta..." />
+                        <ComboboxEmpty>Nenhuma conta encontrada.</ComboboxEmpty>
+                        <ComboboxList>
+                          {(item) => {
+                            const acct = item as {
+                              value: string
+                              label: string
+                              icon: string
+                              color: string
+                            }
+                            return (
+                              <ComboboxItem key={acct.value} value={acct}>
+                                <BankAccountIcon
+                                  icon={acct.icon}
+                                  color={acct.color}
+                                  className="size-4"
+                                  iconClassName="size-2.5"
+                                />
+                                <span className="min-w-0 truncate">
+                                  {acct.label}
+                                </span>
+                              </ComboboxItem>
+                            )
+                          }}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
+                  )
+                }}
               />
               {errors.bankAccountId && (
                 <p className="text-xs text-destructive">
@@ -618,28 +691,64 @@ export const TransactionFormDialog = ({
                 <Controller
                   name="destinationBankAccountId"
                   control={control}
-                  render={({ field }) => (
-                    <Select
-                      value={field.value ?? ''}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione a conta de destino">
-                          {(value) =>
-                            bankAccounts.find((a) => a.id === value)?.name ??
-                            'Selecione a conta de destino'
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {destinationAccounts.map((account) => (
-                          <SelectItem key={account.id} value={account.id}>
-                            {account.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
+                  render={({ field }) => {
+                    const selectedItem =
+                      destinationAccountItems.find(
+                        (i) => i.value === field.value
+                      ) ?? null
+                    return (
+                      <Combobox
+                        value={selectedItem}
+                        onValueChange={(item) =>
+                          field.onChange(
+                            (item as { value: string } | null)?.value ?? ''
+                          )
+                        }
+                        items={destinationAccountItems}
+                      >
+                        <ComboboxTrigger className="w-full">
+                          {selectedItem && (
+                            <BankAccountIcon
+                              icon={selectedItem.icon}
+                              color={selectedItem.color}
+                              className="size-4"
+                              iconClassName="size-2.5"
+                            />
+                          )}
+                          <ComboboxValue placeholder="Selecione a conta de destino" />
+                        </ComboboxTrigger>
+                        <ComboboxContent className="min-w-64">
+                          <ComboboxInput placeholder="Buscar conta..." />
+                          <ComboboxEmpty>
+                            Nenhuma conta encontrada.
+                          </ComboboxEmpty>
+                          <ComboboxList>
+                            {(item) => {
+                              const acct = item as {
+                                value: string
+                                label: string
+                                icon: string
+                                color: string
+                              }
+                              return (
+                                <ComboboxItem key={acct.value} value={acct}>
+                                  <BankAccountIcon
+                                    icon={acct.icon}
+                                    color={acct.color}
+                                    className="size-4"
+                                    iconClassName="size-2.5"
+                                  />
+                                  <span className="min-w-0 truncate">
+                                    {acct.label}
+                                  </span>
+                                </ComboboxItem>
+                              )
+                            }}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )
+                  }}
                 />
                 {errors.destinationBankAccountId && (
                   <p className="text-xs text-destructive">
@@ -653,25 +762,70 @@ export const TransactionFormDialog = ({
                 <Controller
                   name="categoryId"
                   control={control}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecione a categoria">
-                          {(value) =>
-                            filteredCategories.find((c) => c.id === value)
-                              ?.name ?? 'Selecione a categoria'
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredCategories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
+                  render={({ field }) => {
+                    const selectedItem =
+                      categoryItems.find((i) => i.value === field.value) ?? null
+                    return (
+                      <Combobox
+                        value={selectedItem}
+                        onValueChange={(item) =>
+                          field.onChange(
+                            (item as { value: string } | null)?.value ?? ''
+                          )
+                        }
+                        items={categoryItems}
+                      >
+                        <ComboboxTrigger className="w-full">
+                          {selectedItem && (
+                            <span
+                              className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                              style={{ backgroundColor: selectedItem.color }}
+                            >
+                              <HugeiconsIcon
+                                icon={getIconByName(selectedItem.icon)}
+                                strokeWidth={1.5}
+                                className="size-2.5 text-white"
+                              />
+                            </span>
+                          )}
+                          <ComboboxValue placeholder="Selecione a categoria" />
+                        </ComboboxTrigger>
+                        <ComboboxContent className="min-w-64">
+                          <ComboboxInput placeholder="Buscar categoria..." />
+                          <ComboboxEmpty>
+                            Nenhuma categoria encontrada.
+                          </ComboboxEmpty>
+                          <ComboboxList>
+                            {(item) => {
+                              const cat = item as {
+                                value: string
+                                label: string
+                                icon: string
+                                color: string
+                              }
+                              return (
+                                <ComboboxItem key={cat.value} value={cat}>
+                                  <span
+                                    className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                                    style={{ backgroundColor: cat.color }}
+                                  >
+                                    <HugeiconsIcon
+                                      icon={getIconByName(cat.icon)}
+                                      strokeWidth={1.5}
+                                      className="size-2.5 text-white"
+                                    />
+                                  </span>
+                                  <span className="min-w-0 truncate">
+                                    {cat.label}
+                                  </span>
+                                </ComboboxItem>
+                              )
+                            }}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    )
+                  }}
                 />
                 {errors.categoryId && (
                   <p className="text-xs text-destructive">

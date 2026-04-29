@@ -1,5 +1,7 @@
 export {
   Combobox,
+  ComboboxClear,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxGroup,
@@ -7,6 +9,7 @@ export {
   ComboboxItem,
   ComboboxLabel,
   ComboboxList,
+  ComboboxSeparator,
   ComboboxTrigger,
   ComboboxValue,
 } from './combobox'

@@ -40,7 +40,7 @@ export const TransactionGroup = ({
           </p>
           <hr className="flex-1 border-border" />
         </div>
-        <div className="flex flex-col divide-y divide-border rounded-xl border bg-card">
+        <div className="flex flex-col divide-y divide-border overflow-hidden rounded-xl border bg-card">
           {transactions.map((transaction) => (
             <TransactionItem
               key={transaction.id}
