@@ -41,7 +41,7 @@ export async function buildApp() {
     openapi: {
       info: {
         title: 'FinFlow API',
-        version: '0.0.1',
+        version: '1.0.0',
       },
       components: {
         securitySchemes: {

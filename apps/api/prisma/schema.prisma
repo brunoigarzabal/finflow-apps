@@ -98,6 +98,7 @@ model Category {
   type      CategoryType
   color     String       @default("#6366f1")
   icon      String       @default("tag-02")
+  slug      String?      @map("slug")
   isDefault Boolean      @default(false) @map("is_default")
   archived  Boolean      @default(false)
   createdAt DateTime     @default(now()) @map("created_at")

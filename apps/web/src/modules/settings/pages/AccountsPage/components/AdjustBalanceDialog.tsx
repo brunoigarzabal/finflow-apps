@@ -59,8 +59,10 @@ export const AdjustBalanceDialog = ({ account, open, onOpenChange }: Props) => {
     const isIncome = diff > 0
 
     const defaultCategory = isIncome
-      ? incomeCategories?.categories.find((c) => c.isDefault)
-      : expenseCategories?.categories.find((c) => c.isDefault)
+      ? (incomeCategories?.categories.find((c) => c.slug === 'other') ??
+        incomeCategories?.categories.find((c) => c.isDefault))
+      : (expenseCategories?.categories.find((c) => c.slug === 'other') ??
+        expenseCategories?.categories.find((c) => c.isDefault))
 
     if (!defaultCategory) {
       toast.error('Categoria padrão não encontrada')

@@ -6,6 +6,7 @@ export type Category = {
   type: CategoryType
   color: string
   icon: string
+  slug: string | null
   isDefault: boolean
   archived: boolean
   createdAt: string

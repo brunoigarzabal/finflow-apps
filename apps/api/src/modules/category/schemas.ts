@@ -14,6 +14,7 @@ export const categoryResponse = z.object({
   type: categoryType,
   color: z.string(),
   icon: z.string(),
+  slug: z.string().nullable(),
   isDefault: z.boolean(),
   archived: z.boolean(),
   createdAt: z.date(),

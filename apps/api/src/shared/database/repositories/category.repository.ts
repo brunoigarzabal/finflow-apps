@@ -33,6 +33,7 @@ export function categoryRepository(prisma: PrismaArg) {
       type: CategoryType
       color: string
       icon: string
+      slug?: string
       isDefault: boolean
       userId: string
     }) => prisma.category.create({ data }),
@@ -43,6 +44,7 @@ export function categoryRepository(prisma: PrismaArg) {
         type: CategoryType
         color: string
         icon: string
+        slug?: string
         isDefault: boolean
         userId: string
       }[],
