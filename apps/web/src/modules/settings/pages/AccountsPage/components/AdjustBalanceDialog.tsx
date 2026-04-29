@@ -17,6 +17,7 @@ import type { BankAccount } from '@/api/bank-accounts'
 import { useCategories } from '@/api/categories'
 import { useCreateTransaction } from '@/api/transactions'
 import { MoneyInput } from '@/components/common/MoneyInput'
+import { today } from '@/lib/dates'
 
 const adjustBalanceSchema = z.object({
   balance: z.number().int().min(0, 'O saldo deve ser positivo'),
@@ -74,7 +75,7 @@ export const AdjustBalanceDialog = ({ account, open, onOpenChange }: Props) => {
         type: isIncome ? 'INCOME' : 'EXPENSE',
         amount: Math.abs(diff),
         description: 'Ajuste de saldo',
-        date: new Date().toISOString().split('T')[0],
+        date: today(),
         bankAccountId: account.id,
         categoryId: defaultCategory.id,
         isPaid: true,
