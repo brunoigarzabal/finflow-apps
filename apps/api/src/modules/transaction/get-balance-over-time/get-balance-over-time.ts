@@ -2,12 +2,34 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import type { TransactionType } from '../../../../generated/prisma/enums.js'
 
+import { Prisma } from '../../../../generated/prisma/client.js'
+
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { transactionRepository, bankAccountSqlFilter } from '@/shared/database/repositories/transaction.repository.js'
-import { formatDateLocal, resolveDateRange } from '@/shared/helpers/date.js'
+import { addDays, formatDateLocal, resolveDateRange } from '@/shared/helpers/date.js'
 import { computeNet } from '../helpers/recalculate-balance.js'
+import {
+  getRecurringOccurrences,
+  type RecurringOccurrence,
+} from '../helpers/recurring-occurrences.js'
 import { balanceOverTimeQuery, balanceOverTimeResponse } from './get-balance-over-time.schema.js'
-import { Prisma } from '../../../../generated/prisma/client.js'
+
+function classifyOccurrence(
+  occurrence: RecurringOccurrence,
+  cur: { income: number; expense: number },
+) {
+  if (occurrence.type === 'INCOME') {
+    cur.income += occurrence.amount
+  } else if (occurrence.type === 'EXPENSE') {
+    cur.expense += occurrence.amount
+  } else if (occurrence.type === 'TRANSFER') {
+    if (occurrence.isTransferOut) {
+      cur.expense += occurrence.amount
+    } else {
+      cur.income += occurrence.amount
+    }
+  }
+}
 
 export async function getBalanceOverTimeHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
@@ -25,6 +47,8 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
       const userId = await request.getCurrentUserId()
       const input = request.query
       const { startDate, endDate } = resolveDateRange(input.startDate, input.endDate)
+      const includeUnpaid = input.includeUnpaid ?? false
+      const paidOnlySql = includeUnpaid ? Prisma.empty : Prisma.sql`AND is_paid = true`
 
       const bankAccountRepo = bankAccountRepository(app.prisma)
       const transactionRepo = transactionRepository(app.prisma)
@@ -37,11 +61,11 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
 
       const transactionWhere = {
         userId,
-        isPaid: true,
+        ...(includeUnpaid ? {} : { isPaid: true }),
         ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
       }
 
-      const [accountAgg, priorAgg, dailyRows] = await Promise.all([
+      const [accountAgg, priorAgg, dailyRows, recurringOccurrences, priorRecurringOccurrences] = await Promise.all([
         bankAccountRepo.aggregate(accountWhere),
         transactionRepo.groupBy({
           ...transactionWhere,
@@ -62,42 +86,80 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
             SUM(amount)::int AS total
           FROM transactions
           WHERE user_id = ${userId}
-            AND is_paid = true
+            ${paidOnlySql}
             AND date >= ${startDate}
             AND date <= ${endDate}
             ${bankAccountSqlFilter(input.bankAccountId)}
           GROUP BY date, type, is_transfer_out
         `,
+        getRecurringOccurrences(app.prisma, userId, startDate, endDate),
+        getRecurringOccurrences(app.prisma, userId, new Date(0), addDays(startDate, -1)),
       ])
 
-      const initialBalanceSum = accountAgg._sum.initialBalance ?? 0
-      const openingBalance = initialBalanceSum + computeNet(priorAgg)
+      const filterOccurrences = (occurrences: RecurringOccurrence[]) =>
+        occurrences.filter((o) => {
+          if (!o.isVirtual) return false
+          if (!includeUnpaid && !o.isPaid) return false
+          if (input.bankAccountId && o.bankAccountId !== input.bankAccountId) return false
+          return true
+        })
 
-      const dailyNetMap = new Map<string, number>()
+      const filteredPrior = filterOccurrences(priorRecurringOccurrences)
+      const priorAccum = { income: 0, expense: 0 }
+      for (const o of filteredPrior) {
+        classifyOccurrence(o, priorAccum)
+      }
+      const priorRecurringNet = priorAccum.income - priorAccum.expense
+
+      const initialBalanceSum = accountAgg._sum.initialBalance ?? 0
+      const openingBalance = initialBalanceSum + computeNet(priorAgg) + priorRecurringNet
+
+      const dailyFlow = new Map<string, { income: number; expense: number }>()
       for (const row of dailyRows) {
         const dateStr = row.date
-        const current = dailyNetMap.get(dateStr) ?? 0
         const amount = Number(row.total)
+        const cur = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
         if (row.type === 'INCOME') {
-          dailyNetMap.set(dateStr, current + amount)
+          cur.income += amount
         } else if (row.type === 'EXPENSE') {
-          dailyNetMap.set(dateStr, current - amount)
+          cur.expense += amount
         } else if (row.type === 'TRANSFER') {
-          dailyNetMap.set(
-            dateStr,
-            current + (row.is_transfer_out ? -amount : amount),
-          )
+          if (row.is_transfer_out) {
+            cur.expense += amount
+          } else {
+            cur.income += amount
+          }
         }
+        dailyFlow.set(dateStr, cur)
       }
 
-      const balanceOverTime: { date: string; balance: number }[] = []
+      const filteredRecurring = filterOccurrences(recurringOccurrences)
+      for (const o of filteredRecurring) {
+        const dateStr = o.date.toISOString().slice(0, 10)
+        const cur = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
+        classifyOccurrence(o, cur)
+        dailyFlow.set(dateStr, cur)
+      }
+
+      const balanceOverTime: {
+        date: string
+        income: number
+        expense: number
+        balance: number
+      }[] = []
       let runningBalance = openingBalance
       const current = new Date(startDate)
 
       while (current <= endDate) {
         const dateStr = formatDateLocal(current)
-        runningBalance += dailyNetMap.get(dateStr) ?? 0
-        balanceOverTime.push({ date: dateStr, balance: runningBalance })
+        const split = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
+        runningBalance += split.income - split.expense
+        balanceOverTime.push({
+          date: dateStr,
+          income: split.income,
+          expense: split.expense,
+          balance: runningBalance,
+        })
         current.setDate(current.getDate() + 1)
       }
 

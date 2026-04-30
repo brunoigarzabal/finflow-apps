@@ -1,3 +1,4 @@
+export { useBalanceOverTime } from './hooks/useBalanceOverTime'
 export { useTransactionSummary } from './hooks/useTransactionSummary'
 export { useTransactionSummaryByCategory } from './hooks/useTransactionSummaryByCategory'
 export { useTransactions } from './hooks/useTransactions'
@@ -21,6 +22,9 @@ export type {
   ListTransactionsParams,
   SummaryParams,
   SummaryByCategoryParams,
+  BalanceOverTimePoint,
+  BalanceOverTimeParams,
+  BalanceOverTimeResponse,
   CreateTransactionBody,
   CreateTransactionResponse,
   UpdateTransactionBody,

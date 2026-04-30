@@ -14,6 +14,9 @@ export const invalidateTransactionDependencies = (
   queryClient.invalidateQueries({
     queryKey: TRANSACTIONS_QUERY_KEYS.summaryByCategory,
   })
+  queryClient.invalidateQueries({
+    queryKey: TRANSACTIONS_QUERY_KEYS.balanceOverTime,
+  })
   queryClient.invalidateQueries({ queryKey: RECURRING_RULES_QUERY_KEYS.list })
   queryClient.invalidateQueries({ queryKey: BANK_ACCOUNTS_QUERY_KEYS.list })
   queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.detail })

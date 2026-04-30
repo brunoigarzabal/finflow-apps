@@ -8,6 +8,7 @@ export const TRANSACTIONS_ENDPOINTS = {
   delete: (id: string) => `transactions/${id}`,
   summary: 'transactions/summary',
   summaryByCategory: 'transactions/summary-by-category',
+  balanceOverTime: 'transactions/balance-over-time',
 }
 
 export const TRANSACTIONS_QUERY_KEYS = defineQueryKey({
@@ -15,6 +16,7 @@ export const TRANSACTIONS_QUERY_KEYS = defineQueryKey({
   detail: ['transactions', 'detail'],
   summary: ['transactions', 'summary'],
   summaryByCategory: ['transactions', 'summary-by-category'],
+  balanceOverTime: ['transactions', 'balance-over-time'],
 })
 
 export const TRANSACTIONS_MUTATION_KEYS = defineMutationKey({

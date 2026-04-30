@@ -206,3 +206,21 @@ export type SummaryByCategoryParams = {
   bankAccountId?: string
   isPaid?: 'true' | 'false'
 }
+
+export type BalanceOverTimePoint = {
+  date: string
+  income: number
+  expense: number
+  balance: number
+}
+
+export type BalanceOverTimeResponse = {
+  balanceOverTime: BalanceOverTimePoint[]
+}
+
+export type BalanceOverTimeParams = {
+  startDate?: string
+  endDate?: string
+  bankAccountId?: string
+  includeUnpaid?: boolean
+}

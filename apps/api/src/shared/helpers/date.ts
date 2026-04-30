@@ -1,3 +1,8 @@
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 export function resolveDateRange(
   startDate?: string,
   endDate?: string,
@@ -5,10 +10,10 @@ export function resolveDateRange(
   const now = new Date()
   return {
     startDate: startDate
-      ? new Date(startDate)
+      ? parseLocalDate(startDate)
       : new Date(now.getFullYear(), now.getMonth(), 1),
     endDate: endDate
-      ? new Date(endDate)
+      ? parseLocalDate(endDate)
       : new Date(now.getFullYear(), now.getMonth() + 1, 0),
   }
 }

@@ -2,6 +2,8 @@ import { httpClient } from '@/lib/httpClient'
 
 import { TRANSACTIONS_ENDPOINTS } from './config'
 import type {
+  BalanceOverTimeParams,
+  BalanceOverTimeResponse,
   CreateTransactionBody,
   CreateTransactionResponse,
   DeleteTransactionBody,
@@ -37,6 +39,27 @@ export const getSummaryByCategory = (
       params ? { searchParams: params as Record<string, string> } : undefined
     )
     .json<SummaryByCategoryResponse>()
+
+export const getBalanceOverTime = (
+  params?: BalanceOverTimeParams
+): Promise<BalanceOverTimeResponse> => {
+  const searchParams = params
+    ? {
+        ...params,
+        includeUnpaid: params.includeUnpaid ? 'true' : undefined,
+      }
+    : undefined
+
+  return httpClient
+    .authorized()
+    .get(
+      TRANSACTIONS_ENDPOINTS.balanceOverTime,
+      searchParams
+        ? { searchParams: searchParams as Record<string, string> }
+        : undefined
+    )
+    .json<BalanceOverTimeResponse>()
+}
 
 export const listTransactions = (
   params?: ListTransactionsParams
