@@ -7,6 +7,10 @@ export const summaryByCategoryQuery = z.object({
   bankAccountId: z.uuid().optional(),
   startDate: z.string().date().optional(),
   endDate: z.string().date().optional(),
+  isPaid: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional(),
 })
 
 export const summaryByCategoryResponse = z.object({

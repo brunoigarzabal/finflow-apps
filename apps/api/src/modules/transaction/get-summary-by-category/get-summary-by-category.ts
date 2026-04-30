@@ -29,7 +29,7 @@ export async function getSummaryByCategoryHandler(app: FastifyInstance) {
 
       const where = {
         userId,
-        isPaid: true,
+        ...(input.isPaid !== undefined ? { isPaid: input.isPaid } : {}),
         type: input.type,
         recurringOverride: null,
         date: { gte: startDate, lte: endDate },
@@ -58,7 +58,10 @@ export async function getSummaryByCategoryHandler(app: FastifyInstance) {
       }
 
       for (const occurrence of recurringOccurrences) {
-        if (!occurrence.isPaid || occurrence.type !== input.type || !occurrence.categoryId) {
+        if (occurrence.type !== input.type || !occurrence.categoryId) {
+          continue
+        }
+        if (input.isPaid !== undefined && occurrence.isPaid !== input.isPaid) {
           continue
         }
         if (input.bankAccountId && occurrence.bankAccountId !== input.bankAccountId) {

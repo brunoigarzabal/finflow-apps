@@ -166,16 +166,18 @@ export type TransactionSummary = {
 }
 
 export type SummaryByCategoryItem = {
-  categoryId: string | null
-  categoryName: string | null
-  categoryIcon: string | null
-  categoryColor: string | null
-  total: number
-  percentage: number
+  categoryId: string
+  categoryName: string
+  categoryIcon: string
+  categoryColor: string
+  totalAmount: number
+  transactionCount: number
+  percentageOfTotal: number
 }
 
 export type SummaryByCategoryResponse = {
-  items: SummaryByCategoryItem[]
+  summaryByCategory: SummaryByCategoryItem[]
+  total: number
 }
 
 export type TransactionListResponse = {
@@ -202,4 +204,5 @@ export type SummaryByCategoryParams = {
   startDate?: string
   endDate?: string
   bankAccountId?: string
+  isPaid?: 'true' | 'false'
 }

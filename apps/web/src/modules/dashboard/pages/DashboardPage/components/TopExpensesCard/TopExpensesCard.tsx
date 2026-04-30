@@ -1,3 +1,4 @@
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
 import {
   Card,
@@ -7,14 +8,16 @@ import {
   CardTitle,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
-import { Fragment } from 'react'
+import type { ReactNode } from 'react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import { useTransactionSummaryByCategory } from '@/api/transactions'
+import { FALLBACK_CATEGORY_COLOR } from '@/lib/constants'
 import { currentMonthRange } from '@/lib/dates'
+import { formatCurrency } from '@/lib/formatCurrency'
+import { getIconByName } from '@/lib/icons'
 import { usePrivacyStore } from '@/store'
 
-const GRAY_COLOR = '#94a3b8'
 const TOP_COUNT = 5
 
 export const TopExpensesCard = () => {
@@ -23,97 +26,106 @@ export const TopExpensesCard = () => {
     type: 'EXPENSE',
     startDate,
     endDate,
+    isPaid: 'true',
   })
   const isHidden = usePrivacyStore((s) => s.isHidden)
 
-  const items = (data?.items ?? []).slice(0, TOP_COUNT)
+  const items = (data?.summaryByCategory ?? []).slice(0, TOP_COUNT)
+
+  let cardBodyContent: ReactNode
+  if (isLoading) {
+    cardBodyContent = (
+      <div className="flex flex-col gap-3 md:flex-row md:items-start">
+        <div className="flex flex-1 flex-col gap-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-8 w-full" />
+          ))}
+        </div>
+        <Skeleton className="mx-auto h-[9.375rem] w-[9.375rem] rounded-full" />
+      </div>
+    )
+  } else if (items.length === 0) {
+    cardBodyContent = (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        Nenhum gasto registrado no mês
+      </p>
+    )
+  } else {
+    cardBodyContent = (
+      <div className="flex flex-col items-center gap-6 md:flex-row md:items-start">
+        <div className="flex flex-1 flex-col gap-3">
+          {items.map((item) => (
+            <div key={item.categoryId} className="flex items-center gap-3">
+              <div
+                className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: isHidden
+                    ? FALLBACK_CATEGORY_COLOR
+                    : item.categoryColor,
+                }}
+              >
+                <HugeiconsIcon
+                  icon={getIconByName(item.categoryIcon)}
+                  size={16}
+                  className="text-white"
+                />
+              </div>
+              <span className="flex-1 text-sm font-medium">
+                {item.categoryName}
+              </span>
+              <span className="text-sm text-muted-foreground tabular-nums">
+                {item.percentageOfTotal.toFixed(2)}%
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <ResponsiveContainer width={150} height={150}>
+            <PieChart>
+              <Pie
+                data={items}
+                dataKey="totalAmount"
+                nameKey="categoryName"
+                innerRadius={45}
+                outerRadius={68}
+                paddingAngle={3}
+                strokeWidth={0}
+              >
+                {items.map((item) => (
+                  <Cell
+                    key={item.categoryId}
+                    fill={
+                      isHidden ? FALLBACK_CATEGORY_COLOR : item.categoryColor
+                    }
+                  />
+                ))}
+              </Pie>
+              {!isHidden && (
+                <Tooltip
+                  formatter={(value, name) => [
+                    typeof value === 'number' ? formatCurrency(value) : value,
+                    name,
+                  ]}
+                />
+              )}
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
-          Maiores despesas
+          Maiores gastos do mês atual
         </CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-4">
-        {isLoading ? (
-          <Fragment>
-            <Skeleton className="mx-auto h-40 w-40 rounded-full" />
-            <div className="flex flex-col gap-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-5 w-full" />
-              ))}
-            </div>
-          </Fragment>
-        ) : items.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            Nenhum gasto registrado no mês
-          </p>
-        ) : (
-          <Fragment>
-            <ResponsiveContainer width="100%" height={150}>
-              <PieChart>
-                <Pie
-                  data={items}
-                  dataKey="total"
-                  nameKey="categoryName"
-                  innerRadius={45}
-                  outerRadius={68}
-                  paddingAngle={3}
-                  strokeWidth={0}
-                >
-                  {items.map((item, index) => (
-                    <Cell
-                      key={item.categoryId ?? index}
-                      fill={
-                        isHidden
-                          ? GRAY_COLOR
-                          : (item.categoryColor ?? GRAY_COLOR)
-                      }
-                    />
-                  ))}
-                </Pie>
-                {!isHidden && (
-                  <Tooltip
-                    formatter={(value) => [
-                      typeof value === 'number'
-                        ? `${(value / 100).toFixed(2)} BRL`
-                        : value,
-                      '',
-                    ]}
-                  />
-                )}
-              </PieChart>
-            </ResponsiveContainer>
-
-            <div className="flex flex-col gap-2.5">
-              {items.map((item, index) => (
-                <div
-                  key={item.categoryId ?? index}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="size-2.5 shrink-0 rounded-full"
-                      style={{
-                        backgroundColor: isHidden
-                          ? GRAY_COLOR
-                          : (item.categoryColor ?? GRAY_COLOR),
-                      }}
-                    />
-                    <span className="text-sm">
-                      {item.categoryName ?? 'Sem categoria'}
-                    </span>
-                  </div>
-                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-                    {item.percentage.toFixed(1)}%
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Fragment>
-        )}
+        {cardBodyContent}
       </CardContent>
 
       <CardFooter>
