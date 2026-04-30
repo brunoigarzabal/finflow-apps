@@ -8,8 +8,8 @@ import {
   CardTitle,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
-import type { ReactNode } from 'react'
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { useMemo, type ReactNode } from 'react'
+import { Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import { useTransactionSummaryByCategory } from '@/api/transactions'
 import { FALLBACK_CATEGORY_COLOR } from '@/lib/constants'
@@ -31,6 +31,15 @@ export const TopExpensesCard = () => {
   const isHidden = usePrivacyStore((s) => s.isHidden)
 
   const items = (data?.summaryByCategory ?? []).slice(0, TOP_COUNT)
+
+  const pieChartData = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        fill: isHidden ? FALLBACK_CATEGORY_COLOR : item.categoryColor,
+      })),
+    [items, isHidden]
+  )
 
   let cardBodyContent: ReactNode
   if (isLoading) {
@@ -84,23 +93,14 @@ export const TopExpensesCard = () => {
           <ResponsiveContainer width={150} height={150}>
             <PieChart>
               <Pie
-                data={items}
+                data={pieChartData}
                 dataKey="totalAmount"
                 nameKey="categoryName"
                 innerRadius={45}
                 outerRadius={68}
                 paddingAngle={3}
                 strokeWidth={0}
-              >
-                {items.map((item) => (
-                  <Cell
-                    key={item.categoryId}
-                    fill={
-                      isHidden ? FALLBACK_CATEGORY_COLOR : item.categoryColor
-                    }
-                  />
-                ))}
-              </Pie>
+              />
               {!isHidden && (
                 <Tooltip
                   formatter={(value, name) => [

@@ -1,5 +1,6 @@
 import { Skeleton } from '@workspace/ui/components/skeleton'
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { useMemo } from 'react'
+import { Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
 import {
   useTransactionSummaryByCategory,
@@ -17,6 +18,15 @@ type SectionProps = {
 }
 
 const CategorySection = ({ items, total, label }: SectionProps) => {
+  const pieChartData = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        fill: item.categoryColor || FALLBACK_CATEGORY_COLOR,
+      })),
+    [items]
+  )
+
   return (
     <div className="flex flex-col gap-6 md:flex-row">
       <div className="flex flex-1 flex-col">
@@ -36,21 +46,14 @@ const CategorySection = ({ items, total, label }: SectionProps) => {
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={items}
+                data={pieChartData}
                 dataKey="totalAmount"
                 nameKey="categoryName"
                 innerRadius={70}
                 outerRadius={110}
                 paddingAngle={2}
                 strokeWidth={0}
-              >
-                {items.map((item) => (
-                  <Cell
-                    key={item.categoryId}
-                    fill={item.categoryColor || FALLBACK_CATEGORY_COLOR}
-                  />
-                ))}
-              </Pie>
+              />
               <Tooltip
                 formatter={(value, name) => [
                   typeof value === 'number' ? formatCurrency(value) : value,
