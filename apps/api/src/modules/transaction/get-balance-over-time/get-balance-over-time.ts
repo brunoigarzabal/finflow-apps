@@ -160,7 +160,7 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
           expense: split.expense,
           balance: runningBalance,
         })
-        current.setDate(current.getDate() + 1)
+        current.setUTCDate(current.getUTCDate() + 1)
       }
 
       return { balanceOverTime }

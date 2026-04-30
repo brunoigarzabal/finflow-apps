@@ -1,6 +1,6 @@
-function parseLocalDate(dateStr: string): Date {
+function parseUTCDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d)
+  return new Date(Date.UTC(y, m - 1, d))
 }
 
 export function resolveDateRange(
@@ -10,11 +10,11 @@ export function resolveDateRange(
   const now = new Date()
   return {
     startDate: startDate
-      ? parseLocalDate(startDate)
-      : new Date(now.getFullYear(), now.getMonth(), 1),
+      ? parseUTCDate(startDate)
+      : new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)),
     endDate: endDate
-      ? parseLocalDate(endDate)
-      : new Date(now.getFullYear(), now.getMonth() + 1, 0),
+      ? parseUTCDate(endDate)
+      : new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0)),
   }
 }
 
@@ -39,8 +39,8 @@ export function addMonthsPreservingDay(date: Date, months: number): Date {
 }
 
 export function formatDateLocal(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
+  const y = date.getUTCFullYear()
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const d = String(date.getUTCDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }

@@ -104,11 +104,11 @@ export async function listTransactionsHandler(app: FastifyInstance) {
         ...enrichedTransactions,
         ...recurringListItems,
       ].sort((a, b) => {
-        const dateDiff = b.date.getTime() - a.date.getTime()
+        const dateDiff = a.date.getTime() - b.date.getTime()
         if (dateDiff !== 0) {
           return dateDiff
         }
-        return b.createdAt.getTime() - a.createdAt.getTime()
+        return a.createdAt.getTime() - b.createdAt.getTime()
       })
 
       return { transactions: transactionsWithRecurring }

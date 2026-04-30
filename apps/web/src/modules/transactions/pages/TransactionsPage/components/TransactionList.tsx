@@ -87,5 +87,5 @@ const groupByDate = (
     }
   }
 
-  return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b))
+  return Array.from(map.entries())
 }

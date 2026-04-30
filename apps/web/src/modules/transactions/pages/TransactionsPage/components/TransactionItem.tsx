@@ -11,7 +11,7 @@ import type { KeyboardEvent } from 'react'
 
 import type { Transaction } from '@/api/transactions'
 import { BankAccountIcon } from '@/components/common/BankAccountIcon'
-import { formatCurrency } from '@/lib/formatCurrency'
+import { formatNumber } from '@/lib/formatCurrency'
 
 import { InstallmentBadge } from './InstallmentBadge'
 import { RecurringBadge } from './RecurringBadge'
@@ -115,7 +115,7 @@ export const TransactionItem = ({
   const isInstallment = Boolean(transaction.installmentGroupId)
 
   const amountClass = cn(
-    'text-sm font-bold whitespace-nowrap tabular-nums',
+    'text-sm font-medium whitespace-nowrap tabular-nums',
     transaction.type === 'INCOME' && 'text-emerald-500',
     isTransfer && 'text-blue-500'
   )
@@ -137,7 +137,7 @@ export const TransactionItem = ({
     <Fragment>
       {getTransactionIcon(transaction, isTransfer)}
 
-      <span className="flex min-w-0 flex-1 items-center gap-1.5 text-sm font-semibold">
+      <span className="flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium">
         <span className="truncate">{transaction.description}</span>
         {isInstallment && (
           <InstallmentBadge
@@ -171,7 +171,7 @@ export const TransactionItem = ({
 
       <span className={amountClass}>
         {amountPrefix}
-        {formatCurrency(transaction.amount)}
+        {formatNumber(transaction.amount)}
       </span>
 
       <button
