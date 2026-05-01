@@ -21,7 +21,12 @@ type Props = {
   onArchive: (account: BankAccount) => void
 }
 
-export const AccountItem = ({ account, onEdit, onAdjustBalance, onArchive }: Props) => {
+export const AccountItem = ({
+  account,
+  onEdit,
+  onAdjustBalance,
+  onArchive,
+}: Props) => {
   const isNegative = account.currentBalance < 0
 
   return (

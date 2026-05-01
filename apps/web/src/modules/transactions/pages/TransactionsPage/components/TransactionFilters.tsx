@@ -234,7 +234,9 @@ export const TransactionFilters = ({
           items={TYPE_OPTIONS}
         >
           <div className="relative w-40">
-            <ComboboxTrigger className={filters.type ? 'w-full pr-14' : 'w-full'}>
+            <ComboboxTrigger
+              className={filters.type ? 'w-full pr-14' : 'w-full'}
+            >
               <ComboboxValue placeholder="Todos os tipos" />
             </ComboboxTrigger>
             {filters.type && (

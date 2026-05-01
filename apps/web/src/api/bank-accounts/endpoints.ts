@@ -13,7 +13,10 @@ export const listBankAccounts = (
 ): Promise<BankAccountListResponse> =>
   httpClient
     .authorized()
-    .get(BANK_ACCOUNTS_ENDPOINTS.list, archived ? { searchParams: { archived: 'true' } } : undefined)
+    .get(
+      BANK_ACCOUNTS_ENDPOINTS.list,
+      archived ? { searchParams: { archived: 'true' } } : undefined
+    )
     .json<BankAccountListResponse>()
 
 export const getBankAccount = (id: string): Promise<BankAccount> =>

@@ -77,20 +77,23 @@ export const AccountsPage = () => {
         </div>
 
         <div className="flex flex-col">
-          {isLoadingActive ? (
+          {isLoadingActive && (
             <Fragment>
               <AccountItemSkeleton />
               <AccountItemSkeleton />
               <AccountItemSkeleton />
             </Fragment>
-          ) : activeAccounts.length === 0 ? (
+          )}
+          {!isLoadingActive && activeAccounts.length === 0 && (
             <div className="flex flex-col items-center gap-4 py-12 text-center">
               <p className="text-muted-foreground">
                 Você ainda não tem contas cadastradas.
               </p>
               <Button onClick={handleNewAccount}>Criar primeira conta</Button>
             </div>
-          ) : (
+          )}
+          {!isLoadingActive &&
+            activeAccounts.length > 0 &&
             activeAccounts.map((account) => (
               <AccountItem
                 key={account.id}
@@ -99,8 +102,7 @@ export const AccountsPage = () => {
                 onAdjustBalance={handleAdjustBalance}
                 onArchive={setArchiveDialogAccount}
               />
-            ))
-          )}
+            ))}
         </div>
 
         {archivedAccounts.length > 0 && (

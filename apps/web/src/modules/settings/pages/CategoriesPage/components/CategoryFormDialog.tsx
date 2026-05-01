@@ -148,11 +148,13 @@ export const CategoryFormDialog = ({
     }
   }
 
-  const title = isEditing
-    ? 'Editando categoria'
-    : type === 'EXPENSE'
-      ? 'Criando categoria de despesa'
-      : 'Criando categoria de receita'
+  const getTitle = () => {
+    if (isEditing) return 'Editando categoria'
+    if (type === 'EXPENSE') return 'Criando categoria de despesa'
+    return 'Criando categoria de receita'
+  }
+
+  const title = getTitle()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

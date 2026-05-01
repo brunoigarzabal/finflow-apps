@@ -1,6 +1,5 @@
-import { forwardRef, useEffect, useState } from 'react'
-
 import { Input } from '@workspace/ui/components/input'
+import { forwardRef, useEffect, useState } from 'react'
 
 import { formatCurrency } from '@/lib/formatCurrency'
 
