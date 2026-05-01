@@ -53,8 +53,9 @@ export const transactionSchema = z.object({
 export const transferSchema = z
   .object({
     ...baseFields,
-    categoryId: z.string().optional(),
-    destinationBankAccountId: z.string().uuid('Conta de destino é obrigatória'),
+    categoryId: z.string(),
+    destinationBankAccountId: z.uuid('Conta de destino é obrigatória'),
+    repeat: z.undefined().optional(),
   })
   .refine((data) => data.bankAccountId !== data.destinationBankAccountId, {
     message: 'A conta de destino deve ser diferente da conta de origem',

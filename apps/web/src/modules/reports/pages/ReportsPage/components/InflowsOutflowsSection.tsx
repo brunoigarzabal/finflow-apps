@@ -56,7 +56,7 @@ type TooltipPayloadItem = {
 
 type CashflowTooltipProps = {
   active?: boolean
-  payload?: TooltipPayloadItem[]
+  payload?: readonly TooltipPayloadItem[]
 }
 
 const CashflowTooltip = ({ active, payload }: CashflowTooltipProps) => {

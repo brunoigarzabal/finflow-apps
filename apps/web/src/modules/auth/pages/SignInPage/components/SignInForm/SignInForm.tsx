@@ -93,12 +93,12 @@ export const SignInForm = () => {
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Senha</FieldLabel>
-                  <a
-                    href="#"
+                  <button
+                    type="button"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
                   >
                     Esqueceu sua senha?
-                  </a>
+                  </button>
                 </div>
                 <div className="relative">
                   <Input
