@@ -1,6 +1,10 @@
 import { z } from 'zod'
 
-import { bankAccountType, bankAccountIdParam, bankAccountResponse } from '../schemas.js'
+import {
+  bankAccountType,
+  bankAccountIdParam,
+  bankAccountResponse,
+} from '../schemas.js'
 
 export const updateBankAccountBody = z
   .object({

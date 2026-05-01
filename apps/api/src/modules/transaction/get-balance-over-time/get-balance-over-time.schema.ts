@@ -17,6 +17,6 @@ export const balanceOverTimeResponse = z.object({
       income: z.int().nonnegative(),
       expense: z.int().nonnegative(),
       balance: z.int(),
-    }),
+    })
   ),
 })

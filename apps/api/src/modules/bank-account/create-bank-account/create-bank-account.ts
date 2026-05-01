@@ -2,7 +2,11 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
-import { createBankAccountBody, bankAccountResponse } from './create-bank-account.schema.js'
+
+import {
+  createBankAccountBody,
+  bankAccountResponse,
+} from './create-bank-account.schema.js'
 
 export async function createBankAccountHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -29,6 +33,6 @@ export async function createBankAccountHandler(app: FastifyInstance) {
         userId,
       })
       return reply.status(201).send(account)
-    },
+    }
   )
 }

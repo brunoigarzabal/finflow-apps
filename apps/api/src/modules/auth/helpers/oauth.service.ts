@@ -1,11 +1,13 @@
 import { OAuth2Client } from 'google-auth-library'
+
+import { userRepository } from '@/shared/database/repositories/user.repository.js'
+import { BadRequest } from '@/shared/infra/http/errors/index.js'
+
 import type {
   AccountProvider,
   PrismaClient,
 } from '../../../../generated/prisma/client.js'
 
-import { userRepository } from '@/shared/database/repositories/user.repository.js'
-import { BadRequest } from '@/shared/infra/http/errors/index.js'
 import { seedCategories } from './seed-categories.js'
 
 const googleClient = new OAuth2Client()
@@ -20,7 +22,7 @@ interface OAuthProfile {
 
 export async function findOrCreateOAuthUser(
   prisma: PrismaClient,
-  profile: OAuthProfile,
+  profile: OAuthProfile
 ) {
   const repo = userRepository(prisma)
   const account = await repo.findByProvider(profile.providerAccountId)
@@ -42,7 +44,9 @@ export async function findOrCreateOAuthUser(
       })
 
       if (!existingUser.avatarUrl && profile.avatarUrl) {
-        return await txRepo.update(existingUser.id, { avatarUrl: profile.avatarUrl })
+        return await txRepo.update(existingUser.id, {
+          avatarUrl: profile.avatarUrl,
+        })
       }
 
       return existingUser

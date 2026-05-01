@@ -3,7 +3,12 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
-import { updateBankAccountBody, bankAccountIdParam, bankAccountResponse } from './update-bank-account.schema.js'
+
+import {
+  updateBankAccountBody,
+  bankAccountIdParam,
+  bankAccountResponse,
+} from './update-bank-account.schema.js'
 
 export async function updateBankAccountHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().patch(
@@ -34,11 +39,12 @@ export async function updateBankAccountHandler(app: FastifyInstance) {
           ? {
               initialBalance,
               currentBalance:
-                initialBalance + (existing.currentBalance - existing.initialBalance),
+                initialBalance +
+                (existing.currentBalance - existing.initialBalance),
             }
           : {}
 
       return repo.update(request.params.id, { ...rest, ...balanceUpdate })
-    },
+    }
   )
 }

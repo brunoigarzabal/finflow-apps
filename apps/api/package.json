@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,js}\"",
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
@@ -29,10 +31,20 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import-x": "^4.16.2",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-sonarjs": "^4.0.2",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.2.0",
     "prisma": "^7.0.0",
     "tsx": "^4.0.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.54.0"
   }
 }

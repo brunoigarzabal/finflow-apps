@@ -1,10 +1,12 @@
+import { verify } from 'argon2'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { verify } from 'argon2'
 
 import { userRepository } from '@/shared/database/repositories/user.repository.js'
 import { BadRequest } from '@/shared/infra/http/errors/index.js'
+
 import { issueAuthToken } from '../helpers/issue-auth-token.js'
+
 import { loginBody, tokenResponse } from './login.schema.js'
 
 export async function loginHandler(app: FastifyInstance) {
@@ -33,6 +35,6 @@ export async function loginHandler(app: FastifyInstance) {
       }
 
       return reply.send(await issueAuthToken(reply, user.id))
-    },
+    }
   )
 }

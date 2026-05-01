@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
+
 import { categoryIdParam } from '../schemas.js'
 
 export async function archiveCategoryHandler(app: FastifyInstance) {
@@ -26,6 +27,6 @@ export async function archiveCategoryHandler(app: FastifyInstance) {
       }
 
       return reply.status(204).send()
-    },
+    }
   )
 }

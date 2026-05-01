@@ -1,10 +1,14 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { Prisma } from '../../../../generated/prisma/client.js'
-import type { TransactionType } from '../../../../generated/prisma/enums.js'
 
 import { bankAccountSqlFilter } from '@/shared/database/repositories/transaction.repository.js'
-import { summaryByPeriodQuery, summaryByPeriodResponse } from './get-summary-by-period.schema.js'
+
+import type { TransactionType } from '../../../../generated/prisma/enums.js'
+
+import {
+  summaryByPeriodQuery,
+  summaryByPeriodResponse,
+} from './get-summary-by-period.schema.js'
 
 export async function getSummaryByPeriodHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
@@ -26,7 +30,7 @@ export async function getSummaryByPeriodHandler(app: FastifyInstance) {
       const startDate = new Date(
         now.getFullYear(),
         now.getMonth() - input.months + 1,
-        1,
+        1
       )
       const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
@@ -52,7 +56,10 @@ export async function getSummaryByPeriodHandler(app: FastifyInstance) {
         { totalIncome: number; totalExpense: number }
       >()
       for (const row of rows) {
-        const entry = dataMap.get(row.month) ?? { totalIncome: 0, totalExpense: 0 }
+        const entry = dataMap.get(row.month) ?? {
+          totalIncome: 0,
+          totalExpense: 0,
+        }
         if (row.type === 'INCOME') {
           entry.totalIncome += Number(row.total)
         } else if (row.type === 'EXPENSE') {
@@ -81,6 +88,6 @@ export async function getSummaryByPeriodHandler(app: FastifyInstance) {
       }
 
       return { summaryByPeriod }
-    },
+    }
   )
 }

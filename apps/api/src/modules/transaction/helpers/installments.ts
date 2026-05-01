@@ -1,6 +1,6 @@
-import type { RecurringFrequency } from '../../../../generated/prisma/enums.js'
-
 import { addMonthsPreservingDay } from '@/shared/helpers/date.js'
+
+import type { RecurringFrequency } from '../../../../generated/prisma/enums.js'
 
 type InstallmentFrequency = Extract<
   RecurringFrequency,

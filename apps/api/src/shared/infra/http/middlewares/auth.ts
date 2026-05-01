@@ -1,5 +1,5 @@
-import fp from 'fastify-plugin'
 import type { FastifyInstance } from 'fastify'
+import fp from 'fastify-plugin'
 
 import { Unauthorized } from '../errors/index.js'
 
@@ -14,5 +14,5 @@ export default fp(
       }
     })
   },
-  { name: 'auth', dependencies: ['@fastify/jwt'] },
+  { name: 'auth', dependencies: ['@fastify/jwt'] }
 )

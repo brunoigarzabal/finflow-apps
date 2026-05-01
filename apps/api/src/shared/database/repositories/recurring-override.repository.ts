@@ -1,4 +1,7 @@
-import type { Prisma, PrismaClient } from '../../../../generated/prisma/client.js'
+import type {
+  Prisma,
+  PrismaClient,
+} from '../../../../generated/prisma/client.js'
 
 import { transactionInclude } from './transaction.repository.js'
 
@@ -23,7 +26,10 @@ export function recurringOverrideRepository(prisma: PrismaArg) {
     upsert: (
       recurringRuleId: string,
       occurrenceDate: Date,
-      data: Omit<Prisma.RecurringOverrideUncheckedCreateInput, 'recurringRuleId' | 'occurrenceDate'>,
+      data: Omit<
+        Prisma.RecurringOverrideUncheckedCreateInput,
+        'recurringRuleId' | 'occurrenceDate'
+      >
     ) =>
       prisma.recurringOverride.upsert({
         where: {
@@ -42,7 +48,7 @@ export function recurringOverrideRepository(prisma: PrismaArg) {
 
     updateMany: (
       where: Prisma.RecurringOverrideWhereInput,
-      data: Prisma.RecurringOverrideUncheckedUpdateManyInput,
+      data: Prisma.RecurringOverrideUncheckedUpdateManyInput
     ) => prisma.recurringOverride.updateMany({ where, data }),
 
     deleteMany: (where: Prisma.RecurringOverrideWhereInput) =>

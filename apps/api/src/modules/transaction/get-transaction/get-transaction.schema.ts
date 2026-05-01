@@ -1,6 +1,11 @@
 import { z } from 'zod'
 
-import { transactionType, transactionIdParam, transactionResponse, bankAccountBasic } from '../schemas.js'
+import {
+  transactionType,
+  transactionIdParam,
+  transactionResponse,
+  bankAccountBasic,
+} from '../schemas.js'
 
 export const transactionDetailResponse = transactionResponse.extend({
   relatedTransaction: z

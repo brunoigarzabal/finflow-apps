@@ -5,7 +5,7 @@ function parseUTCDate(dateStr: string): Date {
 
 export function resolveDateRange(
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ): { startDate: Date; endDate: Date } {
   const now = new Date()
   return {
@@ -31,7 +31,7 @@ export function addMonthsPreservingDay(date: Date, months: number): Date {
   next.setUTCMonth(next.getUTCMonth() + months)
 
   const lastDay = new Date(
-    Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0),
+    Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)
   ).getUTCDate()
   next.setUTCDate(Math.min(day, lastDay))
 

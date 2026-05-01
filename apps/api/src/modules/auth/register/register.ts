@@ -1,11 +1,13 @@
+import { hash } from 'argon2'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { hash } from 'argon2'
 
 import { userRepository } from '@/shared/database/repositories/user.repository.js'
 import { Conflict } from '@/shared/infra/http/errors/index.js'
+
 import { issueAuthToken } from '../helpers/issue-auth-token.js'
 import { seedCategories } from '../helpers/seed-categories.js'
+
 import { registerBody, tokenResponse } from './register.schema.js'
 
 export async function registerHandler(app: FastifyInstance) {
@@ -38,6 +40,6 @@ export async function registerHandler(app: FastifyInstance) {
       })
 
       return reply.status(201).send(await issueAuthToken(reply, user.id))
-    },
+    }
   )
 }

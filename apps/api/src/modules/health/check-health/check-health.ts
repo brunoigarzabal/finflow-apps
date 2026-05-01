@@ -16,8 +16,6 @@ export async function checkHealthHandler(app: FastifyInstance) {
         },
       },
     },
-    async () => {
-      return { status: 'ok' }
-    },
+    async () => ({ status: 'ok' })
   )
 }

@@ -1,10 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import type { Prisma } from '../../../../generated/prisma/client.js'
 
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { resolveDateRange } from '@/shared/helpers/date.js'
+
+import type { Prisma } from '../../../../generated/prisma/client.js'
 import { getRecurringOccurrences } from '../helpers/recurring-occurrences.js'
+
 import {
   listTransactionsQuery,
   transactionListResponse,

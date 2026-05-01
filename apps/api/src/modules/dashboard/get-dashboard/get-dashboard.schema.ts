@@ -32,7 +32,7 @@ export const dashboardResponse = z.object({
       color: z.string(),
       icon: z.string(),
       currentBalance: z.int(),
-    }),
+    })
   ),
   totalBalance: z.int(),
   summary: z.object({
@@ -50,6 +50,6 @@ export const dashboardResponse = z.object({
       isPaid: z.boolean(),
       bankAccount: bankAccountBasic,
       category: categoryBasic.nullable(),
-    }),
+    })
   ),
 })

@@ -12,6 +12,6 @@ export const summaryByPeriodResponse = z.object({
       totalIncome: z.int(),
       totalExpense: z.int(),
       balance: z.int(),
-    }),
+    })
   ),
 })

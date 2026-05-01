@@ -3,8 +3,13 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
+
 import { recalculateBalance } from '../helpers/recalculate-balance.js'
-import { deleteTransactionBody, transactionIdParam } from './delete-transaction.schema.js'
+
+import {
+  deleteTransactionBody,
+  transactionIdParam,
+} from './delete-transaction.schema.js'
 
 export async function deleteTransactionHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().delete(
@@ -57,7 +62,10 @@ export async function deleteTransactionHandler(app: FastifyInstance) {
         }
 
         if (existing.type === 'TRANSFER' && existing.transferId) {
-          const paired = await repo.findRelated(existing.transferId, request.params.id)
+          const paired = await repo.findRelated(
+            existing.transferId,
+            request.params.id
+          )
 
           if (paired) {
             affectedAccountIds.add(paired.bankAccountId)
@@ -74,6 +82,6 @@ export async function deleteTransactionHandler(app: FastifyInstance) {
       })
 
       return reply.status(204).send()
-    },
+    }
   )
 }

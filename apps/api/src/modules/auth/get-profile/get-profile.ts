@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { userRepository } from '@/shared/database/repositories/user.repository.js'
 import { Unauthorized } from '@/shared/infra/http/errors/index.js'
+
 import { profileResponse } from './get-profile.schema.js'
 
 export async function getProfileHandler(app: FastifyInstance) {
@@ -26,6 +27,6 @@ export async function getProfileHandler(app: FastifyInstance) {
       }
 
       return { user }
-    },
+    }
   )
 }

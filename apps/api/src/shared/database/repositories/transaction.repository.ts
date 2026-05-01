@@ -2,7 +2,6 @@ import {
   Prisma,
   type PrismaClient,
 } from '../../../../generated/prisma/client.js'
-import type { TransactionType } from '../../../../generated/prisma/enums.js'
 
 type TransactionClient = Prisma.TransactionClient
 type PrismaArg = PrismaClient | TransactionClient

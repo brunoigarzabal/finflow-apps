@@ -13,6 +13,6 @@ export async function logoutHandler(app: FastifyInstance) {
     async (_request, reply) => {
       reply.clearCookie('token', { path: '/' })
       return reply.send({ success: true })
-    },
+    }
   )
 }

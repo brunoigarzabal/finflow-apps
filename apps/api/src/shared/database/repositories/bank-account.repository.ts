@@ -1,4 +1,7 @@
-import type { Prisma, PrismaClient } from '../../../../generated/prisma/client.js'
+import type {
+  Prisma,
+  PrismaClient,
+} from '../../../../generated/prisma/client.js'
 import type { BankAccountType } from '../../../../generated/prisma/enums.js'
 
 type TransactionClient = Prisma.TransactionClient
@@ -12,8 +15,7 @@ export function bankAccountRepository(prisma: PrismaArg) {
         orderBy: { name: 'asc' },
       }),
 
-    findById: (id: string) =>
-      prisma.bankAccount.findUnique({ where: { id } }),
+    findById: (id: string) => prisma.bankAccount.findUnique({ where: { id } }),
 
     findByIdOrThrow: (id: string) =>
       prisma.bankAccount.findUniqueOrThrow({
@@ -31,15 +33,18 @@ export function bankAccountRepository(prisma: PrismaArg) {
       userId: string
     }) => prisma.bankAccount.create({ data }),
 
-    update: (id: string, data: Partial<{
-      name: string
-      type: BankAccountType
-      color: string
-      icon: string
-      initialBalance: number
-      currentBalance: number
-      archived: boolean
-    }>) => prisma.bankAccount.update({ where: { id }, data }),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string
+        type: BankAccountType
+        color: string
+        icon: string
+        initialBalance: number
+        currentBalance: number
+        archived: boolean
+      }>
+    ) => prisma.bankAccount.update({ where: { id }, data }),
 
     archiveMany: (id: string, userId: string) =>
       prisma.bankAccount.updateMany({

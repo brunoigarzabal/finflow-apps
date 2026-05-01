@@ -1,22 +1,33 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import type { TransactionType } from '../../../../generated/prisma/enums.js'
-
-import { Prisma } from '../../../../generated/prisma/client.js'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
-import { transactionRepository, bankAccountSqlFilter } from '@/shared/database/repositories/transaction.repository.js'
-import { addDays, formatDateLocal, resolveDateRange } from '@/shared/helpers/date.js'
+import {
+  transactionRepository,
+  bankAccountSqlFilter,
+} from '@/shared/database/repositories/transaction.repository.js'
+import {
+  addDays,
+  formatDateLocal,
+  resolveDateRange,
+} from '@/shared/helpers/date.js'
+
+import { Prisma } from '../../../../generated/prisma/client.js'
+import type { TransactionType } from '../../../../generated/prisma/enums.js'
 import { computeNet } from '../helpers/recalculate-balance.js'
 import {
   getRecurringOccurrences,
   type RecurringOccurrence,
 } from '../helpers/recurring-occurrences.js'
-import { balanceOverTimeQuery, balanceOverTimeResponse } from './get-balance-over-time.schema.js'
+
+import {
+  balanceOverTimeQuery,
+  balanceOverTimeResponse,
+} from './get-balance-over-time.schema.js'
 
 function classifyOccurrence(
   occurrence: RecurringOccurrence,
-  cur: { income: number; expense: number },
+  cur: { income: number; expense: number }
 ) {
   if (occurrence.type === 'INCOME') {
     cur.income += occurrence.amount
@@ -43,12 +54,18 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         response: { 200: balanceOverTimeResponse },
       },
     },
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     async (request) => {
       const userId = await request.getCurrentUserId()
       const input = request.query
-      const { startDate, endDate } = resolveDateRange(input.startDate, input.endDate)
+      const { startDate, endDate } = resolveDateRange(
+        input.startDate,
+        input.endDate
+      )
       const includeUnpaid = input.includeUnpaid ?? false
-      const paidOnlySql = includeUnpaid ? Prisma.empty : Prisma.sql`AND is_paid = true`
+      const paidOnlySql = includeUnpaid
+        ? Prisma.empty
+        : Prisma.sql`AND is_paid = true`
 
       const bankAccountRepo = bankAccountRepository(app.prisma)
       const transactionRepo = transactionRepository(app.prisma)
@@ -65,7 +82,13 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         ...(input.bankAccountId ? { bankAccountId: input.bankAccountId } : {}),
       }
 
-      const [accountAgg, priorAgg, dailyRows, recurringOccurrences, priorRecurringOccurrences] = await Promise.all([
+      const [
+        accountAgg,
+        priorAgg,
+        dailyRows,
+        recurringOccurrences,
+        priorRecurringOccurrences,
+      ] = await Promise.all([
         bankAccountRepo.aggregate(accountWhere),
         transactionRepo.groupBy({
           ...transactionWhere,
@@ -93,14 +116,20 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
           GROUP BY date, type, is_transfer_out
         `,
         getRecurringOccurrences(app.prisma, userId, startDate, endDate),
-        getRecurringOccurrences(app.prisma, userId, new Date(0), addDays(startDate, -1)),
+        getRecurringOccurrences(
+          app.prisma,
+          userId,
+          new Date(0),
+          addDays(startDate, -1)
+        ),
       ])
 
       const filterOccurrences = (occurrences: RecurringOccurrence[]) =>
         occurrences.filter((o) => {
           if (!o.isVirtual) return false
           if (!includeUnpaid && !o.isPaid) return false
-          if (input.bankAccountId && o.bankAccountId !== input.bankAccountId) return false
+          if (input.bankAccountId && o.bankAccountId !== input.bankAccountId)
+            return false
           return true
         })
 
@@ -112,7 +141,8 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
       const priorRecurringNet = priorAccum.income - priorAccum.expense
 
       const initialBalanceSum = accountAgg._sum.initialBalance ?? 0
-      const openingBalance = initialBalanceSum + computeNet(priorAgg) + priorRecurringNet
+      const openingBalance =
+        initialBalanceSum + computeNet(priorAgg) + priorRecurringNet
 
       const dailyFlow = new Map<string, { income: number; expense: number }>()
       for (const row of dailyRows) {
@@ -164,6 +194,6 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
       }
 
       return { balanceOverTime }
-    },
+    }
   )
 }

@@ -1,8 +1,11 @@
-import type { Prisma, PrismaClient } from '../../../../generated/prisma/client.js'
-import type { TransactionType } from '../../../../generated/prisma/enums.js'
-
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
+
+import type {
+  Prisma,
+  PrismaClient,
+} from '../../../../generated/prisma/client.js'
+import type { TransactionType } from '../../../../generated/prisma/enums.js'
 
 type TransactionClient = Prisma.TransactionClient
 type PrismaArg = PrismaClient | TransactionClient
@@ -40,7 +43,7 @@ export function computeNet(aggregations: AggregationRow[]): number {
 
 export async function recalculateBalance(
   prisma: PrismaArg,
-  bankAccountId: string,
+  bankAccountId: string
 ): Promise<void> {
   const bankAccountRepo = bankAccountRepository(prisma)
   const transactionRepo = transactionRepository(prisma)

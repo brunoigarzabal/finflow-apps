@@ -3,7 +3,11 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
 import { Conflict } from '@/shared/infra/http/errors/index.js'
-import { createCategoryBody, categoryResponse } from './create-category.schema.js'
+
+import {
+  createCategoryBody,
+  categoryResponse,
+} from './create-category.schema.js'
 
 export async function createCategoryHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
@@ -41,6 +45,6 @@ export async function createCategoryHandler(app: FastifyInstance) {
         }
         throw error
       }
-    },
+    }
   )
 }

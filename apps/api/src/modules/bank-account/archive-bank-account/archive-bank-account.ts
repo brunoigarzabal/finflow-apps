@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
+
 import { bankAccountIdParam } from '../schemas.js'
 
 export async function archiveBankAccountHandler(app: FastifyInstance) {
@@ -26,6 +27,6 @@ export async function archiveBankAccountHandler(app: FastifyInstance) {
       }
 
       return reply.status(204).send()
-    },
+    }
   )
 }

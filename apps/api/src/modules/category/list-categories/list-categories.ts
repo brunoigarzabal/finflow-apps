@@ -2,7 +2,11 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
-import { listCategoriesQuery, categoryListResponse } from './list-categories.schema.js'
+
+import {
+  listCategoriesQuery,
+  categoryListResponse,
+} from './list-categories.schema.js'
 
 export async function listCategoriesHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().get(
@@ -24,6 +28,6 @@ export async function listCategoriesHandler(app: FastifyInstance) {
         archived: request.query.archived,
       })
       return { categories }
-    },
+    }
   )
 }

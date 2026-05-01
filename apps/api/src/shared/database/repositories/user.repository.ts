@@ -23,8 +23,12 @@ export function userRepository(prisma: PrismaArg) {
         },
       }),
 
-    create: (data: { name: string; email: string; passwordHash?: string; avatarUrl?: string | null }) =>
-      prisma.user.create({ data }),
+    create: (data: {
+      name: string
+      email: string
+      passwordHash?: string
+      avatarUrl?: string | null
+    }) => prisma.user.create({ data }),
 
     update: (id: string, data: { avatarUrl?: string | null }) =>
       prisma.user.update({ where: { id }, data }),
@@ -35,7 +39,10 @@ export function userRepository(prisma: PrismaArg) {
         include: { user: true },
       }),
 
-    createAccount: (data: { provider: AccountProvider; providerAccountId: string; userId: string }) =>
-      prisma.account.create({ data }),
+    createAccount: (data: {
+      provider: AccountProvider
+      providerAccountId: string
+      userId: string
+    }) => prisma.account.create({ data }),
   }
 }

@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
+
 import {
   transactionDetailResponse,
   transactionIdParam,

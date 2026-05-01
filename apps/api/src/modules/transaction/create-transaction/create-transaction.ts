@@ -5,10 +5,12 @@ import { installmentGroupRepository } from '@/shared/database/repositories/insta
 import { recurringRuleRepository } from '@/shared/database/repositories/recurring-rule.repository.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { BadRequest } from '@/shared/infra/http/errors/index.js'
+
 import { buildInstallments } from '../helpers/installments.js'
 import { recalculateBalance } from '../helpers/recalculate-balance.js'
 import { validateBankAccount } from '../helpers/validate-bank-account.js'
 import { validateCategory } from '../helpers/validate-category.js'
+
 import {
   createTransactionBody,
   createTransactionResponse,

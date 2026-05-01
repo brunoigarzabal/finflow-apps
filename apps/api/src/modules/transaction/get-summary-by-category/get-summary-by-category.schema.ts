@@ -23,7 +23,7 @@ export const summaryByCategoryResponse = z.object({
       totalAmount: z.int(),
       transactionCount: z.int(),
       percentageOfTotal: z.number(),
-    }),
+    })
   ),
   total: z.int(),
 })

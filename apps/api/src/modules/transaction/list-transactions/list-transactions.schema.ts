@@ -1,6 +1,10 @@
 import { z } from 'zod'
 
-import { transactionType, transactionResponse, bankAccountBasic } from '../schemas.js'
+import {
+  transactionType,
+  transactionResponse,
+  bankAccountBasic,
+} from '../schemas.js'
 
 const transactionDate = z.string().date()
 

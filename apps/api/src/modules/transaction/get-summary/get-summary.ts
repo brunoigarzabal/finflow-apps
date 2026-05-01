@@ -1,18 +1,20 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import type { PrismaClient } from '../../../../generated/prisma/client.js'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { addDays, resolveDateRange } from '@/shared/helpers/date.js'
-import {
-  getRecurringOccurrences,
-  type RecurringOccurrence,
-} from '../helpers/recurring-occurrences.js'
+
+import type { PrismaClient } from '../../../../generated/prisma/client.js'
 import {
   splitIncomeExpense,
   computeNet,
 } from '../helpers/recalculate-balance.js'
+import {
+  getRecurringOccurrences,
+  type RecurringOccurrence,
+} from '../helpers/recurring-occurrences.js'
+
 import { summaryQuery, summaryResponse } from './get-summary.schema.js'
 
 interface SummaryInput {

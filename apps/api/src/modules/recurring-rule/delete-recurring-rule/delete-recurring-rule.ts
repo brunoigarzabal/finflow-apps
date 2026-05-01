@@ -1,12 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
+import { recalculateBalance } from '@/modules/transaction/helpers/recalculate-balance.js'
 import { recurringOverrideRepository } from '@/shared/database/repositories/recurring-override.repository.js'
 import { recurringRuleRepository } from '@/shared/database/repositories/recurring-rule.repository.js'
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { addDays } from '@/shared/helpers/date.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
-import { recalculateBalance } from '@/modules/transaction/helpers/recalculate-balance.js'
+
 import { deleteRecurringRuleBody, recurringRuleIdParam } from '../schemas.js'
 
 export async function deleteRecurringRuleHandler(app: FastifyInstance) {
@@ -45,7 +46,7 @@ export async function deleteRecurringRuleHandler(app: FastifyInstance) {
         const affectedAccountIds = new Set(
           futureOverrides
             .map((override) => override.transaction?.bankAccountId)
-            .filter((id): id is string => Boolean(id)),
+            .filter((id): id is string => Boolean(id))
         )
 
         await recurringRuleRepo.update(rule.id, {
@@ -67,6 +68,6 @@ export async function deleteRecurringRuleHandler(app: FastifyInstance) {
       })
 
       return reply.status(204).send()
-    },
+    }
   )
 }

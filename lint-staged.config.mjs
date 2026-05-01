@@ -7,6 +7,9 @@ export default {
     `eslint --fix --config packages/ui/eslint.config.js ${files.join(' ')}`,
     `prettier --write ${files.join(' ')}`,
   ],
-  'apps/api/**/*.{ts,js}': 'prettier --write',
+  'apps/api/**/*.{ts,js}': (files) => [
+    `eslint --fix --config apps/api/eslint.config.js ${files.join(' ')}`,
+    `prettier --write ${files.join(' ')}`,
+  ],
   '*.{json,css,md,html}': 'prettier --write',
 }

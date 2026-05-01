@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { recurringRuleRepository } from '@/shared/database/repositories/recurring-rule.repository.js'
+
 import { listRecurringRulesResponse } from '../schemas.js'
 
 export async function listRecurringRulesHandler(app: FastifyInstance) {
@@ -25,6 +26,6 @@ export async function listRecurringRulesHandler(app: FastifyInstance) {
       })
 
       return { recurringRules }
-    },
+    }
   )
 }

@@ -6,10 +6,12 @@ import { recurringRuleRepository } from '@/shared/database/repositories/recurrin
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { addMonthsPreservingDay } from '@/shared/helpers/date.js'
 import { BadRequest, NotFound } from '@/shared/infra/http/errors/index.js'
+
 import { monthsByInstallmentFrequency } from '../helpers/installments.js'
 import { recalculateBalance } from '../helpers/recalculate-balance.js'
 import { validateBankAccount } from '../helpers/validate-bank-account.js'
 import { validateCategory } from '../helpers/validate-category.js'
+
 import {
   updateTransactionBody,
   transactionIdParam,
@@ -33,6 +35,7 @@ export async function updateTransactionHandler(app: FastifyInstance) {
       const userId = await request.getCurrentUserId()
       const input = request.body
 
+      // eslint-disable-next-line sonarjs/cognitive-complexity
       return app.prisma.$transaction(async (tx) => {
         const repo = transactionRepository(tx)
         const recurringOverrideRepo = recurringOverrideRepository(tx)
@@ -216,7 +219,9 @@ export async function updateTransactionHandler(app: FastifyInstance) {
             request.params.id
           )
 
-          const balancePromises = [recalculateBalance(tx, existing.bankAccountId)]
+          const balancePromises = [
+            recalculateBalance(tx, existing.bankAccountId),
+          ]
           if (paired) {
             balancePromises.push(recalculateBalance(tx, paired.bankAccountId))
           }

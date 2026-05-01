@@ -1,4 +1,7 @@
-import type { Prisma, PrismaClient } from '../../../../generated/prisma/client.js'
+import type {
+  Prisma,
+  PrismaClient,
+} from '../../../../generated/prisma/client.js'
 import type { CategoryType } from '../../../../generated/prisma/enums.js'
 
 type TransactionClient = Prisma.TransactionClient
@@ -8,19 +11,20 @@ export function categoryRepository(prisma: PrismaArg) {
   return {
     findMany: (
       userId: string,
-      filters: { type?: CategoryType; archived?: boolean },
+      filters: { type?: CategoryType; archived?: boolean }
     ) =>
       prisma.category.findMany({
         where: {
           userId,
           ...(filters.type ? { type: filters.type } : {}),
-          ...(filters.archived !== undefined ? { archived: filters.archived } : {}),
+          ...(filters.archived !== undefined
+            ? { archived: filters.archived }
+            : {}),
         },
         orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
       }),
 
-    findById: (id: string) =>
-      prisma.category.findUnique({ where: { id } }),
+    findById: (id: string) => prisma.category.findUnique({ where: { id } }),
 
     findManyByIds: (ids: string[]) =>
       prisma.category.findMany({
@@ -47,11 +51,18 @@ export function categoryRepository(prisma: PrismaArg) {
         slug?: string
         isDefault: boolean
         userId: string
-      }[],
+      }[]
     ) => prisma.category.createMany({ data, skipDuplicates: true }),
 
-    update: (id: string, data: Partial<{ name: string; color: string; icon: string; archived: boolean }>) =>
-      prisma.category.update({ where: { id }, data }),
+    update: (
+      id: string,
+      data: Partial<{
+        name: string
+        color: string
+        icon: string
+        archived: boolean
+      }>
+    ) => prisma.category.update({ where: { id }, data }),
 
     archiveMany: (id: string, userId: string) =>
       prisma.category.updateMany({

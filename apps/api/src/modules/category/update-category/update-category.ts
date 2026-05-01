@@ -3,7 +3,12 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
 import { Conflict, NotFound } from '@/shared/infra/http/errors/index.js'
-import { updateCategoryBody, categoryIdParam, categoryResponse } from './update-category.schema.js'
+
+import {
+  updateCategoryBody,
+  categoryIdParam,
+  categoryResponse,
+} from './update-category.schema.js'
 
 export async function updateCategoryHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().patch(
@@ -39,6 +44,6 @@ export async function updateCategoryHandler(app: FastifyInstance) {
         }
         throw error
       }
-    },
+    }
   )
 }

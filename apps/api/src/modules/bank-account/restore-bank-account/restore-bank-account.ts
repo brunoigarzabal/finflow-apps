@@ -3,6 +3,7 @@ import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
 import { BadRequest, NotFound } from '@/shared/infra/http/errors/index.js'
+
 import { bankAccountIdParam, bankAccountResponse } from '../schemas.js'
 
 export async function restoreBankAccountHandler(app: FastifyInstance) {
@@ -31,6 +32,6 @@ export async function restoreBankAccountHandler(app: FastifyInstance) {
       }
 
       return repo.update(request.params.id, { archived: false })
-    },
+    }
   )
 }

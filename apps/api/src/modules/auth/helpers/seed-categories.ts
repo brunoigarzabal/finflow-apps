@@ -1,10 +1,10 @@
+import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
+
 import type {
   CategoryType,
   Prisma,
   PrismaClient,
 } from '../../../../generated/prisma/client.js'
-
-import { categoryRepository } from '@/shared/database/repositories/category.repository.js'
 
 type TransactionClient = Prisma.TransactionClient
 
