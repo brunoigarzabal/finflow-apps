@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
-import { AUTH_COOKIE_CLEAR_OPTIONS } from '../helpers/cookie-options'
+import { AUTH_COOKIE_CLEAR_OPTIONS } from '../helpers/cookie-options.js'
 
 export async function logoutHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(

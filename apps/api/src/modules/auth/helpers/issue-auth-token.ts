@@ -1,6 +1,6 @@
 import type { FastifyReply } from 'fastify'
 
-import { AUTH_COOKIE_OPTIONS } from './cookie-options'
+import { AUTH_COOKIE_OPTIONS } from './cookie-options.js'
 
 export async function issueAuthToken(reply: FastifyReply, userId: string) {
   const token = await reply.jwtSign({ sub: userId }, { expiresIn: '7d' })

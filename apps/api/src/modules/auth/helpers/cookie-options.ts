@@ -1,4 +1,4 @@
-import { env } from '@/shared/config/env'
+import { env } from '@/shared/config/env.js'
 
 const isProduction = env.NODE_ENV === 'production'
 
