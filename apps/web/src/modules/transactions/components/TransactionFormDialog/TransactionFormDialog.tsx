@@ -115,14 +115,15 @@ function defaultDateYmdForViewedMonth(viewedMonth?: Date): string {
 
 const buildDefaultValues = (
   type: TransactionType,
-  viewedMonth?: Date
+  viewedMonth?: Date,
+  firstBankAccountId?: string
 ): TransactionFormData => {
   const date = defaultDateYmdForViewedMonth(viewedMonth)
   return {
     amount: 0,
     description: type === 'TRANSFER' ? 'Transferência' : '',
     date,
-    bankAccountId: '',
+    bankAccountId: firstBankAccountId ?? '',
     categoryId: '',
     isPaid: !isTransactionDateStrictlyFuture(date),
     notes: '',
@@ -316,7 +317,11 @@ export const TransactionFormDialog = ({
     formState: { errors },
   } = useForm<TransactionFormData>({
     resolver: zodResolver(isTransfer ? transferSchema : transactionSchema),
-    defaultValues: buildDefaultValues(type, defaultCalendarMonth),
+    defaultValues: buildDefaultValues(
+      type,
+      defaultCalendarMonth,
+      bankAccounts[0]?.id
+    ),
   })
 
   const selectedBankAccountId = watch('bankAccountId')
@@ -369,10 +374,10 @@ export const TransactionFormDialog = ({
       return
     }
 
-    reset(buildDefaultValues(type, defaultCalendarMonth))
+    reset(buildDefaultValues(type, defaultCalendarMonth, bankAccounts[0]?.id))
     setNotesOpen(false)
     setRepeatOpen(false)
-  }, [open, transaction, type, reset, defaultCalendarMonth])
+  }, [open, transaction, type, reset, defaultCalendarMonth, bankAccounts])
 
   const amount = watch('amount')
   const repeat = watch('repeat')
