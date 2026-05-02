@@ -4,7 +4,7 @@ import { TransactionsPage } from '@/modules/transactions'
 
 export const Route = createFileRoute('/_authenticated/transactions')({
   head: () => ({
-    meta: [{ title: 'Transações | FinFlow' }],
+    meta: [{ title: 'Transações | Minhas Finanças' }],
   }),
   component: TransactionsPage,
 })

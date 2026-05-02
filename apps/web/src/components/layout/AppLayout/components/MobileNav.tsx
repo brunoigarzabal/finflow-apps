@@ -15,7 +15,7 @@ export const MobileNav = ({ open, onOpenChange }: Props) => (
   <Sheet open={open} onOpenChange={onOpenChange}>
     <SheetContent side="left">
       <SheetHeader>
-        <SheetTitle>FinFlow</SheetTitle>
+        <SheetTitle>Minhas Finanças</SheetTitle>
       </SheetHeader>
       <nav className="mt-4 flex flex-col gap-1 px-2">
         <Link

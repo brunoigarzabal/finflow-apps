@@ -13,10 +13,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon.svg'],
       manifest: {
-        name: 'FinFlow',
-        short_name: 'FinFlow',
-        description:
-          'Controle financeiro pessoal com foco em clareza e organização.',
+        name: 'Minhas Finanças',
+        short_name: 'Minhas Finanças',
+        description: 'Controle financeiro pessoal',
         start_url: '/',
         scope: '/',
         display: 'standalone',

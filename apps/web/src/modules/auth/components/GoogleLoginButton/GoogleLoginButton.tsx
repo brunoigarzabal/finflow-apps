@@ -33,6 +33,7 @@ export const GoogleLoginButton = ({ setError }: Props) => {
         theme="outline"
         text="continue_with"
         logo_alignment="center"
+        containerProps={{ className: 'w-full' }}
       />
     </Fragment>
   )

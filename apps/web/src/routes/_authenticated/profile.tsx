@@ -4,7 +4,7 @@ import { ProfilePage } from '@/modules/settings'
 
 export const Route = createFileRoute('/_authenticated/profile')({
   head: () => ({
-    meta: [{ title: 'Perfil | FinFlow' }],
+    meta: [{ title: 'Perfil | Minhas Finanças' }],
   }),
   component: ProfilePage,
 })

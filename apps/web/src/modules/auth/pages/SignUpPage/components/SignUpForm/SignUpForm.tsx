@@ -88,7 +88,7 @@ export const SignUpForm = () => {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="João Silva"
+                  placeholder="Ex: João Silva"
                   aria-invalid={!!errors.name}
                   {...register('name')}
                 />
@@ -99,7 +99,7 @@ export const SignUpForm = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@exemplo.com"
+                  placeholder="exemplo@email.com"
                   aria-invalid={!!errors.email}
                   {...register('email')}
                 />
@@ -118,6 +118,7 @@ export const SignUpForm = () => {
                         className="pr-10"
                         aria-invalid={!!errors.password}
                         {...register('password')}
+                        placeholder="********"
                       />
                       <Button
                         type="button"
@@ -151,6 +152,7 @@ export const SignUpForm = () => {
                         className="pr-10"
                         aria-invalid={!!errors.confirmPassword}
                         {...register('confirmPassword')}
+                        placeholder="********"
                       />
                       <Button
                         type="button"

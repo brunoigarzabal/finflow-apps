@@ -4,7 +4,7 @@ import { DashboardPage } from '@/modules/dashboard'
 
 export const Route = createFileRoute('/_authenticated/')({
   head: () => ({
-    meta: [{ title: 'Dashboard | FinFlow' }],
+    meta: [{ title: 'Dashboard | Minhas Finanças' }],
   }),
   component: DashboardPage,
 })

@@ -59,7 +59,7 @@ export const SignInForm = () => {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Bem-vindo de volta</CardTitle>
-          <CardDescription>Entre com sua conta Apple ou Google</CardDescription>
+          <CardDescription>Entre com sua conta Google</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,7 +82,7 @@ export const SignInForm = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@exemplo.com"
+                  placeholder="email@email.com"
                   aria-invalid={!!errors.email}
                   {...register('email')}
                 />
@@ -93,12 +93,6 @@ export const SignInForm = () => {
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Senha</FieldLabel>
-                  <button
-                    type="button"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Esqueceu sua senha?
-                  </button>
                 </div>
                 <div className="relative">
                   <Input
@@ -107,6 +101,7 @@ export const SignInForm = () => {
                     className="pr-10"
                     aria-invalid={!!errors.password}
                     {...register('password')}
+                    placeholder="********"
                   />
                   <Button
                     type="button"

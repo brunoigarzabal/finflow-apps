@@ -8,7 +8,7 @@ export const SignInPage = () => (
     <div className="flex w-full max-w-sm flex-col gap-6">
       <div className="flex items-center gap-2 self-center font-medium">
         <HugeiconsIcon icon={Wallet03Icon} className="size-6 text-primary" />
-        FinFlow
+        Minhas Finanças
       </div>
       <SignInForm />
     </div>

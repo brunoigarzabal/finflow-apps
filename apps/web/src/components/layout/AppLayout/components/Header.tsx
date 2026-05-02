@@ -34,7 +34,7 @@ export const Header = () => {
               icon={Wallet03Icon}
               className="size-6 text-primary"
             />
-            FinFlow
+            Minhas Finanças
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">

@@ -14,7 +14,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       {
-        title: 'FinFlow',
+        title: 'Minhas Finanças',
       },
     ],
   }),

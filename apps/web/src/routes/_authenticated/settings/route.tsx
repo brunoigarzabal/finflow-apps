@@ -3,7 +3,7 @@ import { Fragment } from 'react'
 
 export const Route = createFileRoute('/_authenticated/settings')({
   head: () => ({
-    meta: [{ title: 'Configurações | FinFlow' }],
+    meta: [{ title: 'Configurações | Minhas Finanças' }],
   }),
   beforeLoad: ({ location }) => {
     if (
