@@ -31,7 +31,10 @@ export async function buildApp() {
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
 
-  app.register(helmet, { global: true })
+  app.register(helmet, {
+    global: true,
+    crossOriginOpenerPolicy: false,
+  })
 
   app.register(cors, {
     origin: true,
