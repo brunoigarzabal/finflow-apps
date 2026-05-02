@@ -13,6 +13,9 @@ export async function loginHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     '/login',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         tags: ['Auth'],
         summary: 'Authenticate with email and password',

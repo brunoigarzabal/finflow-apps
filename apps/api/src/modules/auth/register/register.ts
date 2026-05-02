@@ -14,6 +14,9 @@ export async function registerHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     '/register',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         tags: ['Auth'],
         summary: 'Create a new account',

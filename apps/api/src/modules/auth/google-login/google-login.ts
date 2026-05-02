@@ -15,6 +15,9 @@ export async function googleLoginHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     '/google',
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: '1 minute' },
+      },
       schema: {
         tags: ['Auth'],
         summary: 'Authenticate with Google',
