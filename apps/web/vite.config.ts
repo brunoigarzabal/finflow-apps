@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon.svg'],
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Minhas Finanças',
         short_name: 'Minhas Finanças',

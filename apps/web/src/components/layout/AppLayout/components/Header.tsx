@@ -1,8 +1,10 @@
-import { Menu01Icon, Wallet03Icon } from '@hugeicons/core-free-icons'
+import { Menu01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Link } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/button'
 import { useState } from 'react'
+
+import { AppLogo } from '@/components/common/AppLogo'
 
 import { MobileNav } from './MobileNav'
 import { SettingsMenu } from './SettingsMenu'
@@ -30,10 +32,7 @@ export const Header = () => {
             to="/"
             className="flex items-center gap-2 text-base font-bold tracking-tight"
           >
-            <HugeiconsIcon
-              icon={Wallet03Icon}
-              className="size-6 text-primary"
-            />
+            <AppLogo />
             Minhas Finanças
           </Link>
 
