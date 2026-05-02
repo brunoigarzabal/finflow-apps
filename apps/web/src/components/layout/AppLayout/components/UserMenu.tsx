@@ -18,6 +18,7 @@ export const UserMenu = () => {
 
   const name = data?.user.name ?? ''
   const email = data?.user.email ?? ''
+  const avatarUrl = data?.user.avatarUrl
   const initials = name ? getInitials(name) : '?'
 
   return (
@@ -26,10 +27,19 @@ export const UserMenu = () => {
         openOnHover
         aria-haspopup="menu"
         render={
-          <button className="flex size-8 cursor-pointer items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground" />
+          <button className="flex size-8 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-primary-foreground" />
         }
       >
-        {initials}
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={name}
+            className="size-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          initials
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="bottom">
         <DropdownMenuGroup>

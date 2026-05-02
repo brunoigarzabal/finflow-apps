@@ -491,8 +491,8 @@ export const TransactionFormDialog = ({
             )}
           </div>
 
-          <div className="flex items-end gap-3">
-            <div className="flex flex-1 flex-col gap-1.5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="flex w-full flex-col gap-1.5 sm:flex-1">
               <Label htmlFor="amount">Valor</Label>
               <Controller
                 name="amount"
@@ -512,7 +512,7 @@ export const TransactionFormDialog = ({
               )}
             </div>
 
-            <div className="flex flex-1 flex-col gap-1.5">
+            <div className="flex w-full flex-col gap-1.5 sm:flex-1">
               <Label htmlFor="date">Data</Label>
               <Controller
                 name="date"
@@ -587,37 +587,9 @@ export const TransactionFormDialog = ({
                 </p>
               )}
             </div>
-
-            {!isTransfer && (
-              <Controller
-                name="isPaid"
-                control={control}
-                render={({ field }) => (
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={field.value}
-                    onClick={() => field.onChange(!field.value)}
-                    title={field.value ? 'Pago' : 'Pendente'}
-                    className="flex h-9 shrink-0 cursor-pointer items-center justify-center px-1"
-                  >
-                    <HugeiconsIcon
-                      icon={field.value ? ThumbsUpIcon : ThumbsDownIcon}
-                      strokeWidth={2}
-                      className={cn(
-                        'size-5',
-                        field.value
-                          ? 'text-emerald-500'
-                          : 'text-muted-foreground'
-                      )}
-                    />
-                  </button>
-                )}
-              />
-            )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex flex-1 flex-col gap-1.5">
               <Label>{isTransfer ? 'Saiu da conta' : 'Conta'}</Label>
               <Controller
@@ -877,6 +849,18 @@ export const TransactionFormDialog = ({
                 active={notesOpen}
                 onClick={() => setNotesOpen((current) => !current)}
                 icon={Calendar01Icon}
+              />
+              <Controller
+                name="isPaid"
+                control={control}
+                render={({ field }) => (
+                  <FooterActionButton
+                    label={field.value ? 'Pago' : 'Pagar'}
+                    active={field.value}
+                    onClick={() => field.onChange(!field.value)}
+                    icon={field.value ? ThumbsUpIcon : ThumbsDownIcon}
+                  />
+                )}
               />
             </div>
           )}

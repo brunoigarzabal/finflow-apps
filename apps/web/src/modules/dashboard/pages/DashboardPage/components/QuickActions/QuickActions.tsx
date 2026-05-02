@@ -54,14 +54,15 @@ export const QuickActions = ({ onAction }: Props) => (
       <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
         Ações rápidas
       </span>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2 md:flex">
         {ACTIONS.map(({ label, type, icon, colorClass, bgClass }) => (
           <button
             key={label}
             type="button"
             onClick={() => onAction(type)}
             className={cn(
-              'flex cursor-pointer items-center gap-2 rounded-2xl px-4 py-2.5 transition-all active:scale-95',
+              'flex cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-2.5 transition-all active:scale-95',
+              'last:col-span-2 last:md:col-span-1',
               bgClass
             )}
           >
