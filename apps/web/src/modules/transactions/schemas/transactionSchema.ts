@@ -32,12 +32,7 @@ const repeatSchema = z.discriminatedUnion('type', [
 
 const baseFields = {
   amount: z.number().int().min(1, 'Valor é obrigatório'),
-  description: z
-    .string()
-    .trim()
-    .max(255, 'Descrição muito longa')
-    .optional()
-    .default(''),
+  description: z.string().trim().max(255, 'Descrição muito longa'),
   date: z.string().min(1, 'Data é obrigatória'),
   bankAccountId: z.uuid('Conta é obrigatória'),
   isPaid: z.boolean(),
