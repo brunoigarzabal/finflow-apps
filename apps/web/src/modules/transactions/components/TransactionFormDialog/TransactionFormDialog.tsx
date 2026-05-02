@@ -380,7 +380,13 @@ export const TransactionFormDialog = ({
   const isPending =
     create.isPending || update.isPending || updateRecurringRule.isPending
 
-  const onSubmit = (data: TransactionFormData) => {
+  const onSubmit = (rawData: TransactionFormData) => {
+    const data = { ...rawData }
+    if (!data.description && !isTransfer) {
+      const category = filteredCategories.find((c) => c.id === data.categoryId)
+      if (category) data.description = category.name
+    }
+
     if (!isEditing || !transaction) {
       create.mutate(buildCreateBody(data, type, isTransfer), {
         onSuccess: () => {

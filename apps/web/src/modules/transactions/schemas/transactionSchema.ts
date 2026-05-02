@@ -35,8 +35,9 @@ const baseFields = {
   description: z
     .string()
     .trim()
-    .min(1, 'Descrição é obrigatória')
-    .max(255, 'Descrição muito longa'),
+    .max(255, 'Descrição muito longa')
+    .optional()
+    .default(''),
   date: z.string().min(1, 'Data é obrigatória'),
   bankAccountId: z.uuid('Conta é obrigatória'),
   isPaid: z.boolean(),
