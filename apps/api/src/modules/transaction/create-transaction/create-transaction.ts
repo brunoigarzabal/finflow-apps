@@ -16,6 +16,41 @@ import {
   createTransactionResponse,
 } from './create-transaction.schema.js'
 
+type CreateTransactionInput = typeof createTransactionBody._output
+
+function validateInput(input: CreateTransactionInput) {
+  if (input.type === 'TRANSFER' && !input.destinationBankAccountId) {
+    throw new BadRequest('Conta de destino é obrigatória para transferências')
+  }
+
+  if (input.type !== 'TRANSFER' && input.destinationBankAccountId) {
+    throw new BadRequest('Conta de destino só é permitida para transferências')
+  }
+
+  if (input.type !== 'TRANSFER' && !input.categoryId) {
+    throw new BadRequest('Categoria é obrigatória')
+  }
+
+  if ((input.installment || input.recurring) && input.type === 'TRANSFER') {
+    throw new BadRequest(
+      'Transferências não suportam parcelamento ou recorrência'
+    )
+  }
+
+  if (input.recurring?.endDate && input.recurring.endDate < input.date) {
+    throw new BadRequest(
+      'Data final da recorrência deve ser maior ou igual à data inicial'
+    )
+  }
+
+  if (
+    input.type === 'TRANSFER' &&
+    input.bankAccountId === input.destinationBankAccountId
+  ) {
+    throw new BadRequest('Conta de origem e destino devem ser diferentes')
+  }
+}
+
 export async function createTransactionHandler(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     '/',
@@ -32,40 +67,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
       const userId = await request.getCurrentUserId()
       const input = request.body
 
-      if (input.type === 'TRANSFER' && !input.destinationBankAccountId) {
-        throw new BadRequest(
-          'Conta de destino é obrigatória para transferências'
-        )
-      }
-
-      if (input.type !== 'TRANSFER' && input.destinationBankAccountId) {
-        throw new BadRequest(
-          'Conta de destino só é permitida para transferências'
-        )
-      }
-
-      if (input.type !== 'TRANSFER' && !input.categoryId) {
-        throw new BadRequest('Categoria é obrigatória')
-      }
-
-      if ((input.installment || input.recurring) && input.type === 'TRANSFER') {
-        throw new BadRequest(
-          'Transferências não suportam parcelamento ou recorrência'
-        )
-      }
-
-      if (input.recurring?.endDate && input.recurring.endDate < input.date) {
-        throw new BadRequest(
-          'Data final da recorrência deve ser maior ou igual à data inicial'
-        )
-      }
-
-      if (
-        input.type === 'TRANSFER' &&
-        input.bankAccountId === input.destinationBankAccountId
-      ) {
-        throw new BadRequest('Conta de origem e destino devem ser diferentes')
-      }
+      validateInput(input)
 
       const result = await app.prisma.$transaction(async (tx) => {
         await validateBankAccount(tx, userId, input.bankAccountId)
@@ -116,6 +118,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
             frequency: input.installment.frequency,
             startDate: dateValue,
             description: input.description,
+            isPaid: input.isPaid,
           })
 
           const transactions: Awaited<ReturnType<typeof repo.create>>[] = []
@@ -125,7 +128,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
               amount: installment.amount,
               description: installment.description,
               date: installment.date,
-              isPaid: input.isPaid,
+              isPaid: installment.isPaid,
               notes: input.notes ?? null,
               userId,
               bankAccountId: input.bankAccountId,

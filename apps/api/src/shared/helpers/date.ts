@@ -38,6 +38,17 @@ export function addMonthsPreservingDay(date: Date, months: number): Date {
   return next
 }
 
+export function isDateInFuture(date: Date): boolean {
+  const now = new Date()
+  const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  const dateUTC = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate()
+  )
+  return dateUTC > todayUTC
+}
+
 export function formatDateLocal(date: Date): string {
   const y = date.getUTCFullYear()
   const m = String(date.getUTCMonth() + 1).padStart(2, '0')

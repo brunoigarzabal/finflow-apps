@@ -1,6 +1,10 @@
 import { recurringRuleInclude } from '@/shared/database/repositories/recurring-rule.repository.js'
 import { transactionInclude } from '@/shared/database/repositories/transaction.repository.js'
-import { addDays, addMonthsPreservingDay } from '@/shared/helpers/date.js'
+import {
+  addDays,
+  addMonthsPreservingDay,
+  isDateInFuture,
+} from '@/shared/helpers/date.js'
 
 import type { PrismaClient } from '../../../../generated/prisma/client.js'
 import type {
@@ -126,7 +130,7 @@ function makeVirtualOccurrence(
     amount: rule.amount,
     description: rule.description,
     date: occurrenceDate,
-    isPaid: rule.isPaid,
+    isPaid: rule.isPaid && !isDateInFuture(occurrenceDate),
     notes: rule.notes,
     transferId: null,
     isTransferOut: null,
