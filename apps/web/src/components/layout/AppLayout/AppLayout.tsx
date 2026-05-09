@@ -10,8 +10,8 @@ export const AppLayout = () => {
     <div className="flex h-svh flex-col">
       <Header />
       <ScrollArea key={pathname} className="flex-1 overflow-hidden">
-        <main>
-          <div className="mx-auto w-full max-w-7xl">
+        <main className="h-full">
+          <div className="mx-auto h-full w-full max-w-7xl">
             <Outlet />
           </div>
         </main>

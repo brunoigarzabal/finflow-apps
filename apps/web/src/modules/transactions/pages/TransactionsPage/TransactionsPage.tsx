@@ -101,19 +101,23 @@ export const TransactionsPage = () => {
   return (
     <Fragment>
       <div className="flex h-full flex-col">
-        <div className="flex flex-1 flex-col gap-6 overflow-auto p-6">
-          <TransactionHeader
-            currentMonth={currentMonth}
-            onMonthChange={handleMonthChange}
-            onNewTransaction={handleNewTransaction}
-          />
+        <div className="flex flex-1 flex-col gap-6 overflow-auto p-6 pt-0">
+          <div className="sticky top-0 border-b bg-background/80 pt-6 pb-6 backdrop-blur-md">
+            <div className="flex flex-1 flex-col gap-6">
+              <TransactionHeader
+                currentMonth={currentMonth}
+                onMonthChange={handleMonthChange}
+                onNewTransaction={handleNewTransaction}
+              />
 
-          <TransactionFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            bankAccounts={bankAccounts}
-            categories={categories}
-          />
+              <TransactionFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                bankAccounts={bankAccounts}
+                categories={categories}
+              />
+            </div>
+          </div>
 
           <TransactionList
             transactions={transactions}
