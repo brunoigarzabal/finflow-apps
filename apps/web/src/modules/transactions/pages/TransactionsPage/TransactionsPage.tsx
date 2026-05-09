@@ -109,15 +109,15 @@ export const TransactionsPage = () => {
                 onMonthChange={handleMonthChange}
                 onNewTransaction={handleNewTransaction}
               />
-
-              <TransactionFilters
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                bankAccounts={bankAccounts}
-                categories={categories}
-              />
             </div>
           </div>
+
+          <TransactionFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            bankAccounts={bankAccounts}
+            categories={categories}
+          />
 
           <TransactionList
             transactions={transactions}
