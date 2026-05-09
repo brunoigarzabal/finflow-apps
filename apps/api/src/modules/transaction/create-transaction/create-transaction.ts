@@ -6,7 +6,9 @@ import { recurringRuleRepository } from '@/shared/database/repositories/recurrin
 import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { BadRequest } from '@/shared/infra/http/errors/index.js'
 
+import type { Prisma } from '../../../../generated/prisma/client.js'
 import { buildInstallments } from '../helpers/installments.js'
+import { materializeRecurringOccurrence } from '../helpers/materialize-recurring-occurrence.js'
 import { recalculateBalance } from '../helpers/recalculate-balance.js'
 import { validateBankAccount } from '../helpers/validate-bank-account.js'
 import { validateCategory } from '../helpers/validate-category.js'
@@ -17,6 +19,55 @@ import {
 } from './create-transaction.schema.js'
 
 type CreateTransactionInput = typeof createTransactionBody._output
+
+async function createRecurringTransaction(
+  tx: Prisma.TransactionClient,
+  input: CreateTransactionInput,
+  userId: string,
+  dateValue: Date
+) {
+  if (!input.categoryId) {
+    throw new BadRequest('Categoria é obrigatória para recorrência')
+  }
+
+  const recurringRuleRepo = recurringRuleRepository(tx)
+  const recurringRule = await recurringRuleRepo.create({
+    type: input.type,
+    amount: input.amount,
+    description: input.description,
+    frequency: input.recurring!.frequency,
+    startDate: dateValue,
+    endDate: input.recurring!.endDate
+      ? new Date(input.recurring!.endDate)
+      : null,
+    isPaid: input.isPaid,
+    notes: input.notes ?? null,
+    userId,
+    bankAccountId: input.bankAccountId,
+    categoryId: input.categoryId,
+  })
+
+  if (input.isPaid) {
+    await materializeRecurringOccurrence(tx, {
+      ruleId: recurringRule.id,
+      occurrenceDate: dateValue,
+      transactionData: {
+        type: input.type,
+        amount: input.amount,
+        description: input.description,
+        date: dateValue,
+        isPaid: true,
+        notes: input.notes ?? null,
+        userId,
+        bankAccountId: input.bankAccountId,
+        categoryId: input.categoryId,
+      },
+      accountIdsToRecalculate: [input.bankAccountId],
+    })
+  }
+
+  return { recurringRule }
+}
 
 function validateInput(input: CreateTransactionInput) {
   if (input.type === 'TRANSFER' && !input.destinationBankAccountId) {
@@ -79,28 +130,7 @@ export async function createTransactionHandler(app: FastifyInstance) {
         const dateValue = new Date(input.date)
 
         if (input.recurring) {
-          if (!input.categoryId) {
-            throw new BadRequest('Categoria é obrigatória para recorrência')
-          }
-
-          const recurringRuleRepo = recurringRuleRepository(tx)
-          const recurringRule = await recurringRuleRepo.create({
-            type: input.type,
-            amount: input.amount,
-            description: input.description,
-            frequency: input.recurring.frequency,
-            startDate: dateValue,
-            endDate: input.recurring.endDate
-              ? new Date(input.recurring.endDate)
-              : null,
-            isPaid: input.isPaid,
-            notes: input.notes ?? null,
-            userId,
-            bankAccountId: input.bankAccountId,
-            categoryId: input.categoryId,
-          })
-
-          return { recurringRule }
+          return createRecurringTransaction(tx, input, userId, dateValue)
         }
 
         if (input.installment) {

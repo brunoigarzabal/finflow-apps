@@ -1,12 +1,11 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
-import { recalculateBalance } from '@/modules/transaction/helpers/recalculate-balance.js'
+import { materializeRecurringOccurrence } from '@/modules/transaction/helpers/materialize-recurring-occurrence.js'
 import { validateBankAccount } from '@/modules/transaction/helpers/validate-bank-account.js'
 import { validateCategory } from '@/modules/transaction/helpers/validate-category.js'
 import { recurringOverrideRepository } from '@/shared/database/repositories/recurring-override.repository.js'
 import { recurringRuleRepository } from '@/shared/database/repositories/recurring-rule.repository.js'
-import { transactionRepository } from '@/shared/database/repositories/transaction.repository.js'
 import { addDays } from '@/shared/helpers/date.js'
 import { NotFound } from '@/shared/infra/http/errors/index.js'
 
@@ -38,7 +37,6 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
       return app.prisma.$transaction(async (tx) => {
         const recurringRuleRepo = recurringRuleRepository(tx)
         const recurringOverrideRepo = recurringOverrideRepository(tx)
-        const transactionRepo = transactionRepository(tx)
         const rule = await recurringRuleRepo.findById(request.params.id)
 
         if (!rule || rule.userId !== userId) {
@@ -71,37 +69,26 @@ export async function updateRecurringRuleHandler(app: FastifyInstance) {
           })
           const currentOverride = existingOverride[0]
 
-          const transactionData = {
-            type: rule.type,
-            amount: sharedData.amount,
-            description: sharedData.description,
-            date: updatedDate,
-            isPaid: sharedData.isPaid,
-            notes: sharedData.notes,
-            userId,
-            bankAccountId: sharedData.bankAccountId,
-            categoryId: sharedData.categoryId,
-          }
-
-          const transaction = currentOverride?.transactionId
-            ? await transactionRepo.update(
-                currentOverride.transactionId,
-                transactionData
-              )
-            : await transactionRepo.create(transactionData)
-
-          await recurringOverrideRepo.upsert(rule.id, occurrenceDate, {
-            isCancelled: false,
-            transactionId: transaction.id,
+          const transaction = await materializeRecurringOccurrence(tx, {
+            ruleId: rule.id,
+            occurrenceDate,
+            transactionData: {
+              type: rule.type,
+              amount: sharedData.amount,
+              description: sharedData.description,
+              date: updatedDate,
+              isPaid: sharedData.isPaid,
+              notes: sharedData.notes,
+              userId,
+              bankAccountId: sharedData.bankAccountId,
+              categoryId: sharedData.categoryId,
+            },
+            existingTransactionId: currentOverride?.transactionId ?? undefined,
+            accountIdsToRecalculate: [
+              rule.bankAccountId,
+              sharedData.bankAccountId,
+            ],
           })
-
-          const affectedAccountIds = new Set([
-            rule.bankAccountId,
-            sharedData.bankAccountId,
-          ])
-          for (const accountId of affectedAccountIds) {
-            await recalculateBalance(tx, accountId)
-          }
 
           return { transaction }
         }
