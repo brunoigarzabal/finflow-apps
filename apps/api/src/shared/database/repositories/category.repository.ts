@@ -21,7 +21,7 @@ export function categoryRepository(prisma: PrismaArg) {
             ? { archived: filters.archived }
             : {}),
         },
-        orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+        orderBy: { name: 'asc' },
       }),
 
     findById: (id: string) => prisma.category.findUnique({ where: { id } }),
