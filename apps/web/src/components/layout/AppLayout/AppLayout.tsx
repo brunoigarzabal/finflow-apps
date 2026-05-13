@@ -11,7 +11,7 @@ export const AppLayout = () => {
     <div className="flex h-svh flex-col">
       <Header />
       <ScrollArea key={pathname} className="flex-1 overflow-hidden">
-        <main className="min-h-full pt-14 pb-16 sm:pb-0">
+        <main className="min-h-full pt-[calc(3.5rem+env(safe-area-inset-top))] pb-16 sm:pb-0">
           <div className="mx-auto min-h-full w-full max-w-7xl">
             <Outlet />
           </div>

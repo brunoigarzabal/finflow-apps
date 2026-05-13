@@ -15,8 +15,8 @@ export const Header = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 h-14 border-b bg-background/60 backdrop-blur-xl">
-      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between px-4">
+    <header className="fixed inset-x-0 top-0 z-50 border-b bg-background/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
