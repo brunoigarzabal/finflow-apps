@@ -42,7 +42,7 @@ export const BottomNav = () => {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 flex flex-col border-t bg-background/60 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl sm:hidden">
-      <div className="flex h-18 w-full shrink-0 items-center justify-around">
+      <div className="flex h-18 w-full shrink-0 touch-manipulation items-center justify-around">
         {NAV_ITEMS.map(({ to, label, icon }) => (
           <Link
             key={to}
