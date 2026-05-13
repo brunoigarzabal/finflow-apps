@@ -41,7 +41,7 @@ export const BottomNav = () => {
     pathname === '/profile' || pathname.startsWith('/settings')
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-18 items-center justify-around border-t bg-background/60 backdrop-blur-xl sm:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-50 flex h-18 items-center justify-around border-t bg-background/60 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden">
       {NAV_ITEMS.map(({ to, label, icon }) => (
         <Link
           key={to}
