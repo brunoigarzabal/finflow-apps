@@ -102,7 +102,7 @@ export const TransactionsPage = () => {
     <Fragment>
       <div className="flex h-full flex-col">
         <div className="flex flex-1 flex-col gap-6 overflow-auto p-6 pt-0">
-          <div className="sticky top-0 z-50 border-b bg-background/80 pt-6 pb-6 backdrop-blur-md">
+          <div className="sticky top-0 border-b bg-background/80 pt-6 pb-6 backdrop-blur-md">
             <div className="flex flex-1 flex-col gap-6">
               <TransactionHeader
                 currentMonth={currentMonth}
