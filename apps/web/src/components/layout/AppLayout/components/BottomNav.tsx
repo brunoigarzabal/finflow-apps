@@ -48,7 +48,7 @@ export const BottomNav = () => {
           to={to}
           className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground"
           activeProps={{
-            className: 'text-primary font-medium',
+            className: 'text-primary',
           }}
         >
           <HugeiconsIcon icon={icon} className="size-5" />
@@ -62,7 +62,7 @@ export const BottomNav = () => {
             <button
               className={cn(
                 'flex cursor-pointer flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground',
-                isSettingsActive && 'font-medium text-primary'
+                isSettingsActive && 'text-primary'
               )}
             />
           }
