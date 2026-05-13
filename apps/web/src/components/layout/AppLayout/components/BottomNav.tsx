@@ -46,7 +46,7 @@ export const BottomNav = () => {
         <Link
           key={to}
           to={to}
-          className="flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground"
+          className="flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-muted-foreground transition-colors active:bg-foreground/6"
           activeProps={{
             className: 'text-primary',
           }}
@@ -61,7 +61,7 @@ export const BottomNav = () => {
           render={
             <button
               className={cn(
-                'flex cursor-pointer flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground',
+                'flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-muted-foreground transition-colors active:bg-foreground/6',
                 isSettingsActive && 'text-primary'
               )}
             />
