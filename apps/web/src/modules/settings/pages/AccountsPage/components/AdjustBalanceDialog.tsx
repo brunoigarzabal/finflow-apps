@@ -20,7 +20,7 @@ import { MoneyInput } from '@/components/common/MoneyInput'
 import { today } from '@/lib/dates'
 
 const adjustBalanceSchema = z.object({
-  balance: z.number().int().min(0, 'O saldo deve ser positivo'),
+  balance: z.number().int(),
 })
 
 type AdjustBalanceFormData = z.infer<typeof adjustBalanceSchema>
@@ -108,7 +108,11 @@ export const AdjustBalanceDialog = ({ account, open, onOpenChange }: Props) => {
               name="balance"
               control={control}
               render={({ field }) => (
-                <MoneyInput value={field.value} onChange={field.onChange} />
+                <MoneyInput
+                  value={field.value}
+                  onChange={field.onChange}
+                  allowNegative
+                />
               )}
             />
           </div>

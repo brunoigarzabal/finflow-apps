@@ -9,6 +9,7 @@ import {
   CardHeader,
 } from '@workspace/ui/components/card'
 import { Skeleton } from '@workspace/ui/components/skeleton'
+import { cn } from '@workspace/ui/lib/utils'
 import { Fragment } from 'react'
 
 import { useDashboard } from '@/api/dashboard'
@@ -24,6 +25,8 @@ export const BalanceCard = () => {
   const toggleHidden = usePrivacyStore((s) => s.toggleHidden)
 
   const accounts = data?.bankAccounts ?? []
+  const totalBalance = data?.totalBalance ?? 0
+  const isTotalNegative = totalBalance < 0
 
   return (
     <Card className="relative overflow-hidden">
@@ -40,8 +43,11 @@ export const BalanceCard = () => {
             <Skeleton className="h-10 w-52" />
           ) : (
             <HiddenValue
-              value={formatCurrency(data?.totalBalance ?? 0)}
-              className="text-4xl font-bold tracking-tight"
+              value={formatCurrency(totalBalance)}
+              className={cn(
+                'text-4xl font-bold tracking-tight',
+                isTotalNegative && 'text-destructive'
+              )}
             />
           )}
         </div>
@@ -72,30 +78,41 @@ export const BalanceCard = () => {
               </p>
             ) : (
               <div className="flex flex-wrap gap-3">
-                {accounts.map((account) => (
-                  <Link
-                    key={account.id}
-                    to="/transactions"
-                    search={{ account: account.id }}
-                    className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/70 px-4 py-3 backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    <BankAccountIcon
-                      icon={account.icon}
-                      color={account.color}
-                      className="size-9"
-                      iconClassName="size-4"
-                    />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-xs text-muted-foreground">
-                        {account.name}
-                      </span>
-                      <HiddenValue
-                        value={formatCurrency(account.currentBalance)}
-                        className="text-sm font-semibold"
+                {accounts.map((account) => {
+                  const isNegative = account.currentBalance < 0
+                  return (
+                    <Link
+                      key={account.id}
+                      to="/transactions"
+                      search={{ account: account.id }}
+                      className={cn(
+                        'flex items-center gap-3 rounded-2xl border bg-background/70 px-4 py-3 backdrop-blur-sm transition-all',
+                        isNegative
+                          ? 'border-destructive/30 hover:border-destructive/60 hover:bg-destructive/5'
+                          : 'border-border/60 hover:border-primary/40 hover:bg-primary/5'
+                      )}
+                    >
+                      <BankAccountIcon
+                        icon={account.icon}
+                        color={account.color}
+                        className="size-9"
+                        iconClassName="size-4"
                       />
-                    </div>
-                  </Link>
-                ))}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-xs text-muted-foreground">
+                          {account.name}
+                        </span>
+                        <HiddenValue
+                          value={formatCurrency(account.currentBalance)}
+                          className={cn(
+                            'text-sm font-semibold',
+                            isNegative && 'text-destructive'
+                          )}
+                        />
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </Fragment>
