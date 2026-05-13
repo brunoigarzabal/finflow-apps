@@ -14,10 +14,9 @@ import { Fragment } from 'react'
 
 import { useDashboard } from '@/api/dashboard'
 import { BankAccountIcon } from '@/components/common/BankAccountIcon'
+import { HiddenValue } from '@/components/common/HiddenValue'
 import { formatCurrency } from '@/lib/formatCurrency'
 import { usePrivacyStore } from '@/store'
-
-import { HiddenValue } from '../HiddenValue'
 
 export const BalanceCard = () => {
   const { data, isLoading } = useDashboard()

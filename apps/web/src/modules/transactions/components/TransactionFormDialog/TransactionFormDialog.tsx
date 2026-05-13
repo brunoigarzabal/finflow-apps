@@ -761,7 +761,7 @@ export const TransactionFormDialog = ({
                         <ComboboxTrigger className="w-full">
                           {selectedItem && (
                             <span
-                              className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                              className="flex size-4.5 shrink-0 items-center justify-center rounded-full"
                               style={{ backgroundColor: selectedItem.color }}
                             >
                               <HugeiconsIcon
@@ -789,7 +789,7 @@ export const TransactionFormDialog = ({
                               return (
                                 <ComboboxItem key={cat.value} value={cat}>
                                   <span
-                                    className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                                    className="flex size-4.5 shrink-0 items-center justify-center rounded-full"
                                     style={{ backgroundColor: cat.color }}
                                   >
                                     <HugeiconsIcon

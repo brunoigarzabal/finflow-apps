@@ -4,9 +4,8 @@ import { Fragment } from 'react'
 
 import { useProfile } from '@/api/auth'
 import { useDashboard } from '@/api/dashboard'
+import { HiddenValue } from '@/components/common/HiddenValue'
 import { formatCurrency } from '@/lib/formatCurrency'
-
-import { HiddenValue } from '../HiddenValue'
 
 const getGreeting = () => {
   const hour = new Date().getHours()

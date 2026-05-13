@@ -174,7 +174,7 @@ export const TransactionFilters = ({
             >
               {selectedCategory?.icon && (
                 <span
-                  className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                  className="flex size-4.5 shrink-0 items-center justify-center rounded-full"
                   style={{ backgroundColor: selectedCategory.color }}
                 >
                   <HugeiconsIcon
@@ -203,7 +203,7 @@ export const TransactionFilters = ({
                   <ComboboxItem key={opt.value} value={opt}>
                     {opt.icon && (
                       <span
-                        className="flex size-4 shrink-0 items-center justify-center rounded-full"
+                        className="flex size-4.5 shrink-0 items-center justify-center rounded-full"
                         style={{ backgroundColor: opt.color }}
                       >
                         <HugeiconsIcon

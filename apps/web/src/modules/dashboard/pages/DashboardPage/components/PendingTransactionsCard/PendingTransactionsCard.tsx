@@ -12,11 +12,10 @@ import { Fragment } from 'react'
 
 import type { TransactionType } from '@/api/transactions'
 import { useTransactions } from '@/api/transactions'
+import { HiddenValue } from '@/components/common/HiddenValue'
 import { currentAndNextMonthRange, formatShortDate } from '@/lib/dates'
 import { formatCurrency } from '@/lib/formatCurrency'
 import { getIconByName } from '@/lib/icons'
-
-import { HiddenValue } from '../HiddenValue'
 
 type Props = {
   type: Extract<TransactionType, 'EXPENSE' | 'INCOME'>

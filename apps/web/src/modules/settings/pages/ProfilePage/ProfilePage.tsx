@@ -1,30 +1,16 @@
 import { Fragment } from 'react'
 
-import { useProfile } from '@/api/auth'
+import { ProfileHero } from './components/ProfileHero'
+import { ProfileStats } from './components/ProfileStats'
 
-export const ProfilePage = () => {
-  const { data } = useProfile()
+export const ProfilePage = () => (
+  <Fragment>
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
+      <h1 className="text-2xl font-bold">Minha Conta</h1>
 
-  const name = data?.user.name ?? ''
-  const email = data?.user.email ?? ''
+      <ProfileHero />
 
-  return (
-    <Fragment>
-      <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">Minha Conta</h1>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground">Nome</span>
-            <span className="text-sm font-medium">{name}</span>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground">E-mail</span>
-            <span className="text-sm font-medium">{email}</span>
-          </div>
-        </div>
-      </div>
-    </Fragment>
-  )
-}
+      <ProfileStats />
+    </div>
+  </Fragment>
+)
