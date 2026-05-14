@@ -51,7 +51,7 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogOverlay />
-      <div className="fixed inset-0 z-50 flex min-h-full items-start justify-center overflow-y-auto py-4">
+      <div className="fixed inset-0 z-50 flex min-h-full items-start justify-center overflow-x-hidden overflow-y-auto pt-[max(1rem,env(safe-area-inset-top))] pr-[env(safe-area-inset-right)] pb-[max(1rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)]">
         <DialogPrimitive.Popup
           data-slot="dialog-content"
           className={cn(
