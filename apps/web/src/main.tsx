@@ -7,6 +7,8 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 
 import '@workspace/ui/globals.css'
 
+import { ENVIRONMENT, SENTRY_DSN, isProduction } from './config/env'
+import { monitoring } from './lib/monitoring'
 import { queryClient } from './lib/react-query'
 import { GlobalProvider } from './providers'
 import { routeTree } from './routeTree.gen'
@@ -20,6 +22,18 @@ const router = createRouter({
   defaultPreload: 'intent',
   defaultPreloadDelay: 100,
 })
+
+monitoring.init(
+  {
+    dsn: SENTRY_DSN,
+    environment: ENVIRONMENT ?? 'development',
+    enabled: Boolean(SENTRY_DSN),
+    tracesSampleRate: isProduction ? 0.2 : 1.0,
+    replaysSessionSampleRate: isProduction ? 0.1 : 0,
+    replaysOnErrorSampleRate: 1.0,
+  },
+  router
+)
 
 declare module '@tanstack/react-router' {
   interface Register {
