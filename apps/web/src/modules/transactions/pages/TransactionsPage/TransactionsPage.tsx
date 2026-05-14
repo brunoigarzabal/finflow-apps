@@ -100,18 +100,16 @@ export const TransactionsPage = () => {
 
   return (
     <Fragment>
-      <div className="flex h-full flex-col">
-        <div className="flex flex-1 flex-col gap-6 overflow-auto p-6 pt-0">
-          <div className="sticky top-0 border-b bg-background/80 pt-6 pb-6 backdrop-blur-md">
-            <div className="flex flex-1 flex-col gap-6">
-              <TransactionHeader
-                currentMonth={currentMonth}
-                onMonthChange={handleMonthChange}
-                onNewTransaction={handleNewTransaction}
-              />
-            </div>
-          </div>
+      <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-4.5rem-env(safe-area-inset-bottom,0px))] overflow-auto sm:h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px))]">
+        <div className="sticky top-0 z-10 border-b bg-background/80 px-6 pt-6 pb-6 backdrop-blur-md">
+          <TransactionHeader
+            currentMonth={currentMonth}
+            onMonthChange={handleMonthChange}
+            onNewTransaction={handleNewTransaction}
+          />
+        </div>
 
+        <div className="flex flex-col gap-6 p-6">
           <TransactionFilters
             filters={filters}
             onFilterChange={handleFilterChange}
@@ -128,7 +126,9 @@ export const TransactionsPage = () => {
           />
         </div>
 
-        <TransactionFooter summary={summary} isLoading={isLoadingSummary} />
+        <div className="sticky bottom-0 z-10">
+          <TransactionFooter summary={summary} isLoading={isLoadingSummary} />
+        </div>
       </div>
 
       <TransactionFormDialog

@@ -49,7 +49,7 @@ export const TransactionFooter = ({ summary, isLoading }: Props) => {
 
   return (
     <Fragment>
-      <div className="sticky bottom-0 border-t bg-background px-6 py-4">
+      <div className="border-t bg-background/80 px-6 py-4 backdrop-blur-md">
         <div className="flex flex-col gap-1.5">
           {expanded && (
             <Fragment>
