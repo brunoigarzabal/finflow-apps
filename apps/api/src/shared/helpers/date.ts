@@ -55,3 +55,11 @@ export function formatDateLocal(date: Date): string {
   const d = String(date.getUTCDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
+
+export function getISOWeekMonday(dateStr: string): string {
+  const date = parseUTCDate(dateStr)
+  const day = date.getUTCDay()
+  const diff = day === 0 ? -6 : 1 - day
+  date.setUTCDate(date.getUTCDate() + diff)
+  return formatDateLocal(date)
+}

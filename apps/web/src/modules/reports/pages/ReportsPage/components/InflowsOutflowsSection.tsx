@@ -1,7 +1,7 @@
 import { Label } from '@workspace/ui/components/label'
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import { cn } from '@workspace/ui/lib/utils'
-import { format, parseISO } from 'date-fns'
+import { addDays, format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { ChangeEvent } from 'react'
 import { Fragment, useCallback, useMemo, useState } from 'react'
@@ -15,8 +15,11 @@ import {
   YAxis,
 } from 'recharts'
 
+import type { BalanceOverTimeGroupBy } from '@/api/transactions'
 import { useBalanceOverTime } from '@/api/transactions'
 import { formatCurrency, formatNumber } from '@/lib/formatCurrency'
+
+import type { ViewMode } from '../constants'
 
 type ChartRow = {
   date: string
@@ -30,6 +33,41 @@ type ChartRow = {
 type Props = {
   startDate: string
   endDate: string
+  viewMode: ViewMode
+  periodLabel: string
+}
+
+const VIEW_MODE_TO_GROUP_BY: Record<ViewMode, BalanceOverTimeGroupBy> = {
+  daily: 'daily',
+  weekly: 'weekly',
+  monthly: 'monthly',
+  accumulated: 'daily',
+}
+
+const formatRowLabel = (
+  dateStr: string,
+  viewMode: ViewMode
+): { label: string; displayDate: string } => {
+  const parsed = parseISO(dateStr)
+
+  switch (viewMode) {
+    case 'weekly': {
+      const weekEnd = addDays(parsed, 6)
+      const label = `${format(parsed, 'dd/MM', { locale: ptBR })}`
+      const displayDate = `${format(parsed, 'dd MMM', { locale: ptBR })} à ${format(weekEnd, 'dd MMM', { locale: ptBR })}`
+      return { label, displayDate }
+    }
+    case 'monthly': {
+      const label = format(parsed, 'MMM', { locale: ptBR })
+      const displayDate = format(parsed, "MMM 'de' yyyy", { locale: ptBR })
+      return { label, displayDate }
+    }
+    default: {
+      const label = format(parsed, 'd', { locale: ptBR })
+      const displayDate = format(parsed, 'dd/MM/yyyy', { locale: ptBR })
+      return { label, displayDate }
+    }
+  }
 }
 
 const formatSignedResult = (cents: number): string => {
@@ -94,13 +132,21 @@ const CashflowTooltip = ({ active, payload }: CashflowTooltipProps) => {
   )
 }
 
-export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
+export const InflowsOutflowsSection = ({
+  startDate,
+  endDate,
+  viewMode,
+  periodLabel,
+}: Props) => {
   const [includeUnpaid, setIncludeUnpaid] = useState(true)
+  const groupBy = VIEW_MODE_TO_GROUP_BY[viewMode]
+  const isAccumulated = viewMode === 'accumulated'
 
   const { data, isLoading, isError } = useBalanceOverTime({
     startDate,
     endDate,
     includeUnpaid,
+    groupBy,
   })
 
   const handleIncludeUnpaidChange = useCallback(
@@ -112,50 +158,65 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
 
   const rows: ChartRow[] = useMemo(() => {
     const series = data?.balanceOverTime ?? []
-    return series.map((point) => ({
-      date: point.date,
-      label: format(parseISO(point.date), 'd', { locale: ptBR }),
-      displayDate: format(parseISO(point.date), 'dd/MM/yyyy', {
-        locale: ptBR,
-      }),
-      income: point.income,
-      expense: point.expense,
-      balance: point.balance,
-    }))
-  }, [data?.balanceOverTime])
+
+    if (isAccumulated) {
+      const totals = series.reduce(
+        (acc, point) => ({
+          income: acc.income + point.income,
+          expense: acc.expense + point.expense,
+          balance: point.balance,
+        }),
+        { income: 0, expense: 0, balance: 0 }
+      )
+      return [
+        {
+          date: startDate,
+          label: periodLabel,
+          displayDate: periodLabel,
+          income: totals.income,
+          expense: totals.expense,
+          balance: totals.balance,
+        },
+      ]
+    }
+
+    return series.map((point) => {
+      const { label, displayDate } = formatRowLabel(point.date, viewMode)
+      return {
+        date: point.date,
+        label,
+        displayDate,
+        income: point.income,
+        expense: point.expense,
+        balance: point.balance,
+      }
+    })
+  }, [data?.balanceOverTime, viewMode, isAccumulated, startDate, periodLabel])
 
   if (isLoading) {
     return (
-      <Fragment>
-        <h2 className="text-lg font-semibold">Entradas x Saídas</h2>
-        <div className="mt-4 flex flex-col gap-6">
-          <Skeleton className="h-[18.75rem] w-full rounded-lg" />
-          <div className="flex flex-col gap-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-[18.75rem] w-full rounded-lg" />
+        <div className="flex flex-col gap-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
         </div>
-      </Fragment>
+      </div>
     )
   }
 
   if (isError) {
     return (
-      <Fragment>
-        <h2 className="text-lg font-semibold">Entradas x Saídas</h2>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Não foi possível carregar o relatório. Tente novamente.
-        </p>
-      </Fragment>
+      <p className="text-sm text-muted-foreground">
+        Não foi possível carregar o relatório. Tente novamente.
+      </p>
     )
   }
 
   return (
     <Fragment>
-      <h2 className="text-lg font-semibold">Entradas x Saídas</h2>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Label
           htmlFor="reports-include-unpaid"
           className="cursor-pointer gap-2 font-normal text-muted-foreground"
@@ -184,17 +245,19 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
             />
             <span className="text-muted-foreground">Saídas</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block h-0.5 w-4 shrink-0 bg-chart-3"
-              aria-hidden
-            />
-            <span className="text-muted-foreground">Saldo</span>
-          </div>
+          {!isAccumulated && (
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block h-0.5 w-4 shrink-0 bg-chart-3"
+                aria-hidden
+              />
+              <span className="text-muted-foreground">Saldo</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="mt-4 h-[18.75rem] w-full min-w-0">
+      <div className="h-[18.75rem] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={rows}
@@ -214,13 +277,15 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
               tick={{ fontSize: 10 }}
               allowDecimals={false}
             />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              width={56}
-              tickFormatter={axisTickCurrency}
-              tick={{ fontSize: 10 }}
-            />
+            {!isAccumulated && (
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                width={56}
+                tickFormatter={axisTickCurrency}
+                tick={{ fontSize: 10 }}
+              />
+            )}
             <Tooltip content={CashflowTooltip} />
             <Bar
               yAxisId="left"
@@ -228,7 +293,7 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
               name="Entradas"
               fill="var(--color-chart-1)"
               radius={[2, 2, 0, 0]}
-              maxBarSize={14}
+              maxBarSize={isAccumulated ? 120 : 14}
             />
             <Bar
               yAxisId="left"
@@ -236,29 +301,31 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
               name="Saídas"
               fill="var(--color-destructive)"
               radius={[2, 2, 0, 0]}
-              maxBarSize={14}
+              maxBarSize={isAccumulated ? 120 : 14}
             />
-            <Area
-              yAxisId="right"
-              type="monotone"
-              dataKey="balance"
-              name="Saldo"
-              stroke="var(--color-chart-3)"
-              fill="var(--color-chart-3)"
-              fillOpacity={0.2}
-              strokeWidth={1.5}
-            />
+            {!isAccumulated && (
+              <Area
+                yAxisId="right"
+                type="monotone"
+                dataKey="balance"
+                name="Saldo"
+                stroke="var(--color-chart-3)"
+                fill="var(--color-chart-3)"
+                fillOpacity={0.2}
+                strokeWidth={1.5}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         {includeUnpaid
           ? 'Valores consideram transações pagas e não pagas, em todas as contas.'
           : 'Valores consideram apenas transações pagas, em todas as contas.'}
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-border">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full min-w-[36rem] text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/50 text-left">
@@ -278,9 +345,7 @@ export const InflowsOutflowsSection = ({ startDate, endDate }: Props) => {
                   className="border-b border-border last:border-0"
                 >
                   <td className="px-3 py-2 text-muted-foreground tabular-nums">
-                    {format(parseISO(row.date), 'dd/MM/yyyy', {
-                      locale: ptBR,
-                    })}
+                    {row.displayDate}
                   </td>
                   <td
                     className={cn(

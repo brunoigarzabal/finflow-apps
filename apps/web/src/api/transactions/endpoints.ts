@@ -47,6 +47,7 @@ export const getBalanceOverTime = (
     ? {
         ...params,
         includeUnpaid: params.includeUnpaid ? 'true' : undefined,
+        groupBy: params.groupBy,
       }
     : undefined
 

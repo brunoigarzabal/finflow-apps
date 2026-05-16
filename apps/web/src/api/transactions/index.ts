@@ -23,6 +23,7 @@ export type {
   SummaryParams,
   SummaryByCategoryParams,
   BalanceOverTimePoint,
+  BalanceOverTimeGroupBy,
   BalanceOverTimeParams,
   BalanceOverTimeResponse,
   CreateTransactionBody,

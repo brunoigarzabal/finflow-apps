@@ -9,6 +9,7 @@ import {
 import {
   addDays,
   formatDateLocal,
+  getISOWeekMonday,
   resolveDateRange,
 } from '@/shared/helpers/date.js'
 
@@ -171,7 +172,7 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         dailyFlow.set(dateStr, cur)
       }
 
-      const balanceOverTime: {
+      const dailyPoints: {
         date: string
         income: number
         expense: number
@@ -184,7 +185,7 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         const dateStr = formatDateLocal(current)
         const split = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
         runningBalance += split.income - split.expense
-        balanceOverTime.push({
+        dailyPoints.push({
           date: dateStr,
           income: split.income,
           expense: split.expense,
@@ -192,6 +193,44 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         })
         current.setUTCDate(current.getUTCDate() + 1)
       }
+
+      const groupBy = input.groupBy ?? 'daily'
+
+      if (groupBy === 'daily') {
+        return { balanceOverTime: dailyPoints }
+      }
+
+      const grouped = new Map<
+        string,
+        { income: number; expense: number; balance: number }
+      >()
+      const groupOrder: string[] = []
+
+      for (const point of dailyPoints) {
+        const key =
+          groupBy === 'weekly'
+            ? getISOWeekMonday(point.date)
+            : point.date.slice(0, 7) + '-01'
+
+        const existing = grouped.get(key)
+        if (existing) {
+          existing.income += point.income
+          existing.expense += point.expense
+          existing.balance = point.balance
+        } else {
+          groupOrder.push(key)
+          grouped.set(key, {
+            income: point.income,
+            expense: point.expense,
+            balance: point.balance,
+          })
+        }
+      }
+
+      const balanceOverTime = groupOrder.map((key) => ({
+        date: key,
+        ...grouped.get(key)!,
+      }))
 
       return { balanceOverTime }
     }

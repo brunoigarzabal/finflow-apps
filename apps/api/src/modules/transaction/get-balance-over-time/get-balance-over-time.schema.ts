@@ -8,6 +8,7 @@ export const balanceOverTimeQuery = z.object({
     .enum(['true', 'false'])
     .transform((v) => v === 'true')
     .optional(),
+  groupBy: z.enum(['daily', 'weekly', 'monthly']).default('daily').optional(),
 })
 
 export const balanceOverTimeResponse = z.object({

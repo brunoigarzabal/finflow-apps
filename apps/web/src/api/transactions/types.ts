@@ -218,9 +218,12 @@ export type BalanceOverTimeResponse = {
   balanceOverTime: BalanceOverTimePoint[]
 }
 
+export type BalanceOverTimeGroupBy = 'daily' | 'weekly' | 'monthly'
+
 export type BalanceOverTimeParams = {
   startDate?: string
   endDate?: string
   bankAccountId?: string
   includeUnpaid?: boolean
+  groupBy?: BalanceOverTimeGroupBy
 }
