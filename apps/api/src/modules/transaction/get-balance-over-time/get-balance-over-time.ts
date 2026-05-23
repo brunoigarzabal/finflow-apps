@@ -26,20 +26,19 @@ import {
   balanceOverTimeResponse,
 } from './get-balance-over-time.schema.js'
 
-function classifyOccurrence(
-  occurrence: RecurringOccurrence,
-  cur: { income: number; expense: number }
-) {
+type DailyFlow = { income: number; expense: number; transferNet: number }
+
+const emptyFlow = (): DailyFlow => ({ income: 0, expense: 0, transferNet: 0 })
+
+function classifyOccurrence(occurrence: RecurringOccurrence, cur: DailyFlow) {
   if (occurrence.type === 'INCOME') {
     cur.income += occurrence.amount
   } else if (occurrence.type === 'EXPENSE') {
     cur.expense += occurrence.amount
   } else if (occurrence.type === 'TRANSFER') {
-    if (occurrence.isTransferOut) {
-      cur.expense += occurrence.amount
-    } else {
-      cur.income += occurrence.amount
-    }
+    cur.transferNet += occurrence.isTransferOut
+      ? -occurrence.amount
+      : occurrence.amount
   }
 }
 
@@ -135,31 +134,28 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
         })
 
       const filteredPrior = filterOccurrences(priorRecurringOccurrences)
-      const priorAccum = { income: 0, expense: 0 }
+      const priorAccum = emptyFlow()
       for (const o of filteredPrior) {
         classifyOccurrence(o, priorAccum)
       }
-      const priorRecurringNet = priorAccum.income - priorAccum.expense
+      const priorRecurringNet =
+        priorAccum.income - priorAccum.expense + priorAccum.transferNet
 
       const initialBalanceSum = accountAgg._sum.initialBalance ?? 0
       const openingBalance =
         initialBalanceSum + computeNet(priorAgg) + priorRecurringNet
 
-      const dailyFlow = new Map<string, { income: number; expense: number }>()
+      const dailyFlow = new Map<string, DailyFlow>()
       for (const row of dailyRows) {
         const dateStr = row.date
         const amount = Number(row.total)
-        const cur = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
+        const cur = dailyFlow.get(dateStr) ?? emptyFlow()
         if (row.type === 'INCOME') {
           cur.income += amount
         } else if (row.type === 'EXPENSE') {
           cur.expense += amount
         } else if (row.type === 'TRANSFER') {
-          if (row.is_transfer_out) {
-            cur.expense += amount
-          } else {
-            cur.income += amount
-          }
+          cur.transferNet += row.is_transfer_out ? -amount : amount
         }
         dailyFlow.set(dateStr, cur)
       }
@@ -167,7 +163,7 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
       const filteredRecurring = filterOccurrences(recurringOccurrences)
       for (const o of filteredRecurring) {
         const dateStr = o.date.toISOString().slice(0, 10)
-        const cur = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
+        const cur = dailyFlow.get(dateStr) ?? emptyFlow()
         classifyOccurrence(o, cur)
         dailyFlow.set(dateStr, cur)
       }
@@ -183,8 +179,8 @@ export async function getBalanceOverTimeHandler(app: FastifyInstance) {
 
       while (current <= endDate) {
         const dateStr = formatDateLocal(current)
-        const split = dailyFlow.get(dateStr) ?? { income: 0, expense: 0 }
-        runningBalance += split.income - split.expense
+        const split = dailyFlow.get(dateStr) ?? emptyFlow()
+        runningBalance += split.income - split.expense + split.transferNet
         dailyPoints.push({
           date: dateStr,
           income: split.income,

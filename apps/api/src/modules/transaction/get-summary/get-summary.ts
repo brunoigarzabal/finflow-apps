@@ -122,9 +122,11 @@ export async function getSummary(
     overdueRecurringForAccount,
     false
   )
-  const paidTotals = splitIncomeExpense(paidAggs)
-  const pendingTotals = splitIncomeExpense(pendingAggs)
-  const overdueTotals = splitIncomeExpense(overdueAggs)
+  const excludeTransfers = (aggs: typeof paidAggs) =>
+    aggs.filter((a) => a.type !== 'TRANSFER')
+  const paidTotals = splitIncomeExpense(excludeTransfers(paidAggs))
+  const pendingTotals = splitIncomeExpense(excludeTransfers(pendingAggs))
+  const overdueTotals = splitIncomeExpense(excludeTransfers(overdueAggs))
   const totalIncome = paidTotals.income + paidRecurring.income
   const totalExpense = paidTotals.expense + paidRecurring.expense
   const pendingIncome = pendingTotals.income + pendingRecurring.income
