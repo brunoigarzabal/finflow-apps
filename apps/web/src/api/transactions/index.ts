@@ -6,6 +6,7 @@ export { useTransaction } from './hooks/useTransaction'
 export { useCreateTransaction } from './hooks/useCreateTransaction'
 export { useUpdateTransaction } from './hooks/useUpdateTransaction'
 export { useDeleteTransaction } from './hooks/useDeleteTransaction'
+export { getOccurrenceDate } from './getOccurrenceDate'
 export type {
   Transaction,
   TransactionDetail,

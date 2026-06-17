@@ -54,6 +54,7 @@ export type RecurringOccurrence = {
   bankAccount: BasicEntity
   category: BasicEntity | null
   recurringRuleId: string
+  occurrenceDate: string
   isVirtual?: boolean
 }
 
@@ -140,6 +141,7 @@ function makeVirtualOccurrence(
     bankAccount: rule.bankAccount,
     category: rule.category,
     recurringRuleId: rule.id,
+    occurrenceDate: date,
     isVirtual: true,
   }
 }
@@ -206,6 +208,7 @@ export async function getRecurringOccurrences(
           installmentCount:
             override.transaction.installmentGroup?.count ?? null,
           recurringRuleId: rule.id,
+          occurrenceDate: formatDateKey(override.occurrenceDate),
         })
         continue
       }

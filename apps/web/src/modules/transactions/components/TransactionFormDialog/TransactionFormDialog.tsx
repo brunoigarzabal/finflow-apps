@@ -42,7 +42,11 @@ import { toast } from 'sonner'
 import type { BankAccount } from '@/api/bank-accounts'
 import type { Category } from '@/api/categories'
 import { useUpdateRecurringRule } from '@/api/recurring-rules'
-import { useCreateTransaction, useUpdateTransaction } from '@/api/transactions'
+import {
+  getOccurrenceDate,
+  useCreateTransaction,
+  useUpdateTransaction,
+} from '@/api/transactions'
 import type {
   CreateTransactionBody,
   InstallmentScope,
@@ -421,7 +425,7 @@ export const TransactionFormDialog = ({
           body: {
             ...commonBody,
             scope: recurringScope,
-            occurrenceDate: transaction.date.slice(0, 10),
+            occurrenceDate: getOccurrenceDate(transaction),
           },
         },
         {

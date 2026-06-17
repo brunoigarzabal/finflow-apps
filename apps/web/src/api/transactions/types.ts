@@ -66,6 +66,7 @@ export type Transaction = {
   } | null
   isVirtual?: boolean
   recurringRuleId?: string
+  occurrenceDate?: string
   installmentGroupId?: string | null
   installmentNumber?: number | null
   installmentCount?: number | null

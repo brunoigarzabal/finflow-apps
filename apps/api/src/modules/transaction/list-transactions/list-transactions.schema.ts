@@ -22,6 +22,7 @@ export const listTransactionsQuery = z.object({
 
 export const transactionListItem = transactionResponse.extend({
   id: z.string(),
+  occurrenceDate: z.string().date().optional(),
   relatedBankAccount: bankAccountBasic.nullable(),
 })
 

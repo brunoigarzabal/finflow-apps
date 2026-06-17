@@ -6,6 +6,7 @@ import {
   useDeleteRecurringRule,
   useUpdateRecurringRule,
 } from '@/api/recurring-rules'
+import { getOccurrenceDate } from '@/api/transactions'
 import type { Transaction, UpdateTransactionBody } from '@/api/transactions'
 import { toastError } from '@/lib/toastError'
 
@@ -66,7 +67,7 @@ export const useRecurringScopeFlow = ({ recurringRules }: Params) => {
               body: {
                 ...pendingRecurringEdit.body,
                 scope,
-                occurrenceDate: transaction.date.slice(0, 10),
+                occurrenceDate: getOccurrenceDate(transaction),
               },
             },
             {
@@ -114,7 +115,7 @@ export const useRecurringScopeFlow = ({ recurringRules }: Params) => {
           id: recurringRuleId,
           body: {
             scope,
-            occurrenceDate: transaction.date.slice(0, 10),
+            occurrenceDate: getOccurrenceDate(transaction),
           },
         },
         {
@@ -159,7 +160,7 @@ export const useRecurringScopeFlow = ({ recurringRules }: Params) => {
           id: transaction.recurringRuleId,
           body: {
             scope: 'THIS',
-            occurrenceDate: transaction.date.slice(0, 10),
+            occurrenceDate: getOccurrenceDate(transaction),
             isPaid: !transaction.isPaid,
           },
         },
@@ -182,7 +183,7 @@ export const useRecurringScopeFlow = ({ recurringRules }: Params) => {
           id: transaction.recurringRuleId,
           body: {
             scope: 'THIS',
-            occurrenceDate: transaction.date.slice(0, 10),
+            occurrenceDate: getOccurrenceDate(transaction),
             isPaid: true,
           },
         },
