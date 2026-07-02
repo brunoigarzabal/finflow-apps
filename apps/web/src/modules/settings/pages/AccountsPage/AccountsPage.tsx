@@ -4,7 +4,11 @@ import { Button } from '@workspace/ui/components/button'
 import { Fragment, useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
-import { useBankAccounts, useRestoreBankAccount } from '@/api/bank-accounts'
+import {
+  useBankAccounts,
+  useRestoreBankAccount,
+  useSetDefaultBankAccount,
+} from '@/api/bank-accounts'
 import type { BankAccount } from '@/api/bank-accounts'
 
 import { AccountFormDialog } from './components/AccountFormDialog'
@@ -17,6 +21,7 @@ export const AccountsPage = () => {
   const { data: activeData, isLoading: isLoadingActive } = useBankAccounts()
   const { data: archivedData } = useBankAccounts(true)
   const restore = useRestoreBankAccount()
+  const setDefault = useSetDefaultBankAccount()
 
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null)
@@ -66,6 +71,16 @@ export const AccountsPage = () => {
     [restore]
   )
 
+  const handleSetDefault = useCallback(
+    (account: BankAccount) => {
+      setDefault.mutate(account.id, {
+        onSuccess: () => toast.success('Conta padrão atualizada'),
+        onError: () => toast.error('Erro ao definir conta padrão'),
+      })
+    },
+    [setDefault]
+  )
+
   return (
     <Fragment>
       <div className="flex flex-col gap-4">
@@ -101,6 +116,7 @@ export const AccountsPage = () => {
                 onEdit={handleEdit}
                 onAdjustBalance={handleAdjustBalance}
                 onArchive={setArchiveDialogAccount}
+                onSetDefault={handleSetDefault}
               />
             ))}
         </div>

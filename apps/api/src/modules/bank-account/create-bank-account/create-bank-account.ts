@@ -23,6 +23,7 @@ export async function createBankAccountHandler(app: FastifyInstance) {
     async (request, reply) => {
       const userId = await request.getCurrentUserId()
       const repo = bankAccountRepository(app.prisma)
+      const isFirst = (await repo.count(userId)) === 0
       const account = await repo.create({
         name: request.body.name,
         type: request.body.type,
@@ -30,6 +31,7 @@ export async function createBankAccountHandler(app: FastifyInstance) {
         icon: request.body.icon,
         initialBalance: request.body.initialBalance,
         currentBalance: request.body.initialBalance,
+        isDefault: isFirst,
         userId,
       })
       return reply.status(201).send(account)

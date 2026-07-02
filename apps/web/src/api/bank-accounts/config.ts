@@ -4,6 +4,7 @@ export const BANK_ACCOUNTS_ENDPOINTS = {
   list: 'bank-accounts',
   detail: (id: string) => `bank-accounts/${id}`,
   restore: (id: string) => `bank-accounts/${id}/restore`,
+  default: (id: string) => `bank-accounts/${id}/default`,
 }
 
 export const BANK_ACCOUNTS_QUERY_KEYS = defineQueryKey({
@@ -16,4 +17,5 @@ export const BANK_ACCOUNTS_MUTATION_KEYS = defineMutationKey({
   update: ['bank-accounts', 'update'],
   archive: ['bank-accounts', 'archive'],
   restore: ['bank-accounts', 'restore'],
+  setDefault: ['bank-accounts', 'set-default'],
 })

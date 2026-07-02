@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 
 import { bankAccountRepository } from '@/shared/database/repositories/bank-account.repository.js'
-import { NotFound } from '@/shared/infra/http/errors/index.js'
+import { BadRequest, NotFound } from '@/shared/infra/http/errors/index.js'
 
 import { bankAccountIdParam } from '../schemas.js'
 
@@ -20,6 +20,16 @@ export async function archiveBankAccountHandler(app: FastifyInstance) {
     async (request, reply) => {
       const userId = await request.getCurrentUserId()
       const repo = bankAccountRepository(app.prisma)
+      const account = await repo.findById(request.params.id)
+
+      if (!account || account.userId !== userId) {
+        throw new NotFound('Conta bancária não encontrada')
+      }
+
+      if (account.isDefault) {
+        throw new BadRequest('Defina outra conta padrão antes de arquivar')
+      }
+
       const { count } = await repo.archiveMany(request.params.id, userId)
 
       if (count === 0) {

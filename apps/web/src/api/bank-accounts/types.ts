@@ -8,6 +8,7 @@ export type BankAccount = {
   icon: string
   initialBalance: number
   currentBalance: number
+  isDefault: boolean
   archived: boolean
   createdAt: string
   updatedAt: string

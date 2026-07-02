@@ -129,6 +129,7 @@ Repositories accept both `PrismaClient` and `Prisma.TransactionClient` for use i
 ### Module exports
 
 Each module exports its routes function via `index.ts` barrel:
+
 ```ts
 export { authRoutes } from './routes.js'
 ```
@@ -156,40 +157,41 @@ Shared schemas within a module live in a `schemas.ts` at the module root.
 
 ### Endpoints
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/auth/register` | No | Create account (email/password) |
-| POST | `/auth/login` | No | Login with email/password |
-| POST | `/auth/google` | No | Login/register with Google ID token |
-| POST | `/auth/logout` | No | Clear token cookie |
-| GET | `/auth/profile` | Yes | Get current user profile |
-| GET | `/health` | No | Health check |
-| GET | `/bank-accounts` | Yes | List bank accounts |
-| GET | `/bank-accounts/:id` | Yes | Get bank account by ID |
-| POST | `/bank-accounts` | Yes | Create bank account |
-| PATCH | `/bank-accounts/:id` | Yes | Update bank account |
-| DELETE | `/bank-accounts/:id` | Yes | Archive bank account |
-| PATCH | `/bank-accounts/:id/restore` | Yes | Restore archived bank account |
-| GET | `/categories` | Yes | List categories |
-| GET | `/categories/:id` | Yes | Get category by ID |
-| POST | `/categories` | Yes | Create category |
-| PATCH | `/categories/:id` | Yes | Update category |
-| DELETE | `/categories/:id` | Yes | Archive category |
-| PATCH | `/categories/:id/restore` | Yes | Restore archived category |
-| GET | `/transactions` | Yes | List transactions for a period, including virtual recurring occurrences |
-| GET | `/transactions/:id` | Yes | Get transaction by ID |
-| POST | `/transactions` | Yes | Create normal, installment, or recurring transaction |
-| PATCH | `/transactions/:id` | Yes | Update transaction; installment transactions support `THIS` or `ALL_REMAINING` scope |
-| DELETE | `/transactions/:id` | Yes | Delete transaction; installment transactions support `THIS` or `ALL_REMAINING` scope |
-| GET | `/transactions/summary` | Yes | Get income/expense summary for period |
-| GET | `/transactions/summary-by-category` | Yes | Get summary grouped by category |
-| GET | `/transactions/summary-by-period` | Yes | Get monthly summary over N months |
-| GET | `/transactions/balance-over-time` | Yes | Get daily balance evolution |
-| GET | `/recurring-rules` | Yes | List active recurring rules |
-| PATCH | `/recurring-rules/:id` | Yes | Update one occurrence or this and future occurrences |
-| DELETE | `/recurring-rules/:id/occurrence` | Yes | Cancel one occurrence or this and future occurrences |
-| DELETE | `/recurring-rules/:id` | Yes | End a recurring rule from a given date |
-| GET | `/dashboard` | Yes | Get consolidated dashboard data |
+| Method | Path                                | Auth | Description                                                                          |
+| ------ | ----------------------------------- | ---- | ------------------------------------------------------------------------------------ |
+| POST   | `/auth/register`                    | No   | Create account (email/password)                                                      |
+| POST   | `/auth/login`                       | No   | Login with email/password                                                            |
+| POST   | `/auth/google`                      | No   | Login/register with Google ID token                                                  |
+| POST   | `/auth/logout`                      | No   | Clear token cookie                                                                   |
+| GET    | `/auth/profile`                     | Yes  | Get current user profile                                                             |
+| GET    | `/health`                           | No   | Health check                                                                         |
+| GET    | `/bank-accounts`                    | Yes  | List bank accounts                                                                   |
+| GET    | `/bank-accounts/:id`                | Yes  | Get bank account by ID                                                               |
+| POST   | `/bank-accounts`                    | Yes  | Create bank account                                                                  |
+| PATCH  | `/bank-accounts/:id`                | Yes  | Update bank account                                                                  |
+| DELETE | `/bank-accounts/:id`                | Yes  | Archive bank account                                                                 |
+| PATCH  | `/bank-accounts/:id/restore`        | Yes  | Restore archived bank account                                                        |
+| PATCH  | `/bank-accounts/:id/default`        | Yes  | Set bank account as default                                                          |
+| GET    | `/categories`                       | Yes  | List categories                                                                      |
+| GET    | `/categories/:id`                   | Yes  | Get category by ID                                                                   |
+| POST   | `/categories`                       | Yes  | Create category                                                                      |
+| PATCH  | `/categories/:id`                   | Yes  | Update category                                                                      |
+| DELETE | `/categories/:id`                   | Yes  | Archive category                                                                     |
+| PATCH  | `/categories/:id/restore`           | Yes  | Restore archived category                                                            |
+| GET    | `/transactions`                     | Yes  | List transactions for a period, including virtual recurring occurrences              |
+| GET    | `/transactions/:id`                 | Yes  | Get transaction by ID                                                                |
+| POST   | `/transactions`                     | Yes  | Create normal, installment, or recurring transaction                                 |
+| PATCH  | `/transactions/:id`                 | Yes  | Update transaction; installment transactions support `THIS` or `ALL_REMAINING` scope |
+| DELETE | `/transactions/:id`                 | Yes  | Delete transaction; installment transactions support `THIS` or `ALL_REMAINING` scope |
+| GET    | `/transactions/summary`             | Yes  | Get income/expense summary for period                                                |
+| GET    | `/transactions/summary-by-category` | Yes  | Get summary grouped by category                                                      |
+| GET    | `/transactions/summary-by-period`   | Yes  | Get monthly summary over N months                                                    |
+| GET    | `/transactions/balance-over-time`   | Yes  | Get daily balance evolution                                                          |
+| GET    | `/recurring-rules`                  | Yes  | List active recurring rules                                                          |
+| PATCH  | `/recurring-rules/:id`              | Yes  | Update one occurrence or this and future occurrences                                 |
+| DELETE | `/recurring-rules/:id/occurrence`   | Yes  | Cancel one occurrence or this and future occurrences                                 |
+| DELETE | `/recurring-rules/:id`              | Yes  | End a recurring rule from a given date                                               |
+| GET    | `/dashboard`                        | Yes  | Get consolidated dashboard data                                                      |
 
 ### Email/password flow
 
@@ -235,16 +237,17 @@ Deleting a `Category` that has `Transaction` records is blocked (`onDelete: Rest
 ## Error handling
 
 All errors extend `HttpError(statusCode, message)`. The global error handler catches:
+
 - `HttpError` → responds with statusCode + message
 - `ZodError` → 400 + validation issues
 - Unknown → 500
 
 ## Environment variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `DATABASE_URL` | Yes | — | PostgreSQL connection string |
-| `JWT_SECRET` | Yes | — | Secret for signing JWTs |
-| `GOOGLE_CLIENT_ID` | Yes | — | Google OAuth client ID |
-| `PORT` | No | 3333 | Server port |
-| `NODE_ENV` | No | development | `development`, `production`, or `test` |
+| Variable           | Required | Default     | Description                            |
+| ------------------ | -------- | ----------- | -------------------------------------- |
+| `DATABASE_URL`     | Yes      | —           | PostgreSQL connection string           |
+| `JWT_SECRET`       | Yes      | —           | Secret for signing JWTs                |
+| `GOOGLE_CLIENT_ID` | Yes      | —           | Google OAuth client ID                 |
+| `PORT`             | No       | 3333        | Server port                            |
+| `NODE_ENV`         | No       | development | `development`, `production`, or `test` |

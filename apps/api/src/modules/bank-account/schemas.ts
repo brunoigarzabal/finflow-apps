@@ -16,6 +16,7 @@ export const bankAccountResponse = z.object({
   icon: z.string(),
   initialBalance: z.int(),
   currentBalance: z.int(),
+  isDefault: z.boolean(),
   archived: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),

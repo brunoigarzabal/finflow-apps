@@ -53,3 +53,9 @@ export const restoreBankAccount = (id: string): Promise<BankAccount> =>
     .authorized()
     .patch(BANK_ACCOUNTS_ENDPOINTS.restore(id))
     .json<BankAccount>()
+
+export const setDefaultBankAccount = (id: string): Promise<BankAccount> =>
+  httpClient
+    .authorized()
+    .patch(BANK_ACCOUNTS_ENDPOINTS.default(id))
+    .json<BankAccount>()

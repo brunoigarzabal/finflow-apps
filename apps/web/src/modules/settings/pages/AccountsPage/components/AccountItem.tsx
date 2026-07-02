@@ -1,4 +1,4 @@
-import { MoreVerticalIcon } from '@hugeicons/core-free-icons'
+import { MoreVerticalIcon, StarIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Button } from '@workspace/ui/components/button'
 import {
@@ -19,6 +19,7 @@ type Props = {
   onEdit: (account: BankAccount) => void
   onAdjustBalance: (account: BankAccount) => void
   onArchive: (account: BankAccount) => void
+  onSetDefault: (account: BankAccount) => void
 }
 
 export const AccountItem = ({
@@ -26,6 +27,7 @@ export const AccountItem = ({
   onEdit,
   onAdjustBalance,
   onArchive,
+  onSetDefault,
 }: Props) => {
   const isNegative = account.currentBalance < 0
 
@@ -56,6 +58,26 @@ export const AccountItem = ({
           {formatCurrency(account.currentBalance)}
         </span>
 
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          disabled={account.isDefault}
+          onClick={() => onSetDefault(account)}
+        >
+          <HugeiconsIcon
+            icon={StarIcon}
+            strokeWidth={2}
+            className={cn(
+              account.isDefault
+                ? 'fill-primary text-primary'
+                : 'text-muted-foreground'
+            )}
+          />
+          <span className="sr-only">
+            {account.isDefault ? 'Conta padrão' : 'Definir como padrão'}
+          </span>
+        </Button>
+
         <DropdownMenu>
           <DropdownMenuTrigger
             render={<Button variant="ghost" size="icon-sm" />}
@@ -70,7 +92,10 @@ export const AccountItem = ({
             <DropdownMenuItem onClick={() => onAdjustBalance(account)}>
               Ajustar saldo
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onArchive(account)}>
+            <DropdownMenuItem
+              disabled={account.isDefault}
+              onClick={() => onArchive(account)}
+            >
               Arquivar
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -311,6 +311,11 @@ export const TransactionFormDialog = ({
     [categories, type, isTransfer]
   )
 
+  const defaultBankAccountId = useMemo(
+    () => bankAccounts.find((a) => a.isDefault)?.id ?? bankAccounts[0]?.id,
+    [bankAccounts]
+  )
+
   const {
     register,
     handleSubmit,
@@ -324,7 +329,7 @@ export const TransactionFormDialog = ({
     defaultValues: buildDefaultValues(
       type,
       defaultCalendarMonth,
-      bankAccounts[0]?.id
+      defaultBankAccountId
     ),
   })
 
@@ -378,10 +383,17 @@ export const TransactionFormDialog = ({
       return
     }
 
-    reset(buildDefaultValues(type, defaultCalendarMonth, bankAccounts[0]?.id))
+    reset(buildDefaultValues(type, defaultCalendarMonth, defaultBankAccountId))
     setNotesOpen(false)
     setRepeatOpen(false)
-  }, [open, transaction, type, reset, defaultCalendarMonth, bankAccounts])
+  }, [
+    open,
+    transaction,
+    type,
+    reset,
+    defaultCalendarMonth,
+    defaultBankAccountId,
+  ])
 
   const amount = watch('amount')
   const repeat = watch('repeat')

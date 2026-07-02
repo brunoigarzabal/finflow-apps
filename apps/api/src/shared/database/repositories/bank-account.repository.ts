@@ -30,6 +30,7 @@ export function bankAccountRepository(prisma: PrismaArg) {
       icon: string
       initialBalance: number
       currentBalance: number
+      isDefault?: boolean
       userId: string
     }) => prisma.bankAccount.create({ data }),
 
@@ -42,9 +43,18 @@ export function bankAccountRepository(prisma: PrismaArg) {
         icon: string
         initialBalance: number
         currentBalance: number
+        isDefault: boolean
         archived: boolean
       }>
     ) => prisma.bankAccount.update({ where: { id }, data }),
+
+    count: (userId: string) => prisma.bankAccount.count({ where: { userId } }),
+
+    clearDefault: (userId: string) =>
+      prisma.bankAccount.updateMany({
+        where: { userId, isDefault: true },
+        data: { isDefault: false },
+      }),
 
     archiveMany: (id: string, userId: string) =>
       prisma.bankAccount.updateMany({

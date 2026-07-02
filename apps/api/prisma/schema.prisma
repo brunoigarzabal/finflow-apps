@@ -81,6 +81,7 @@ model BankAccount {
   icon           String          @default("wallet-02")
   initialBalance Int             @default(0) @map("initial_balance")
   currentBalance Int             @default(0) @map("current_balance")
+  isDefault      Boolean         @default(false) @map("is_default")
   archived       Boolean         @default(false)
   createdAt      DateTime        @default(now()) @map("created_at")
   updatedAt      DateTime        @updatedAt @map("updated_at")
