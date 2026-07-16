@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 
 import { ProfileHero } from './components/ProfileHero'
 import { ProfileStats } from './components/ProfileStats'
+import { SecurityCard } from './components/SecurityCard'
 
 export const ProfilePage = () => (
   <Fragment>
@@ -11,6 +12,8 @@ export const ProfilePage = () => (
       <ProfileHero />
 
       <ProfileStats />
+
+      <SecurityCard />
     </div>
   </Fragment>
 )
