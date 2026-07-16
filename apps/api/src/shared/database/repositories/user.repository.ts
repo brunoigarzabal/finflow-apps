@@ -23,6 +23,19 @@ export function userRepository(prisma: PrismaArg) {
         },
       }),
 
+    findByIdWithAuth: (id: string) =>
+      prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+          passwordHash: true,
+          accounts: { select: { provider: true } },
+        },
+      }),
+
     create: (data: {
       name: string
       email: string
@@ -30,8 +43,10 @@ export function userRepository(prisma: PrismaArg) {
       avatarUrl?: string | null
     }) => prisma.user.create({ data }),
 
-    update: (id: string, data: { avatarUrl?: string | null }) =>
-      prisma.user.update({ where: { id }, data }),
+    update: (
+      id: string,
+      data: { avatarUrl?: string | null; email?: string; passwordHash?: string }
+    ) => prisma.user.update({ where: { id }, data }),
 
     findByProvider: (providerAccountId: string) =>
       prisma.account.findUnique({
@@ -44,5 +59,10 @@ export function userRepository(prisma: PrismaArg) {
       providerAccountId: string
       userId: string
     }) => prisma.account.create({ data }),
+
+    deleteAccountByProvider: (provider: AccountProvider, userId: string) =>
+      prisma.account.delete({
+        where: { provider_userId: { provider, userId } },
+      }),
   }
 }

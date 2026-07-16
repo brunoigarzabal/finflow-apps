@@ -20,13 +20,24 @@ export async function getProfileHandler(app: FastifyInstance) {
     async (request) => {
       const userId = await request.getCurrentUserId()
       const repo = userRepository(app.prisma)
-      const user = await repo.findById(userId)
+      const user = await repo.findByIdWithAuth(userId)
 
       if (!user) {
         throw new Unauthorized('Usuário não encontrado')
       }
 
-      return { user }
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          avatarUrl: user.avatarUrl,
+          hasPassword: Boolean(user.passwordHash),
+          googleLinked: user.accounts.some(
+            (account) => account.provider === 'GOOGLE'
+          ),
+        },
+      }
     }
   )
 }

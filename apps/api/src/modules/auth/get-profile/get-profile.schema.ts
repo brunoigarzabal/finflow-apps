@@ -6,5 +6,7 @@ export const profileResponse = z.object({
     name: z.string(),
     email: z.email(),
     avatarUrl: z.url().nullable(),
+    hasPassword: z.boolean(),
+    googleLinked: z.boolean(),
   }),
 })

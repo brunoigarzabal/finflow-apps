@@ -164,6 +164,9 @@ Shared schemas within a module live in a `schemas.ts` at the module root.
 | POST   | `/auth/google`                      | No   | Login/register with Google ID token                                                  |
 | POST   | `/auth/logout`                      | No   | Clear token cookie                                                                   |
 | GET    | `/auth/profile`                     | Yes  | Get current user profile                                                             |
+| PATCH  | `/auth/password`                    | Yes  | Change password (or set one for OAuth-only users)                                    |
+| PATCH  | `/auth/email`                       | Yes  | Change email (requires current password)                                             |
+| DELETE | `/auth/accounts/google`             | Yes  | Unlink Google account (requires a password set)                                      |
 | GET    | `/health`                           | No   | Health check                                                                         |
 | GET    | `/bank-accounts`                    | Yes  | List bank accounts                                                                   |
 | GET    | `/bank-accounts/:id`                | Yes  | Get bank account by ID                                                               |
