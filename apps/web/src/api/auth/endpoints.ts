@@ -2,9 +2,12 @@ import { httpClient } from '@/lib/httpClient'
 
 import { AUTH_ENDPOINTS } from './config'
 import type {
+  ChangeEmailBody,
+  ChangePasswordBody,
   GoogleLoginBody,
   LoginBody,
   RegisterBody,
+  SuccessResponse,
   TokenResponse,
   ProfileResponse,
 } from './types'
@@ -35,3 +38,21 @@ export const logout = () =>
     .authorized()
     .post(AUTH_ENDPOINTS.logout)
     .json<{ success: boolean }>()
+
+export const changeEmail = (body: ChangeEmailBody) =>
+  httpClient
+    .authorized()
+    .patch(AUTH_ENDPOINTS.changeEmail, { json: body })
+    .json<SuccessResponse>()
+
+export const changePassword = (body: ChangePasswordBody) =>
+  httpClient
+    .authorized()
+    .patch(AUTH_ENDPOINTS.changePassword, { json: body })
+    .json<SuccessResponse>()
+
+export const unlinkGoogle = () =>
+  httpClient
+    .authorized()
+    .delete(AUTH_ENDPOINTS.unlinkGoogle)
+    .json<SuccessResponse>()

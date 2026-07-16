@@ -6,6 +6,9 @@ export const AUTH_ENDPOINTS = {
   google: 'auth/google',
   profile: 'auth/profile',
   logout: 'auth/logout',
+  changeEmail: 'auth/email',
+  changePassword: 'auth/password',
+  unlinkGoogle: 'auth/accounts/google',
 } as const
 
 export const AUTH_QUERY_KEYS = defineQueryKey({
@@ -17,4 +20,7 @@ export const AUTH_MUTATION_KEYS = defineMutationKey({
   register: ['auth', 'register'],
   google: ['auth', 'google'],
   logout: ['auth', 'logout'],
+  changeEmail: ['auth', 'change-email'],
+  changePassword: ['auth', 'change-password'],
+  unlinkGoogle: ['auth', 'unlink-google'],
 })

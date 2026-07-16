@@ -22,8 +22,24 @@ export type User = {
   name: string
   email: string
   avatarUrl: string | null
+  hasPassword: boolean
+  googleLinked: boolean
 }
 
 export type ProfileResponse = {
   user: User
+}
+
+export type ChangeEmailBody = {
+  email: string
+  password: string
+}
+
+export type ChangePasswordBody = {
+  currentPassword?: string
+  newPassword: string
+}
+
+export type SuccessResponse = {
+  success: boolean
 }
