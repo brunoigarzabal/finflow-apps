@@ -151,7 +151,7 @@ Shared schemas within a module live in a `schemas.ts` at the module root.
 
 ### JWT cookies
 
-- Token contains `{ sub: userId }` with 7-day expiry
+- Token contains `{ sub: userId }` with 90-day expiry
 - Stored as httpOnly cookie (`secure` in production, `sameSite: lax`)
 - `issueAuthToken(reply, userId)` helper handles sign + cookie for all auth routes
 

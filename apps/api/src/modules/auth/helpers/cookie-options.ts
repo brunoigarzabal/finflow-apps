@@ -7,7 +7,7 @@ export const AUTH_COOKIE_OPTIONS = {
   secure: isProduction,
   sameSite: isProduction ? ('none' as const) : ('lax' as const),
   path: '/',
-  maxAge: 7 * 24 * 60 * 60,
+  maxAge: 90 * 24 * 60 * 60,
 }
 
 export const AUTH_COOKIE_CLEAR_OPTIONS = {
