@@ -58,7 +58,10 @@ export type RecurringOccurrence = {
   isVirtual?: boolean
 }
 
-function nextOccurrenceDate(date: Date, frequency: RecurringFrequency): Date {
+export function nextOccurrenceDate(
+  date: Date,
+  frequency: RecurringFrequency
+): Date {
   if (frequency === 'DAILY') {
     return addDays(date, 1)
   }
