@@ -1,7 +1,7 @@
 'use client'
 
 import type { VariantProps } from 'class-variance-authority'
-import { useMemo } from 'react'
+import { Fragment, useMemo } from 'react'
 
 import { Label } from '@workspace/ui/components/label'
 import { Separator } from '@workspace/ui/components/separator'
@@ -139,19 +139,22 @@ function FieldSeparator({
       data-slot="field-separator"
       data-content={!!children}
       className={cn(
-        'relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2',
+        'relative -my-2 flex h-5 items-center gap-2 text-sm group-data-[variant=outline]/field-group:-mb-2',
         className
       )}
       {...props}
     >
-      <Separator className="absolute inset-0 top-1/2" />
+      <Separator className="flex-1" />
       {children && (
-        <span
-          className="relative mx-auto block w-fit bg-background px-2 text-muted-foreground"
-          data-slot="field-separator-content"
-        >
-          {children}
-        </span>
+        <Fragment>
+          <span
+            className="block w-fit text-muted-foreground"
+            data-slot="field-separator-content"
+          >
+            {children}
+          </span>
+          <Separator className="flex-1" />
+        </Fragment>
       )}
     </div>
   )
