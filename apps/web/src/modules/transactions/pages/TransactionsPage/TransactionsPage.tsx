@@ -100,8 +100,8 @@ export const TransactionsPage = () => {
 
   return (
     <Fragment>
-      <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-4.5rem-env(safe-area-inset-bottom,0px))] overflow-auto sm:h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px))]">
-        <div className="sticky top-0 z-10 border-b bg-background/80 px-6 pt-6 pb-6 backdrop-blur-md">
+      <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px)-6rem-env(safe-area-inset-bottom,0px))] overflow-auto sm:h-[calc(100dvh-4.5rem-env(safe-area-inset-top,0px))]">
+        <div className="scroll-edge-top sticky top-0 z-10 px-6 pt-6 pb-8">
           <TransactionHeader
             currentMonth={currentMonth}
             onMonthChange={handleMonthChange}
@@ -126,7 +126,7 @@ export const TransactionsPage = () => {
           />
         </div>
 
-        <div className="sticky bottom-0 z-10">
+        <div className="scroll-edge-bottom sticky bottom-0 z-10 px-4 pt-6 pb-4 sm:px-6">
           <TransactionFooter summary={summary} isLoading={isLoadingSummary} />
         </div>
       </div>

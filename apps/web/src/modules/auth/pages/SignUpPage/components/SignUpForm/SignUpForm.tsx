@@ -75,9 +75,7 @@ export const SignUpForm = () => {
                   setError={(message) => setError('root', { message })}
                 />
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Ou continue com e-mail
-              </FieldSeparator>
+              <FieldSeparator>Ou continue com e-mail</FieldSeparator>
               {errors.root && (
                 <Alert variant="destructive">
                   <AlertDescription>{errors.root.message}</AlertDescription>

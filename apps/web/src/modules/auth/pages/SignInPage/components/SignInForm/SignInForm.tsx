@@ -69,9 +69,7 @@ export const SignInForm = () => {
                   setError={(message) => setError('root', { message })}
                 />
               </Field>
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-                Ou continue com
-              </FieldSeparator>
+              <FieldSeparator>Ou continue com</FieldSeparator>
               {errors.root && (
                 <Alert variant="destructive">
                   <AlertDescription>{errors.root.message}</AlertDescription>

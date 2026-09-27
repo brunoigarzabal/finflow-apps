@@ -84,7 +84,7 @@ export const ReportsPage = () => {
 
       <ReportTabs value={activeTab} onChange={handleTabChange} />
 
-      <div className="flex flex-col gap-4 rounded-xl bg-card p-6 shadow-card">
+      <div className="flex flex-col gap-4 rounded-xl material p-6 shadow-card">
         {activeTab === 'categories' && (
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold">Categorias</h2>

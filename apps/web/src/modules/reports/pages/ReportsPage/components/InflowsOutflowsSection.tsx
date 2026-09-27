@@ -106,7 +106,7 @@ const CashflowTooltip = ({ active, payload }: CashflowTooltipProps) => {
     return null
   }
   return (
-    <div className="shadow-panel rounded-md border border-border bg-card px-3 py-2 text-xs">
+    <div className="rounded-md glass-thick px-3 py-2 text-xs">
       <p className="font-medium text-foreground">{row.displayDate}</p>
       <ul className="mt-2 flex flex-col gap-1 text-muted-foreground">
         <li className="flex justify-between gap-6">

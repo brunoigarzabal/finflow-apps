@@ -41,15 +41,15 @@ export const BottomNav = () => {
     pathname === '/profile' || pathname.startsWith('/settings')
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 flex transform-gpu flex-col border-t bg-background/60 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-xl sm:hidden">
-      <div className="flex h-18 w-full shrink-0 touch-manipulation items-center justify-around">
+    <nav className="scroll-edge-bottom pointer-events-none fixed inset-x-0 bottom-0 z-50 flex transform-gpu flex-col px-4 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] sm:hidden">
+      <div className="pointer-events-auto flex h-16 w-full shrink-0 touch-manipulation items-center justify-around rounded-full glass p-1">
         {NAV_ITEMS.map(({ to, label, icon }) => (
           <Link
             key={to}
             to={to}
-            className="flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-muted-foreground transition-colors active:bg-foreground/6"
+            className="flex h-full flex-1 flex-col items-center justify-center gap-0.5 rounded-full text-muted-foreground transition-colors active:bg-foreground/8"
             activeProps={{
-              className: 'text-primary',
+              className: 'bg-foreground/8 text-primary',
             }}
           >
             <HugeiconsIcon icon={icon} className="size-5" />
@@ -62,8 +62,8 @@ export const BottomNav = () => {
             render={
               <button
                 className={cn(
-                  'flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-muted-foreground transition-colors active:bg-foreground/6',
-                  isSettingsActive && 'text-primary'
+                  'flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full text-muted-foreground transition-colors active:bg-foreground/8',
+                  isSettingsActive && 'bg-foreground/8 text-primary'
                 )}
               />
             }

@@ -15,8 +15,8 @@ export const Header = () => {
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b bg-background/60 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
+    <header className="scroll-edge-top pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-3">
+      <div className="pointer-events-auto mx-auto flex h-14 w-full max-w-7xl items-center justify-between rounded-full glass px-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
@@ -39,27 +39,27 @@ export const Header = () => {
           <nav className="hidden items-center gap-1 md:flex">
             <Link
               to="/"
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               activeProps={{
-                className: 'bg-foreground/6 text-foreground font-medium',
+                className: 'bg-foreground/8 text-foreground font-medium',
               }}
             >
               Dashboard
             </Link>
             <Link
               to="/transactions"
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               activeProps={{
-                className: 'bg-foreground/6 text-foreground font-medium',
+                className: 'bg-foreground/8 text-foreground font-medium',
               }}
             >
               Lançamentos
             </Link>
             <Link
               to="/reports"
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
               activeProps={{
-                className: 'bg-foreground/6 text-foreground font-medium',
+                className: 'bg-foreground/8 text-foreground font-medium',
               }}
             >
               Relatórios

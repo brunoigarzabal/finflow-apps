@@ -19,7 +19,7 @@ export const Route = createFileRoute('/_authenticated/settings')({
 function SettingsLayout() {
   return (
     <Fragment>
-      <div className="hidden min-h-[calc(100svh-3.5rem)] md:flex">
+      <div className="hidden min-h-[calc(100svh-4.5rem)] md:flex">
         <aside className="w-56 border-r p-4">
           <nav className="flex flex-col gap-1">
             <Link

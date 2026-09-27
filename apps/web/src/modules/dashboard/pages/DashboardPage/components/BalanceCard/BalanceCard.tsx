@@ -85,7 +85,7 @@ export const BalanceCard = () => {
                       to="/transactions"
                       search={{ account: account.id }}
                       className={cn(
-                        'flex items-center gap-3 rounded-2xl border bg-background/70 px-4 py-3 backdrop-blur-sm transition-all',
+                        'flex items-center gap-3 rounded-2xl border material px-4 py-3 transition-all',
                         isNegative
                           ? 'border-destructive/30 hover:border-destructive/60 hover:bg-destructive/5'
                           : 'border-border/60 hover:border-primary/40 hover:bg-primary/5'
