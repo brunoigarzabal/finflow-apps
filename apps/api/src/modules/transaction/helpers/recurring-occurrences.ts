@@ -206,6 +206,7 @@ export async function getRecurringOccurrences(
       if (override?.transaction) {
         occurrences.push({
           ...override.transaction,
+          createdAt: rule.createdAt,
           installmentGroupId: override.transaction.installmentGroupId,
           installmentNumber: override.transaction.installmentNumber,
           installmentCount:
