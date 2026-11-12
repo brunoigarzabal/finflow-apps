@@ -37,7 +37,8 @@ src/
 │   │   │   ├── transaction.repository.ts
 │   │   │   ├── recurring-rule.repository.ts
 │   │   │   ├── recurring-override.repository.ts
-│   │   │   └── installment-group.repository.ts
+│   │   │   ├── installment-group.repository.ts
+│   │   │   └── personal-access-token.repository.ts
 │   │   └── index.ts
 │   ├── helpers/
 │   │   └── date.ts        # Date utilities (resolveDateRange, formatDateLocal)
@@ -95,6 +96,19 @@ src/
     │   ├── get-dashboard/
     │   ├── routes.ts
     │   └── index.ts
+    ├── personal-access-token/
+    │   ├── create-personal-access-token/
+    │   ├── list-personal-access-tokens/
+    │   ├── revoke-personal-access-token/
+    │   ├── helpers/           # token generation/hashing, authenticatePersonalAccessToken
+    │   ├── schemas.ts
+    │   ├── routes.ts
+    │   └── index.ts
+    ├── mcp/
+    │   ├── helpers/           # createMcpServer, tool context, shared tool input schemas
+    │   ├── tools/             # one file per read-only MCP tool
+    │   ├── routes.ts          # POST /mcp (Streamable HTTP, stateless)
+    │   └── index.ts
     └── health/
         ├── check-health/
         ├── routes.ts
@@ -145,7 +159,7 @@ Shared schemas within a module live in a `schemas.ts` at the module root.
 5. `prismaPlugin` — decorates `app.prisma`
 6. `errorHandler` — global error handler
 7. `authPlugin` — decorates `request.getCurrentUserId()`
-8. Route modules registered with prefixes (`/auth`, `/health`, `/bank-accounts`, `/categories`, `/transactions`, `/recurring-rules`, `/dashboard`)
+8. Route modules registered with prefixes (`/auth`, `/health`, `/bank-accounts`, `/categories`, `/transactions`, `/recurring-rules`, `/dashboard`, `/personal-access-tokens`, `/mcp`)
 
 ## Authentication system
 
@@ -195,6 +209,18 @@ Shared schemas within a module live in a `schemas.ts` at the module root.
 | DELETE | `/recurring-rules/:id/occurrence`   | Yes  | Cancel one occurrence or this and future occurrences                                 |
 | DELETE | `/recurring-rules/:id`              | Yes  | End a recurring rule from a given date                                               |
 | GET    | `/dashboard`                        | Yes  | Get consolidated dashboard data                                                      |
+| GET    | `/personal-access-tokens`           | Yes  | List active personal access tokens                                                   |
+| POST   | `/personal-access-tokens`           | Yes  | Create a personal access token (plaintext returned only once)                        |
+| DELETE | `/personal-access-tokens/:id`       | Yes  | Revoke a personal access token                                                       |
+| POST   | `/mcp`                              | PAT  | MCP server (Streamable HTTP, stateless, read-only tools)                             |
+
+### Personal access tokens and MCP
+
+- Personal access tokens (`ffpat_…`) exist only for machine clients of `/mcp`. They are stored as SHA-256 hashes, revocable, max 10 active per user, and `lastUsedAt` is throttled to one write per minute.
+- `/mcp` authenticates with `Authorization: Bearer ffpat_…` via `authenticatePersonalAccessToken()`. The REST API keeps using `request.getCurrentUserId()` (JWT only), so a PAT can't reach REST routes or create other tokens, and a session JWT can't reach `/mcp`.
+- `/mcp` must not send `WWW-Authenticate` on 401: MCP clients such as agentes.chat would start OAuth discovery.
+- Each request builds a fresh `McpServer` scoped to the token's user (stateless, `enableJsonResponse`), so it works across restarts and replicas. Each tool callback is wrapped in `toolHandler()`, which serializes the result as JSON and logs `tool`, `userId`, `tokenId`, `durationMs` (and the error on failure).
+- Tools reuse use-case functions (`getSummary`, `getSummaryByCategory`, `getSummaryByPeriod`, `listTransactions`) and repositories; never duplicate query logic in a tool. Mark read tools with `READ_ONLY_ANNOTATIONS`, reuse module enums (`categoryType`, `transactionType`), and register new tools in `MCP_TOOLS` (`tools/index.ts`). Amounts stay in centavos and the server instructions tell the agent so.
 
 ### Email/password flow
 
@@ -225,6 +251,7 @@ Transaction: id, type (enum: INCOME|EXPENSE|TRANSFER), amount (Int, centavos), d
 RecurringRule: id, type (INCOME|EXPENSE), amount, description, frequency, startDate, endDate?, isPaid, notes?, userId, bankAccountId, categoryId
 RecurringOverride: id, recurringRuleId, occurrenceDate, isCancelled, transactionId?
 InstallmentGroup: id, totalAmount, count, userId, transactions[]
+PersonalAccessToken: id, name, tokenHash (unique), tokenPrefix, lastUsedAt?, revokedAt?, userId
 ```
 
 **Monetary values are stored as `Int` in centavos** (e.g. R$10,50 = `1050`). Never use floats for money.

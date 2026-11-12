@@ -18,6 +18,8 @@ import { bankAccountRoutes } from './modules/bank-account/index.js'
 import { categoryRoutes } from './modules/category/index.js'
 import { dashboardRoutes } from './modules/dashboard/index.js'
 import { healthRoutes } from './modules/health/index.js'
+import { mcpRoutes } from './modules/mcp/index.js'
+import { personalAccessTokenRoutes } from './modules/personal-access-token/index.js'
 import { recurringRuleRoutes } from './modules/recurring-rule/index.js'
 import { transactionRoutes } from './modules/transaction/index.js'
 import { env } from './shared/config/env.js'
@@ -93,6 +95,10 @@ export async function buildApp() {
   app.register(transactionRoutes, { prefix: '/transactions' })
   app.register(recurringRuleRoutes, { prefix: '/recurring-rules' })
   app.register(dashboardRoutes, { prefix: '/dashboard' })
+  app.register(personalAccessTokenRoutes, {
+    prefix: '/personal-access-tokens',
+  })
+  app.register(mcpRoutes, { prefix: '/mcp' })
 
   return app
 }
