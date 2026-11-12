@@ -20,10 +20,7 @@ export async function listRecurringRulesHandler(app: FastifyInstance) {
       const userId = await request.getCurrentUserId()
       const repo = recurringRuleRepository(app.prisma)
 
-      const recurringRules = await repo.findMany({
-        userId,
-        OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
-      })
+      const recurringRules = await repo.findActiveByUser(userId)
 
       return { recurringRules }
     }

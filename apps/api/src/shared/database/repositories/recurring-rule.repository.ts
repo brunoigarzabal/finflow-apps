@@ -19,9 +19,12 @@ export { recurringRuleInclude }
 
 export function recurringRuleRepository(prisma: PrismaArg) {
   return {
-    findMany: (where: Prisma.RecurringRuleWhereInput) =>
+    findActiveByUser: (userId: string) =>
       prisma.recurringRule.findMany({
-        where,
+        where: {
+          userId,
+          OR: [{ endDate: null }, { endDate: { gte: new Date() } }],
+        },
         include: recurringRuleInclude,
         orderBy: [{ startDate: 'asc' }, { createdAt: 'asc' }],
       }),
