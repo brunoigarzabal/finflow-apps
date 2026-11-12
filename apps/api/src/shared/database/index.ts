@@ -7,3 +7,4 @@ export {
   transactionInclude,
   bankAccountSqlFilter,
 } from './repositories/transaction.repository.js'
+export { personalAccessTokenRepository } from './repositories/personal-access-token.repository.js'
